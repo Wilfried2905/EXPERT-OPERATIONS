@@ -11,8 +11,8 @@ import MainLayout from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
-// Correction de l'import pour utiliser le bon composant RecommendationsView
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
+import DocumentNavigation from "@/components/operations/DocumentNavigation";
 
 function App() {
   const { user, isLoading } = useUser();
@@ -72,10 +72,15 @@ function App() {
           </ProtectedRoute>
         </Route>
 
-        {/* Route spécifique pour les recommandations */}
         <Route path="/recommendations">
           <ProtectedRoute>
             <RecommendationsView />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/documents">
+          <ProtectedRoute>
+            <DocumentNavigation section="recommandations" onBack={() => window.history.back()} />
           </ProtectedRoute>
         </Route>
 

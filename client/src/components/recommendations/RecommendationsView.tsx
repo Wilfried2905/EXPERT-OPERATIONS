@@ -66,21 +66,59 @@ export default function RecommendationsView() {
 
   const handleExportWord = async () => {
     try {
-      const clientName = "Client"; // À remplacer par le vrai nom du client
+      const clientName = "Client"; 
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
       const exportData = {
-        recommendations,
+        recommendations: recommendations?.map(rec => ({
+          ...rec,
+          progress: rec.progress ?? 0,
+          requiredEquipment: rec.requiredEquipment?.map(category => ({
+            ...category,
+            items: category.items?.map(item => ({
+              ...item,
+              technicalDescription: "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
+              benefits: [
+                "Amélioration de la performance globale du système",
+                "Réduction de la consommation énergétique",
+                "Conformité aux normes en vigueur",
+                "Facilité de maintenance et de gestion"
+              ],
+              alternatives: [
+                {
+                  name: "Alternative économique",
+                  description: "Version plus abordable avec des fonctionnalités essentielles",
+                  pros: ["Coût initial réduit", "Installation rapide", "Maintenance simple"],
+                  cons: ["Performance limitée", "Durée de vie plus courte", "Fonctionnalités réduites"]
+                },
+                {
+                  name: "Alternative premium",
+                  description: "Version haut de gamme avec fonctionnalités avancées",
+                  pros: ["Performance maximale", "Durabilité supérieure", "Fonctionnalités étendues"],
+                  cons: ["Installation complexe", "Maintenance spécialisée requise"]
+                }
+              ]
+            }))
+          }))
+        })),
+        impactAnalysis: recommendations?.map(rec => ({
+          title: rec.title,
+          energyEfficiency: {
+            value: rec.impact.energyEfficiency * 100,
+            explanation: `L'amélioration de l'efficacité énergétique de ${(rec.impact.energyEfficiency * 100).toFixed(1)}% sera obtenue par...`
+          },
+          performance: {
+            value: rec.impact.performance * 100,
+            explanation: `L'augmentation de la performance de ${(rec.impact.performance * 100).toFixed(1)}% sera réalisée par...`
+          },
+          compliance: {
+            value: rec.impact.compliance * 100,
+            explanation: `L'amélioration de la conformité de ${(rec.impact.compliance * 100).toFixed(1)}% sera atteinte en...`
+          }
+        })),
         complianceMatrix,
-        ganttData,
-        impacts: recommendations?.map(rec => ({
-          name: rec.title,
-          energyEfficiency: rec.impact.energyEfficiency * 100,
-          performance: rec.impact.performance * 100,
-          compliance: rec.impact.compliance * 100,
-          explanation: rec.impact.explanation
-        }))
+        ganttData
       };
 
       const blob = await exportToWord(exportData);
@@ -110,7 +148,7 @@ export default function RecommendationsView() {
   };
 
   const handleGenerateReport = () => {
-    setLocation('/operations/documents');
+    setLocation('/documents'); 
   };
 
   const renderImpactExplanation = (type: string, value: number) => {
