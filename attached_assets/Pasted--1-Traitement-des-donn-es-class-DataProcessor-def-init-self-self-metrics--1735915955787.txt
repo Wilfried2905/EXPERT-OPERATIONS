@@ -1,0 +1,148 @@
+# 1. Traitement des données
+class DataProcessor:
+   def __init__(self):
+       self.metrics = {
+           'pue': [],
+           'availability': [],
+           'tier_level': None,
+           'compliance_gaps': []
+       }
+
+   def parse_client_files(self, files):
+       """Parse les fichiers client (Word, Excel, etc)"""
+       parsed_data = {}
+       for file in files:
+           if file.endswith('.docx'):
+               parsed_data.update(self._parse_word(file))
+           elif file.endswith('.xlsx'):
+               parsed_data.update(self._parse_excel(file))
+       return parsed_data
+
+   def extract_metrics(self, data):
+       """Extrait les métriques clés"""
+       self.metrics['pue'] = self._calculate_pue(data)
+       self.metrics['availability'] = self._calculate_availability(data)
+       self.metrics['tier_level'] = self._determine_tier(data)
+       return self.metrics
+
+   def validate_data(self):
+       """Validation des données"""
+       validation_rules = {
+           'pue': lambda x: 1.0 <= x <= 3.0,
+           'availability': lambda x: 0 <= x <= 100,
+           'tier_level': lambda x: x in [1,2,3,4]
+       }
+       return all(validation_rules[key](value) for key, value in self.metrics.items())
+
+# 2. Visualisations
+class ChartGenerator:
+   def __init__(self, metrics):
+       self.metrics = metrics
+       
+   def generate_pue_chart(self):
+       """Génère graphique PUE"""
+       plt.figure()
+       plt.plot(self.metrics['pue'])
+       plt.title('Evolution du PUE')
+       return plt.gcf()
+
+   def generate_architecture_diagram(self):
+       """Génère diagramme d'architecture"""
+       # Utiliser bibliothèque comme graphviz
+       pass
+
+   def generate_compliance_matrix(self):
+       """Génère matrice de conformité"""
+       compliance_data = pd.DataFrame(self.metrics['compliance_gaps'])
+       return compliance_data.to_html()
+
+   def generate_gantt(self, tasks):
+       """Génère planning Gantt"""
+       pass
+
+# 3. Structure Word 
+class WordGenerator:
+   def __init__(self, template_type):
+       self.doc = Document()
+       self.template = self._load_template(template_type)
+       
+   def _load_template(self, type):
+       """Charge le template selon le type de document"""
+       templates = {
+           'audit': 'templates/audit.docx',
+           'cahier_charges': 'templates/cdc.docx',
+           'offre': 'templates/offre.docx'
+       }
+       return templates[type]
+
+   def apply_styles(self):
+       """Applique les styles"""
+       styles = {
+           'heading1': {'size': 16, 'bold': True},
+           'normal': {'size': 11},
+           'table': {'style': 'Table Grid'}
+       }
+       for paragraph in self.doc.paragraphs:
+           self._apply_style(paragraph, styles)
+
+   def add_header_footer(self):
+       """Ajoute en-têtes/pieds de page"""
+       section = self.doc.sections[0]
+       header = section.header
+       footer = section.footer
+       header.paragraphs[0].text = "3R TECHNOLOGIES"
+       footer.paragraphs[0].text = f"Page {{current}}/{{total}}"
+
+# 4. Moteur de recommandations
+class RecommendationEngine:
+   def __init__(self):
+       self.priority_rules = {
+           'critical': lambda x: x['impact'] > 0.8,
+           'high': lambda x: 0.5 < x['impact'] <= 0.8,
+           'medium': lambda x: 0.3 < x['impact'] <= 0.5,
+           'low': lambda x: x['impact'] <= 0.3
+       }
+       
+   def generate_recommendations(self, metrics):
+       """Génère recommandations selon métriques"""
+       recommendations = {
+           'immediate': self._get_immediate_actions(metrics),
+           'short_term': self._get_short_term_actions(metrics),
+           'long_term': self._get_long_term_actions(metrics)
+       }
+       return recommendations
+
+   def calculate_impacts(self, recommendation):
+       """Calcule impacts"""
+       impacts = {
+           'cost': self._calculate_cost_impact(recommendation),
+           'performance': self._calculate_performance_impact(recommendation),
+           'compliance': self._calculate_compliance_impact(recommendation)
+       }
+       return impacts
+
+   def get_alternatives(self, recommendation):
+       """Génère alternatives"""
+       return self._find_alternatives(recommendation)
+
+# Usage
+def generate_document(input_files, doc_type):
+   # Initialize
+   processor = DataProcessor()
+   data = processor.parse_client_files(input_files)
+   metrics = processor.extract_metrics(data)
+   
+   # Generate visuals
+   charts = ChartGenerator(metrics)
+   pue_chart = charts.generate_pue_chart()
+   
+   # Generate recommendations
+   engine = RecommendationEngine()
+   recommendations = engine.generate_recommendations(metrics)
+   
+   # Create Word doc
+   word_gen = WordGenerator(doc_type)
+   word_gen.apply_styles()
+   word_gen.add_header_footer()
+   
+   return word_gen.doc
