@@ -60,40 +60,76 @@ Score de conformité global: ${input.auditData.compliance.score}%
   switch (input.type) {
     case DocumentType.TECHNICAL_OFFER:
       return `${baseContext}
-Générez une offre technique complète incluant :
-1. Présentation de l'entreprise et expertise
-2. Compréhension du besoin client
-3. Solution technique proposée
-4. Méthodologie d'intervention
-5. Planning et organisation
-6. Équipe et références
-7. Annexes techniques`;
+Générez une offre technique complète selon le plan suivant :
+1. Introduction
+   - Présentation de 3R TECHNOLOGIE
+   - Expertise en datacenters
+   - Certifications TIA-942
+   - Équipe projet et qualifications
+
+2. Analyse des Besoins
+   - Contexte et enjeux client
+   - Objectifs de conformité TIA-942
+   - Contraintes techniques et opérationnelles
+   - Exigences de performance
+
+3. Architecture Technique TIA-942
+   - Classification Tier visée
+   - Architecture générale
+   - Redondance N+1/2N selon Tier
+   - Points de défaillance unique (SPOF)
+
+4. Infrastructures Critiques
+   - Alimentation électrique
+   - Système de refroidissement
+   - Sécurité physique
+   - Connectivité`;
 
     case DocumentType.AUDIT_REPORT:
       return `${baseContext}
-Générez un rapport d'audit détaillé incluant :
-1. Résumé exécutif
-2. Méthodologie d'audit
-3. État des lieux de l'infrastructure
-4. Analyse des performances
-5. Évaluation des risques
-6. Conformité aux normes
-7. Recommandations détaillées
-8. Plan d'action
-9. Annexes`;
+Générez un rapport d'audit détaillé selon le plan suivant :
+1. Résumé Exécutif
+   - Objectifs de l'audit
+   - Méthodologie d'évaluation
+   - Synthèse des conclusions majeures
+   - Recommandations prioritaires
+
+2. Analyse de Conformité TIA-942
+   - Architecture et Structure
+   - Système Électrique
+   - Système de Refroidissement
+   - Sécurité et Contrôle d'Accès
+   - Conformité des Infrastructures
+   - Points d'Amélioration
+
+3. Recommandations
+   - Améliorations Prioritaires
+   - Plan d'Action Détaillé
+   - Estimations Budgétaires
+   - Calendrier de Mise en Œuvre`;
 
     case DocumentType.SPECIFICATIONS:
       return `${baseContext}
-Générez un cahier des charges détaillé incluant :
-1. Contexte et objectifs
-2. Spécifications fonctionnelles
-3. Exigences techniques
-4. Contraintes et normes
-5. Livrables attendus
-6. Planning prévisionnel
-7. Modalités de réalisation
-8. Critères de réception
-9. Annexes techniques`;
+Générez un cahier des charges détaillé selon le plan suivant :
+1. Présentation du Projet
+   - Contexte général
+   - Objectifs du projet
+   - Périmètre d'intervention
+   - Classification Tier visée
+
+2. Exigences TIA-942
+   - Conformité architecturale
+   - Conformité électrique
+   - Conformité climatisation
+   - Conformité sécurité
+   - Niveaux de redondance requis
+
+3. Spécifications Techniques
+   - Architecture physique
+   - Infrastructure électrique
+   - Système de refroidissement
+   - Sécurité et monitoring
+   - Infrastructure réseau`;
 
     default:
       throw new Error('Type de document non supporté');
