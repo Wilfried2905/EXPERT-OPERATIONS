@@ -33,7 +33,12 @@ export default function RecommendationsView() {
             tierLevel: 3,
             complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
           },
-          responses: {} // À remplir avec les réponses du questionnaire
+          responses: {}, // À remplir avec les réponses du questionnaire
+          additionalData: {
+            images: [], // URLs des images collectées
+            documents: [], // URLs des documents analysés
+            comments: [] // Commentaires additionnels
+          }
         };
 
         const newRecommendations = await generateRecommendations(auditData);
