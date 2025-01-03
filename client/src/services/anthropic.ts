@@ -73,11 +73,11 @@ Format ta réponse en JSON pour faciliter le parsing.`;
       messages: [{ role: "user", content: prompt }]
     });
 
-    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+    if (!response.content?.[0]?.value) {
       throw new Error('Invalid response format from Anthropic API');
     }
 
-    const parsedContent = JSON.parse(response.content[0].text);
+    const parsedContent = JSON.parse(response.content[0].value);
     if (!Array.isArray(parsedContent)) {
       throw new Error('Invalid recommendations format: expected array');
     }
@@ -134,11 +134,11 @@ export async function generateMatrixCompliance(auditData: AuditData) {
       messages: [{ role: "user", content: prompt }]
     });
 
-    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+    if (!response.content?.[0]?.value) {
       throw new Error('Invalid response format from Anthropic API');
     }
 
-    return JSON.parse(response.content[0].text);
+    return JSON.parse(response.content[0].value);
   } catch (error) {
     console.error('Error generating compliance matrix:', error);
     throw new Error('Failed to generate compliance matrix');
@@ -165,11 +165,11 @@ export async function generateGanttData(recommendations: Recommendation[]) {
       messages: [{ role: "user", content: prompt }]
     });
 
-    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+    if (!response.content?.[0]?.value) {
       throw new Error('Invalid response format from Anthropic API');
     }
 
-    return JSON.parse(response.content[0].text);
+    return JSON.parse(response.content[0].value);
   } catch (error) {
     console.error('Error generating Gantt data:', error);
     throw new Error('Failed to generate Gantt data');
