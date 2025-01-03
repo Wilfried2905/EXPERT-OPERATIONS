@@ -10,6 +10,7 @@ import { Download, ChevronLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
@@ -66,7 +67,7 @@ export default function RecommendationsView() {
 
   const handleExportWord = async () => {
     try {
-      const clientName = "Client"; 
+      const clientName = "Client"; // À remplacer par le vrai nom du client
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
@@ -78,14 +79,14 @@ export default function RecommendationsView() {
             ...category,
             items: category.items?.map(item => ({
               ...item,
-              technicalDescription: "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
-              benefits: [
+              technicalDescription: item.technicalDescription || "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
+              benefits: item.benefits || [
                 "Amélioration de la performance globale du système",
                 "Réduction de la consommation énergétique",
                 "Conformité aux normes en vigueur",
                 "Facilité de maintenance et de gestion"
               ],
-              alternatives: [
+              alternatives: item.alternatives || [
                 {
                   name: "Alternative économique",
                   description: "Version plus abordable avec des fonctionnalités essentielles",
@@ -106,30 +107,67 @@ export default function RecommendationsView() {
           title: rec.title,
           energyEfficiency: {
             value: rec.impact.energyEfficiency * 100,
-            explanation: `L'amélioration de l'efficacité énergétique de ${(rec.impact.energyEfficiency * 100).toFixed(1)}% sera obtenue par...`
+            explanation: renderImpactExplanation('energyEfficiency', rec.impact.energyEfficiency * 100)
           },
           performance: {
             value: rec.impact.performance * 100,
-            explanation: `L'augmentation de la performance de ${(rec.impact.performance * 100).toFixed(1)}% sera réalisée par...`
+            explanation: renderImpactExplanation('performance', rec.impact.performance * 100)
           },
           compliance: {
             value: rec.impact.compliance * 100,
-            explanation: `L'amélioration de la conformité de ${(rec.impact.compliance * 100).toFixed(1)}% sera atteinte en...`
+            explanation: renderImpactExplanation('compliance', rec.impact.compliance * 100)
           }
         })),
-        complianceMatrix,
-        ganttData
+        complianceMatrix: complianceMatrix ? Object.entries(complianceMatrix).map(([category, data]: [string, any]) => ({
+          category,
+          description: data.description,
+          conformityLevel: data.conformityLevel,
+          details: data.details,
+          requiredActions: data.requiredActions?.map((action: any) => ({
+            action: action.action,
+            normReference: action.normReference,
+            requirement: action.requirement,
+            explanation: action.explanation
+          }))
+        })) : [],
+        ganttData: ganttData?.tasks?.map((task: any) => ({
+          name: task.name,
+          details: {
+            description: task.details?.description,
+            phases: task.details?.phases?.map((phase: any) => ({
+              name: phase.name,
+              duration: phase.duration,
+              tasks: phase.tasks,
+              deliverables: phase.deliverables
+            })),
+            milestones: task.details?.milestones?.map((milestone: any) => ({
+              name: milestone.name,
+              date: milestone.date,
+              requirements: milestone.requirements
+            }))
+          }
+        }))
       };
 
+      console.log('Preparing Word export with data:', exportData);
       const blob = await exportToWord(exportData);
+      console.log('Word export blob created:', blob);
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting to Word:', error);
+      useToast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'export Word',
+        variant: "destructive"
+      });
     }
   };
 
