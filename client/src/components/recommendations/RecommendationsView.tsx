@@ -68,17 +68,21 @@ export default function RecommendationsView() {
 
   const handleExportWord = async () => {
     try {
+      if (!Array.isArray(recommendations)) {
+        throw new Error('Les recommandations ne sont pas dans le bon format');
+      }
+
       const clientName = "Client"; 
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
       const exportData = {
-        recommendations: recommendations?.map(rec => ({
+        recommendations: recommendations.map(rec => ({
           ...rec,
           progress: rec.progress ?? 0,
-          requiredEquipment: rec.requiredEquipment?.map(category => ({
+          requiredEquipment: (rec.requiredEquipment || []).map(category => ({
             ...category,
-            items: category.items?.map(item => ({
+            items: (category.items || []).map(item => ({
               ...item,
               technicalDescription: item.technicalDescription || "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
               benefits: item.benefits || [
@@ -104,7 +108,7 @@ export default function RecommendationsView() {
             }))
           }))
         })),
-        impactAnalysis: recommendations?.map(rec => ({
+        impactAnalysis: recommendations.map(rec => ({
           title: rec.title,
           energyEfficiency: {
             value: rec.impact.energyEfficiency * 100,
