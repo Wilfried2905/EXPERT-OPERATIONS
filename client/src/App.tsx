@@ -93,7 +93,7 @@ function App() {
                   <h1 className="text-2xl font-bold text-gray-900">{t('errors.pageNotFound')}</h1>
                 </div>
                 <p className="mt-4 text-sm text-gray-600">
-                  {t('errors.pageNotFound')}
+                  {t('errors.pageNotFoundDescription')}
                 </p>
               </CardContent>
             </Card>
