@@ -244,6 +244,17 @@ const QuestionnaireEvaluation = () => {
             ))}
           </div>
         </Card>
+
+        <div className="mt-6 flex justify-end">
+          <button 
+            onClick={() => setLocation('/recommendations')}
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
+            } text-white`}
+          >
+            Voir les Recommandations
+          </button>
+        </div>
       </div>
     </div>
   );
