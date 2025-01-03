@@ -1,9 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Recommendation, Priority, TimeFrame } from '../store/useRecommendationsStore';
+import crypto from 'crypto';
 
 // the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  dangerouslyAllowBrowser: true
 });
 
 interface AuditData {
@@ -16,12 +18,12 @@ interface AuditData {
   responses: Record<string, { 
     status: string; 
     comments: string;
-    attachments?: string[]; // URLs des images/fichiers attachés
+    attachments?: string[];
   }>;
   additionalData?: {
-    images?: string[]; // Base64 des images
-    documents?: string[]; // Contenu des documents
-    comments?: string[]; // Commentaires généraux
+    images?: string[];
+    documents?: string[];
+    comments?: string[];
   };
 }
 
@@ -71,11 +73,38 @@ Format ta réponse en JSON pour faciliter le parsing.`;
       messages: [{ role: "user", content: prompt }]
     });
 
-    const recommendations = JSON.parse(response.content[0].text);
+    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+      throw new Error('Invalid response format from Anthropic API');
+    }
 
-    return recommendations.map(rec => ({
-      ...rec,
+    const parsedContent = JSON.parse(response.content[0].text);
+    if (!Array.isArray(parsedContent)) {
+      throw new Error('Invalid recommendations format: expected array');
+    }
+
+    return parsedContent.map((rec: any) => ({
       id: crypto.randomUUID(),
+      title: rec.title,
+      description: rec.description,
+      priority: rec.priority as Priority,
+      timeFrame: rec.timeFrame as TimeFrame,
+      impact: {
+        cost: rec.impact.cost,
+        performance: rec.impact.performance,
+        compliance: rec.impact.compliance
+      },
+      alternatives: rec.alternatives.map((alt: any) => ({
+        description: alt.description,
+        pros: alt.pros,
+        cons: alt.cons,
+        estimatedCost: alt.estimatedCost
+      })),
+      metrics: {
+        pue: rec.metrics.pue,
+        availability: rec.metrics.availability,
+        tierLevel: rec.metrics.tierLevel,
+        complianceGaps: rec.metrics.complianceGaps
+      },
       progress: 0,
       implemented: false
     }));
@@ -87,7 +116,7 @@ Format ta réponse en JSON pour faciliter le parsing.`;
 
 export async function generateMatrixCompliance(auditData: AuditData) {
   try {
-    const prompt = `Génère une matrice de conformité détaillée basée sur toutes ces données:
+    const prompt = `Génère une matrice de conformité détaillée basée sur ces données:
     ${JSON.stringify(auditData, null, 2)}
 
     Format ta réponse en JSON avec:
@@ -105,6 +134,10 @@ export async function generateMatrixCompliance(auditData: AuditData) {
       messages: [{ role: "user", content: prompt }]
     });
 
+    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+      throw new Error('Invalid response format from Anthropic API');
+    }
+
     return JSON.parse(response.content[0].text);
   } catch (error) {
     console.error('Error generating compliance matrix:', error);
@@ -121,7 +154,7 @@ export async function generateGanttData(recommendations: Recommendation[]) {
     - Tâches et sous-tâches
     - Durées estimées précises
     - Dépendances et chemins critiques
-    - Ressources nécessaires détaillées
+    - Ressources nécessaires
     - Jalons clés
     - Risques et contingences
     - Estimations de coûts`;
@@ -131,6 +164,10 @@ export async function generateGanttData(recommendations: Recommendation[]) {
       max_tokens: 2000,
       messages: [{ role: "user", content: prompt }]
     });
+
+    if (!response.content || !response.content[0] || typeof response.content[0].text !== 'string') {
+      throw new Error('Invalid response format from Anthropic API');
+    }
 
     return JSON.parse(response.content[0].text);
   } catch (error) {

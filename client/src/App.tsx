@@ -11,6 +11,7 @@ import MainLayout from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
+import RecommendationsView from "./components/recommendations/RecommendationsView";
 
 function App() {
   const { user, isLoading } = useUser();
@@ -67,6 +68,12 @@ function App() {
         <Route path="/operations">
           <ProtectedRoute>
             <OperationsPage />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/recommendations">
+          <ProtectedRoute>
+            <RecommendationsView />
           </ProtectedRoute>
         </Route>
 
