@@ -7,6 +7,7 @@ import { generateRecommendations, generateMatrixCompliance, generateGanttData } 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { exportToWord, exportToExcel } from '@/services/exports';
 import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function RecommendationsView() {
   const {
@@ -22,6 +23,7 @@ export default function RecommendationsView() {
   const [ganttData, setGanttData] = useState(null);
 
   useEffect(() => {
+    console.log("RecommendationsView: Component mounted");
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -33,24 +35,28 @@ export default function RecommendationsView() {
             tierLevel: 3,
             complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
           },
-          responses: {}, // À remplir avec les réponses du questionnaire
+          responses: {},
           additionalData: {
-            images: [], // URLs des images collectées
-            documents: [], // URLs des documents analysés
-            comments: [] // Commentaires additionnels
+            images: [],
+            documents: [],
+            comments: []
           }
         };
 
+        console.log("RecommendationsView: Fetching recommendations");
         const newRecommendations = await generateRecommendations(auditData);
         setRecommendations(newRecommendations);
 
+        console.log("RecommendationsView: Fetching compliance matrix");
         const matrix = await generateMatrixCompliance(auditData);
         setComplianceMatrix(matrix);
 
+        console.log("RecommendationsView: Fetching Gantt data");
         const gantt = await generateGanttData(newRecommendations);
         setGanttData(gantt);
 
       } catch (err) {
+        console.error("RecommendationsView: Error fetching data", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -89,11 +95,19 @@ export default function RecommendationsView() {
   };
 
   if (loading) {
-    return <div>Chargement des recommandations...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg">Chargement des recommandations...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Erreur: {error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-red-600">Erreur: {error}</p>
+      </div>
+    );
   }
 
   return (
@@ -101,20 +115,20 @@ export default function RecommendationsView() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Recommandations</h1>
         <div className="space-x-4">
-          <button
+          <Button
             onClick={handleExportWord}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center"
+            className="bg-blue-600 hover:bg-blue-700"
           >
             <Download className="w-4 h-4 mr-2" />
             Export Word
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleExportExcel}
-            className="px-4 py-2 bg-green-600 text-white rounded-md flex items-center"
+            className="bg-green-600 hover:bg-green-700"
           >
             <Download className="w-4 h-4 mr-2" />
             Export Excel
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -128,7 +142,7 @@ export default function RecommendationsView() {
 
         <TabsContent value="recommendations">
           <div className="grid gap-6">
-            {recommendations.map((rec) => (
+            {recommendations?.map((rec) => (
               <Card key={rec.id}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
