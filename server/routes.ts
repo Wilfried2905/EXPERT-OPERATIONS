@@ -1,7 +1,71 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
-import { generateRecommendations } from "./anthropic";
+import Anthropic from '@anthropic-ai/sdk';
+
+// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+export async function generateRecommendations(req: any, res: any) {
+  try {
+    const auditData = req.body;
+    const prompt = `En tant qu'expert en audit de datacenters, analyse en détail toutes les données suivantes et génère des recommandations détaillées et approfondies.
+
+Données d'audit complètes à analyser:
+${JSON.stringify(auditData, null, 2)}
+
+Instructions d'analyse:
+1. Analyser les métriques quantitatives (PUE, disponibilité, TIER)
+2. Évaluer les commentaires qualitatifs et observations
+3. Examiner les images et documents fournis
+4. Identifier les écarts par rapport aux normes ISO/IEC
+5. Comparer avec les meilleures pratiques du secteur
+6. Considérer les benchmarks industriels
+
+Génère des recommandations structurées selon ce format:
+1. Titre
+2. Description détaillée incluant:
+   - Contexte spécifique du datacenter
+   - Justification basée sur les normes
+   - Référence aux meilleures pratiques
+3. Priorité (critique/haute/moyenne/faible) avec justification
+4. Temporalité (immédiat/court terme/long terme) avec planning suggéré
+5. Impact détaillé:
+   - Coût (0-1) avec estimation budgétaire
+   - Performance (0-1) avec métriques attendues
+   - Conformité (0-1) avec normes concernées
+6. Alternatives possibles:
+   - Description
+   - Avantages détaillés
+   - Inconvénients potentiels
+   - Estimation des coûts
+7. Métriques impactées:
+   - PUE cible
+   - Disponibilité attendue
+   - Niveau TIER visé
+   - Points de conformité adressés
+
+Format ta réponse en JSON pour faciliter le parsing.`;
+
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 4000,
+      messages: [{ role: "user", content: prompt }]
+    });
+
+    if (!response.content?.[0]?.text) {
+      throw new Error('Invalid response format from Anthropic API');
+    }
+
+    const recommendations = JSON.parse(response.content[0].text);
+    res.json(recommendations);
+  } catch (error) {
+    console.error("Error generating recommendations:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
 
 export function registerRoutes(app: Express): Server {
   // Configurer l'authentification en premier
