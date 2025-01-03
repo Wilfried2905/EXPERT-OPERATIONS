@@ -81,75 +81,69 @@ const handleExportWord = async () => {
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
-      // Préparer les données dans le bon format pour l'export Word
+      // Structure simplifiée pour les recommandations
       const formattedRecommendations = recommendations.map(rec => ({
-        title: rec.title,
-        description: rec.description,
-        priority: rec.priority,
-        progress: rec.progress ?? 0,
+        title: rec.title || "",
+        description: rec.description || "",
+        priority: rec.priority || "medium",
+        progress: rec.progress || 0,
         impact: {
-          energyEfficiency: rec.impact?.energyEfficiency * 100 || 0,
-          performance: rec.impact?.performance * 100 || 0,
-          compliance: rec.impact?.compliance * 100 || 0
-        },
-        technicalExplanation: rec.technicalExplanation || "",
-        normReference: rec.normReference || {}
-      }));
-
-      const formattedImpacts = recommendations.map(rec => ({
-        title: rec.title,
-        energyEfficiencyImpact: {
-          value: rec.impact?.energyEfficiency * 100 || 0,
-          explanation: renderImpactExplanation('energyEfficiency', (rec.impact?.energyEfficiency || 0) * 100)
-        },
-        performanceImpact: {
-          value: rec.impact?.performance * 100 || 0,
-          explanation: renderImpactExplanation('performance', (rec.impact?.performance || 0) * 100)
-        },
-        complianceImpact: {
-          value: rec.impact?.compliance * 100 || 0,
-          explanation: renderImpactExplanation('compliance', (rec.impact?.compliance || 0) * 100)
+          energyEfficiency: (rec.impact?.energyEfficiency || 0) * 100,
+          performance: (rec.impact?.performance || 0) * 100,
+          compliance: (rec.impact?.compliance || 0) * 100
         }
       }));
 
-      const formattedMatrix = complianceMatrix ? 
+      // Structure simplifiée pour les impacts
+      const impactDetails = recommendations.map(rec => ({
+        title: rec.title || "",
+        impacts: {
+          energyEfficiency: {
+            value: (rec.impact?.energyEfficiency || 0) * 100,
+            details: renderImpactExplanation('energyEfficiency', (rec.impact?.energyEfficiency || 0) * 100)
+          },
+          performance: {
+            value: (rec.impact?.performance || 0) * 100,
+            details: renderImpactExplanation('performance', (rec.impact?.performance || 0) * 100)
+          },
+          compliance: {
+            value: (rec.impact?.compliance || 0) * 100,
+            details: renderImpactExplanation('compliance', (rec.impact?.compliance || 0) * 100)
+          }
+        }
+      }));
+
+      // Structure simplifiée pour la matrice de conformité
+      const matrixData = complianceMatrix ? 
         Object.entries(complianceMatrix).map(([category, data]: [string, any]) => ({
           category,
           description: data.description || "",
-          conformityLevel: data.conformityLevel || 0,
-          details: data.details || "",
-          actions: data.requiredActions?.map((action: any) => ({
-            name: action.action,
-            norm: action.normReference,
-            requirement: action.requirement,
-            explanation: action.explanation
-          })) || []
+          level: data.conformityLevel || 0,
+          actions: Array.isArray(data.requiredActions) ? data.requiredActions.map((action: any) => ({
+            name: action.action || "",
+            requirement: action.requirement || ""
+          })) : []
         })) : [];
 
-      const formattedPlanning = ganttData?.tasks?.map((task: any) => ({
-        name: task.name,
-        description: task.details?.description || "",
-        phases: task.details?.phases?.map((phase: any) => ({
-          name: phase.name,
-          duration: phase.duration,
-          tasks: phase.tasks || [],
-          deliverables: phase.deliverables || []
-        })) || [],
-        milestones: task.details?.milestones?.map((milestone: any) => ({
-          name: milestone.name,
-          date: milestone.date,
-          requirements: milestone.requirements || []
-        })) || []
-      })) || [];
+      // Structure simplifiée pour le planning
+      const planningData = Array.isArray(ganttData?.tasks) ? 
+        ganttData.tasks.map((task: any) => ({
+          name: task.name || "",
+          description: task.details?.description || "",
+          duration: task.details?.duration || "",
+          phases: Array.isArray(task.details?.phases) ? task.details.phases.map((phase: any) => ({
+            name: phase.name || "",
+            duration: phase.duration || ""
+          })) : []
+        })) : [];
 
       const exportData = {
         recommendations: formattedRecommendations,
-        impacts: formattedImpacts,
-        matrix: formattedMatrix,
-        planning: formattedPlanning
+        impacts: impactDetails,
+        matrix: matrixData,
+        planning: planningData
       };
 
-      console.log('Preparing Word export with data:', exportData);
       const blob = await exportToWord(exportData);
 
       if (!blob) {
