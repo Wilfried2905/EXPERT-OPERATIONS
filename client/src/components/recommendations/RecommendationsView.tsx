@@ -24,7 +24,6 @@ export default function RecommendationsView() {
 
   const [complianceMatrix, setComplianceMatrix] = useState(null);
   const [ganttData, setGanttData] = useState(null);
-  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +45,6 @@ export default function RecommendationsView() {
         };
 
         const response = await generateRecommendations(auditData);
-        console.log("API Response:", response);
         setRecommendations(response.recommendations || []);
 
         const matrix = await generateMatrixCompliance(auditData);
@@ -55,7 +53,7 @@ export default function RecommendationsView() {
         const gantt = await generateGanttData(response.recommendations || []);
         setGanttData(gantt);
 
-      } catch (err: unknown) {
+      } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       } finally {
@@ -72,7 +70,20 @@ export default function RecommendationsView() {
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
-      const blob = await exportToWord(recommendations);
+      const exportData = {
+        recommendations,
+        complianceMatrix,
+        ganttData,
+        impacts: recommendations?.map(rec => ({
+          name: rec.title,
+          energyEfficiency: rec.impact.energyEfficiency * 100,
+          performance: rec.impact.performance * 100,
+          compliance: rec.impact.compliance * 100,
+          explanation: rec.impact.explanation
+        }))
+      };
+
+      const blob = await exportToWord(exportData);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -90,7 +101,7 @@ export default function RecommendationsView() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `recommendations_${new Date().toISOString()}.xlsx`;
+      a.download = `3R_Recommandations_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -100,6 +111,27 @@ export default function RecommendationsView() {
 
   const handleGenerateReport = () => {
     setLocation('/operations/documents');
+  };
+
+  const renderImpactExplanation = (type: string, value: number) => {
+    const getExplanation = () => {
+      switch (type) {
+        case 'energyEfficiency':
+          return `L'amélioration de l'efficacité énergétique de ${value.toFixed(1)}% sera obtenue grâce à l'optimisation des systèmes de refroidissement et à une meilleure gestion de la charge thermique. Cela se traduit par une réduction significative de la consommation d'énergie et une amélioration du PUE (Power Usage Effectiveness).`;
+        case 'performance':
+          return `L'augmentation de la performance de ${value.toFixed(1)}% sera réalisée par la modernisation des équipements et l'optimisation des processus opérationnels. Cela permettra une meilleure disponibilité des services et une réduction des temps d'arrêt.`;
+        case 'compliance':
+          return `L'amélioration de la conformité de ${value.toFixed(1)}% sera atteinte en alignant les installations sur les normes en vigueur, notamment EN 50600 pour les datacenters. Cela renforcera la sécurité et la fiabilité de l'infrastructure.`;
+        default:
+          return '';
+      }
+    };
+
+    return (
+      <div className="mt-2 text-sm text-gray-600">
+        {getExplanation()}
+      </div>
+    );
   };
 
   if (loading) {
@@ -182,60 +214,31 @@ export default function RecommendationsView() {
                     </span>
                   </div>
                   <div className="mt-2 text-sm text-gray-600">
-                    <p><strong>Norme applicable:</strong> {rec.normReference.code}</p>
-                    <p>{rec.normReference.description}</p>
-                    <p className="mt-1"><strong>Exigence:</strong> {rec.normReference.requirement}</p>
+                    <p><strong>Norme applicable:</strong> {rec.normReference?.code}</p>
+                    <p>{rec.normReference?.description}</p>
+                    <p className="mt-1"><strong>Exigence:</strong> {rec.normReference?.requirement}</p>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="mb-4">{rec.description}</p>
+                  <div className="mb-4">
+                    <p className="mb-2">{rec.description}</p>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2">Explication technique simplifiée :</h4>
+                      <p className="text-sm text-gray-700">{rec.technicalExplanation}</p>
+                    </div>
+                  </div>
 
                   <div className="mb-6">
                     <h4 className="font-semibold mb-2">Impact</h4>
                     <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <span className="text-sm">Efficacité énergétique</span>
-                        <Progress value={rec.impact.energyEfficiency * 100} />
-                        <p className="text-sm mt-1">{rec.impact.details.energyEfficiency}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm">Performance</span>
-                        <Progress value={rec.impact.performance * 100} />
-                        <p className="text-sm mt-1">{rec.impact.details.performance}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm">Conformité</span>
-                        <Progress value={rec.impact.compliance * 100} />
-                        <p className="text-sm mt-1">{rec.impact.details.compliance}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <h4 className="font-semibold mb-2">Alternatives</h4>
-                    <div className="space-y-2">
-                      {rec.alternatives.map((alt, index) => (
-                        <div key={index} className="p-3 bg-gray-50 rounded">
-                          <p className="font-medium">{alt.description}</p>
-                          <div className="mt-2 grid grid-cols-2 gap-4">
-                            <div>
-                              <h5 className="text-sm font-medium text-green-600">Avantages</h5>
-                              <ul className="list-disc list-inside text-sm">
-                                {alt.pros.map((pro, i) => (
-                                  <li key={i}>{pro}</li>
-                                ))}
-                              </ul>
-                            </div>
-                            <div>
-                              <h5 className="text-sm font-medium text-red-600">Inconvénients</h5>
-                              <ul className="list-disc list-inside text-sm">
-                                {alt.cons.map((con, i) => (
-                                  <li key={i}>{con}</li>
-                                ))}
-                              </ul>
-                            </div>
+                      {['energyEfficiency', 'performance', 'compliance'].map((impactType) => (
+                        <div key={impactType}>
+                          <span className="text-sm capitalize">{impactType.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
+                          <div className="flex items-center gap-2">
+                            <Progress value={rec.impact[impactType] * 100} />
+                            <span className="text-sm">{(rec.impact[impactType] * 100).toFixed(1)}%</span>
                           </div>
-                          <p className="mt-2 text-sm">Efficacité estimée: {alt.estimatedEfficiency}</p>
+                          {renderImpactExplanation(impactType, rec.impact[impactType] * 100)}
                         </div>
                       ))}
                     </div>
@@ -257,6 +260,24 @@ export default function RecommendationsView() {
         <TabsContent value="impacts">
           <Card>
             <CardContent className="pt-6">
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold mb-4">Vue d'ensemble des impacts</h3>
+                <p className="text-gray-700 mb-4">
+                  Ce graphique présente une visualisation comparative des impacts de chaque recommandation selon trois axes principaux :
+                </p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                  <li className="text-gray-700">
+                    <span className="font-semibold">Efficacité énergétique (vert)</span> : Mesure l'amélioration de la consommation d'énergie et du PUE
+                  </li>
+                  <li className="text-gray-700">
+                    <span className="font-semibold">Performance (bleu)</span> : Évalue l'amélioration des performances opérationnelles
+                  </li>
+                  <li className="text-gray-700">
+                    <span className="font-semibold">Conformité (orange)</span> : Indique le niveau de mise en conformité avec les normes
+                  </li>
+                </ul>
+              </div>
+
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={recommendations?.map(rec => ({
                   name: rec.title.substring(0, 20) + '...',
@@ -273,6 +294,24 @@ export default function RecommendationsView() {
                   <Bar dataKey="compliance" fill="#f59e0b" name="Conformité" />
                 </BarChart>
               </ResponsiveContainer>
+
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Analyse détaillée des impacts</h4>
+                {recommendations?.map((rec) => (
+                  <div key={rec.id} className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium mb-2">{rec.title}</h5>
+                    <div className="space-y-2">
+                      {Object.entries(rec.impact).map(([key, value]) => (
+                        key !== 'details' && (
+                          <div key={key}>
+                            {renderImpactExplanation(key, value * 100)}
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -285,15 +324,50 @@ export default function RecommendationsView() {
                   <h3 className="text-xl font-semibold">{rec.title}</h3>
                 </CardHeader>
                 <CardContent>
-                  {rec.requiredEquipment.map((category, index) => (
+                  {rec.requiredEquipment?.map((category, index) => (
                     <div key={index} className="mb-6">
                       <h4 className="font-semibold mb-3">{category.category}</h4>
                       <div className="space-y-4">
-                        {category.items.map((item, itemIndex) => (
+                        {category.items?.map((item, itemIndex) => (
                           <div key={itemIndex} className="p-4 bg-gray-50 rounded">
                             <p className="font-medium">{item.name}</p>
-                            <p className="text-sm mt-1">Spécifications: {item.specification}</p>
-                            <p className="text-sm text-blue-600">Norme: {item.normReference}</p>
+                            <div className="mt-2">
+                              <h5 className="text-sm font-medium mb-1">Description technique :</h5>
+                              <p className="text-sm text-gray-600 mb-2">{item.technicalDescription}</p>
+
+                              <h5 className="text-sm font-medium mb-1">Bénéfices pour le client :</h5>
+                              <ul className="list-disc list-inside text-sm text-gray-600 mb-2">
+                                {item.benefits?.map((benefit, i) => (
+                                  <li key={i}>{benefit}</li>
+                                ))}
+                              </ul>
+
+                              <h5 className="text-sm font-medium mb-1">Alternatives disponibles :</h5>
+                              {item.alternatives?.map((alt, i) => (
+                                <div key={i} className="mb-2 p-2 bg-white rounded">
+                                  <p className="text-sm font-medium">{alt.name}</p>
+                                  <p className="text-sm text-gray-600">{alt.description}</p>
+                                  <div className="grid grid-cols-2 gap-2 mt-1">
+                                    <div>
+                                      <p className="text-xs font-medium text-green-600">Avantages :</p>
+                                      <ul className="list-disc list-inside text-xs text-gray-600">
+                                        {alt.pros?.map((pro, j) => (
+                                          <li key={j}>{pro}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-red-600">Inconvénients :</p>
+                                      <ul className="list-disc list-inside text-xs text-gray-600">
+                                        {alt.cons?.map((con, j) => (
+                                          <li key={j}>{con}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -325,11 +399,20 @@ export default function RecommendationsView() {
                         </div>
                         <div>
                           <h4 className="text-sm font-medium mb-2">Actions requises</h4>
-                          {data.requiredActions.map((action: any, index: number) => (
+                          {data.requiredActions?.map((action: any, index: number) => (
                             <div key={index} className="mb-2">
                               <p className="text-sm font-medium">{action.action}</p>
-                              <p className="text-xs text-gray-600">Norme: {action.normReference}</p>
-                              <p className="text-xs text-gray-600">Exigence: {action.requirement}</p>
+                              <div className="ml-4">
+                                <p className="text-xs text-gray-600">
+                                  <span className="font-medium">Norme :</span> {action.normReference}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  <span className="font-medium">Exigence :</span> {action.requirement}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  <span className="font-medium">Explication :</span> {action.explanation}
+                                </p>
+                              </div>
                             </div>
                           ))}
                         </div>
