@@ -9,6 +9,7 @@ import { exportToWord, exportToExcel } from '@/services/exports';
 import { Download, ChevronLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { format } from 'date-fns';
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
@@ -67,11 +68,15 @@ export default function RecommendationsView() {
 
   const handleExportWord = async () => {
     try {
+      const clientName = "Client"; // À remplacer par le vrai nom du client
+      const currentDate = format(new Date(), 'yyyy-MM-dd');
+      const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
+
       const blob = await exportToWord(recommendations);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `recommendations_${new Date().toISOString()}.docx`;
+      a.download = fileName;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -91,6 +96,10 @@ export default function RecommendationsView() {
     } catch (error) {
       console.error('Error exporting to Excel:', error);
     }
+  };
+
+  const handleGenerateReport = () => {
+    setLocation('/operations/documents');
   };
 
   if (loading) {
@@ -138,7 +147,7 @@ export default function RecommendationsView() {
             Export Excel
           </Button>
           <Button
-            onClick={() => setShowReportModal(true)}
+            onClick={handleGenerateReport}
             className="bg-[#FF9900] hover:bg-[#e68a00] text-white"
           >
             <FileText className="w-4 h-4 mr-2" />
