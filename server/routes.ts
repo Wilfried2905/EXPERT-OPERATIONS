@@ -167,7 +167,7 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
                 tierLevel: "Certification TIER III (99.982%)"
               }
             },
-            progress: 0,
+            progress: 45.5,
             implemented: false,
             timeline: {
               phases: [

@@ -235,8 +235,8 @@ export default function RecommendationsView() {
                   <div>
                     <h4 className="font-semibold mb-2">Progression</h4>
                     <div className="flex items-center gap-2">
-                      <Progress value={rec.progress} />
-                      <span className="text-sm">{rec.progress.toFixed(1)}%</span>
+                      <Progress value={rec.progress ?? 0} />
+                      <span className="text-sm">{(rec.progress ?? 0).toFixed(1)}%</span>
                     </div>
                   </div>
                 </CardContent>
