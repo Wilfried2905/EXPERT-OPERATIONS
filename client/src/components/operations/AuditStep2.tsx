@@ -171,24 +171,14 @@ const AuditStep2 = () => {
           </div>
         </Card>
 
-        <div className="mt-6 flex justify-between">
+        <div className="mt-6 flex justify-end">
           <button 
-            onClick={() => window.history.back()}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode 
-                ? 'bg-[#002B47] text-white' 
-                : 'bg-[#003366] text-white'
-            }`}
-          >
-            Précédent
-          </button>
-          <button 
-            onClick={handleNext}
+            onClick={() => setLocation('/recommendations')}
             className={`px-6 py-3 rounded font-medium ${
               isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
             } text-white`}
           >
-            {activeTab === sections.length - 1 ? 'Informations Client' : 'Suivant'}
+            Voir les Recommandations
           </button>
         </div>
       </div>

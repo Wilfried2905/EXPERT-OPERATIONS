@@ -15,15 +15,6 @@ interface Question {
 }
 
 export const RecommendationsView = () => {
-  console.log("RecommendationsView: Composant en cours de montage");
-
-  useEffect(() => {
-    console.log("RecommendationsView: Composant monté");
-    return () => {
-      console.log("RecommendationsView: Composant démonté");
-    };
-  }, []);
-
   const [questions, setQuestions] = useState<Question[]>([
     // Groupe 1: Sécurité physique
     { id: '1.1', text: 'Contrôle d\'accès aux salles serveurs', group: 'Sécurité physique', response: null },
@@ -55,14 +46,6 @@ export const RecommendationsView = () => {
   const { generateRecommendations, isLoading } = useAnthropic();
   const { toast } = useToast();
 
-  console.log("RecommendationsView: Hook useAnthropic chargé:", { isLoading });
-
-  const updateQuestionResponse = (id: string, response: 'conforme' | 'non-conforme') => {
-    setQuestions(prev => prev.map(q =>
-      q.id === id ? { ...q, response } : q
-    ));
-  };
-
   const calculateGroupScore = (groupName: string) => {
     const groupQuestions = questions.filter(q => q.group === groupName);
     const repondues = groupQuestions.filter(q => q.response !== null);
@@ -87,8 +70,6 @@ export const RecommendationsView = () => {
   };
 
   const handleGenerateRecommendations = async () => {
-    console.log("RecommendationsView: Démarrage de handleGenerateRecommendations");
-
     const auditData = {
       infrastructure: {
         questionnaire: {
@@ -111,29 +92,54 @@ export const RecommendationsView = () => {
         }
       }
     };
-    console.log("RecommendationsView: Données d'audit préparées:", auditData);
 
     try {
-      console.log("RecommendationsView: Tentative d'envoi des données");
-      const result = await generateRecommendations({ auditData });
-      console.log("RecommendationsView: Réponse reçue:", result);
+      const result = await generateRecommendations({ 
+        auditData,
+        options: {
+          model: "claude-3-5-sonnet-20241022",
+          temperature: 0.7,
+          maxTokens: 2000
+        }
+      });
 
       if (result.text) {
+        const processedRecommendations = processRecommendations(result.text);
+
         localStorage.setItem('recommendationsData', JSON.stringify({
-          recommendations: result.text,
+          recommendations: processedRecommendations,
           auditData
         }));
-        console.log("RecommendationsView: Redirection vers /recommendations-detail");
+
         setLocation('/recommendations-detail');
       }
     } catch (error) {
-      console.error("RecommendationsView: Erreur lors de la génération:", error);
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : 'Une erreur est survenue lors de la génération des recommandations',
         variant: "destructive"
       });
     }
+  };
+
+  const processRecommendations = (text: string) => {
+    // Implémentation du système de priorité basé sur le code Python
+    const priorities = {
+      critical: (impact: number) => impact > 0.8,
+      high: (impact: number) => 0.5 < impact && impact <= 0.8,
+      medium: (impact: number) => 0.3 < impact && impact <= 0.5,
+      low: (impact: number) => impact <= 0.3
+    };
+
+    //  This is a placeholder.  A robust implementation would require more sophisticated NLP techniques
+    //  to extract impact scores and apply priorities.  This example simply returns the original text.
+    return text;
+  };
+
+  const updateQuestionResponse = (id: string, response: 'conforme' | 'non-conforme') => {
+    setQuestions(prev => prev.map(q =>
+      q.id === id ? { ...q, response } : q
+    ));
   };
 
   return (
