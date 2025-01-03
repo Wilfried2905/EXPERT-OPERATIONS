@@ -100,7 +100,40 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Ajouter ici d'autres routes API si nécessaire...
+  // Mock routes pour les autres endpoints
+  app.post("/api/anthropic/compliance-matrix", (req, res) => {
+    res.json({
+      "Sécurité physique": {
+        conformityLevel: 75,
+        requiredActions: ["Mettre à jour le contrôle d'accès", "Renforcer la vidéosurveillance"]
+      },
+      "Infrastructure": {
+        conformityLevel: 85,
+        requiredActions: ["Optimiser la redondance électrique"]
+      }
+    });
+  });
+
+  app.post("/api/anthropic/gantt", (req, res) => {
+    res.json({
+      tasks: [
+        {
+          name: "Mise à niveau infrastructure",
+          duration: 30,
+          startDate: "2024-01-15",
+          endDate: "2024-02-15",
+          dependencies: []
+        },
+        {
+          name: "Optimisation système refroidissement",
+          duration: 45,
+          startDate: "2024-02-16",
+          endDate: "2024-03-30",
+          dependencies: ["Mise à niveau infrastructure"]
+        }
+      ]
+    });
+  });
 
   const httpServer = createServer(app);
   return httpServer;
