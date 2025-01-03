@@ -76,83 +76,37 @@ export default function RecommendationsView() {
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
-      const exportData = {
-        recommendations: recommendations.map(rec => ({
-          ...rec,
-          progress: rec.progress ?? 0,
-          requiredEquipment: (rec.requiredEquipment || []).map(category => ({
-            ...category,
-            items: (category.items || []).map(item => ({
-              ...item,
-              technicalDescription: item.technicalDescription || "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
-              benefits: item.benefits || [
-                "Amélioration de la performance globale du système",
-                "Réduction de la consommation énergétique",
-                "Conformité aux normes en vigueur",
-                "Facilité de maintenance et de gestion"
-              ],
-              alternatives: item.alternatives || [
-                {
-                  name: "Alternative économique",
-                  description: "Version plus abordable avec des fonctionnalités essentielles",
-                  pros: ["Coût initial réduit", "Installation rapide", "Maintenance simple"],
-                  cons: ["Performance limitée", "Durée de vie plus courte", "Fonctionnalités réduites"]
-                },
-                {
-                  name: "Alternative premium",
-                  description: "Version haut de gamme avec fonctionnalités avancées",
-                  pros: ["Performance maximale", "Durabilité supérieure", "Fonctionnalités étendues"],
-                  cons: ["Installation complexe", "Maintenance spécialisée requise"]
-                }
-              ]
-            }))
+      const exportData = recommendations.map(rec => ({
+        ...rec,
+        progress: rec.progress ?? 0,
+        requiredEquipment: (rec.requiredEquipment || []).map(category => ({
+          ...category,
+          items: (category.items || []).map(item => ({
+            ...item,
+            technicalDescription: item.technicalDescription || "Description détaillée du matériel, incluant ses spécifications techniques et son rôle dans l'infrastructure.",
+            benefits: item.benefits || [
+              "Amélioration de la performance globale du système",
+              "Réduction de la consommation énergétique",
+              "Conformité aux normes en vigueur",
+              "Facilité de maintenance et de gestion"
+            ],
+            alternatives: item.alternatives || [
+              {
+                name: "Alternative économique",
+                description: "Version plus abordable avec des fonctionnalités essentielles",
+                pros: ["Coût initial réduit", "Installation rapide", "Maintenance simple"],
+                cons: ["Performance limitée", "Durée de vie plus courte", "Fonctionnalités réduites"]
+              },
+              {
+                name: "Alternative premium",
+                description: "Version haut de gamme avec fonctionnalités avancées",
+                pros: ["Performance maximale", "Durabilité supérieure", "Fonctionnalités étendues"],
+                cons: ["Installation complexe", "Maintenance spécialisée requise"]
+              }
+            ]
           }))
-        })),
-        impactAnalysis: recommendations.map(rec => ({
-          title: rec.title,
-          energyEfficiency: {
-            value: rec.impact.energyEfficiency * 100,
-            explanation: renderImpactExplanation('energyEfficiency', rec.impact.energyEfficiency * 100)
-          },
-          performance: {
-            value: rec.impact.performance * 100,
-            explanation: renderImpactExplanation('performance', rec.impact.performance * 100)
-          },
-          compliance: {
-            value: rec.impact.compliance * 100,
-            explanation: renderImpactExplanation('compliance', rec.impact.compliance * 100)
-          }
-        })),
-        complianceMatrix: complianceMatrix ? Object.entries(complianceMatrix).map(([category, data]: [string, any]) => ({
-          category,
-          description: data.description,
-          conformityLevel: data.conformityLevel,
-          details: data.details,
-          requiredActions: data.requiredActions?.map((action: any) => ({
-            action: action.action,
-            normReference: action.normReference,
-            requirement: action.requirement,
-            explanation: action.explanation
-          }))
-        })) : [],
-        ganttData: ganttData?.tasks?.map((task: any) => ({
-          name: task.name,
-          details: {
-            description: task.details?.description,
-            phases: task.details?.phases?.map((phase: any) => ({
-              name: phase.name,
-              duration: phase.duration,
-              tasks: phase.tasks,
-              deliverables: phase.deliverables
-            })),
-            milestones: task.details?.milestones?.map((milestone: any) => ({
-              name: milestone.name,
-              date: milestone.date,
-              requirements: milestone.requirements
-            }))
-          }
         }))
-      };
+      }));
 
       console.log('Preparing Word export with data:', exportData);
       const blob = await exportToWord(exportData);
