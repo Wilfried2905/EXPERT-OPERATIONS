@@ -11,7 +11,7 @@ import MainLayout from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
-// Importer le bon composant RecommendationsView depuis le dossier recommendations
+// Correction de l'import pour utiliser le bon composant RecommendationsView
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
 
 function App() {
@@ -72,6 +72,7 @@ function App() {
           </ProtectedRoute>
         </Route>
 
+        {/* Route spécifique pour les recommandations */}
         <Route path="/recommendations">
           <ProtectedRoute>
             <RecommendationsView />
