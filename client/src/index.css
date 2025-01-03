@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background-color: #FFFFFF;
+    --background-color-dark: #1A1A1A;
+    --text-color: #000000;
+    --text-color-dark: #E0E0E0;
+  }
+
+  .dark {
+    --background-color: #1A1A1A;
+    --background-color-dark: #FFFFFF;
+    --text-color: #E0E0E0;
+    --text-color-dark: #000000;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-[var(--text-color)];
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-primary;
+  }
+
+  button {
+    @apply font-sans;
+  }
+}

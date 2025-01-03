@@ -1,0 +1,191 @@
+import React, { useState, useMemo } from 'react';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Upload, Info, BarChart } from 'lucide-react';
+
+interface QuestionResult {
+  id: string;
+  status: 'conforme' | 'non-conforme' | null;
+  comments?: string;
+  files?: File[];
+}
+
+const AuditOperationnel = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeMainSection, setActiveMainSection] = useState<'analyse' | 'evaluation'>('analyse');
+  const [activeTab, setActiveTab] = useState(0);
+  const [results, setResults] = useState<Record<string, QuestionResult>>({});
+
+  // Structure des données de l'audit
+  const auditSections = {
+    analyse: {
+      title: "Analyse de l'existant",
+      description: "Questions liées à l'existant chez le client",
+      sections: [
+        {
+          title: "Objectifs et stratégie opérationnelle",
+          questions: [
+            {
+              question: "Quels sont les principaux objectifs du client en matière de performance opérationnelle ?",
+              norm: "Cette question permet de comprendre les priorités du client en matière d'efficacité et de performance dans ses opérations.",
+              id: "obj-1"
+            },
+            {
+              question: "Avez-vous déjà réalisé un audit opérationnel ?",
+              norm: "Permet de connaître l'historique des audits et des évaluations précédentes réalisés sur les opérations internes.",
+              id: "obj-2"
+            },
+            {
+              question: "Quels sont les indicateurs de performance (KPI) actuellement suivis ?",
+              norm: "Cela permet d'évaluer les mesures de performance utilisées et leur pertinence dans le cadre des objectifs du client.",
+              id: "obj-3"
+            },
+            {
+              question: "Quelles ressources ou outils utilisez-vous pour gérer vos opérations au quotidien ?",
+              norm: "Cette question permet de comprendre les outils en place pour la gestion des processus opérationnels.",
+              id: "obj-4"
+            }
+          ]
+        },
+        // ... Ajoutez toutes les autres sections de l'analyse de l'existant
+      ]
+    },
+    evaluation: {
+      title: "Questionnaire d'évaluation",
+      description: "Basé sur les bonnes pratiques en matière d'audit opérationnel",
+      sections: [
+        {
+          title: "Structuration des processus opérationnels",
+          questions: [
+            {
+              question: "Les processus sont-ils régulièrement optimisés ?",
+              norm: "Référence : ISO 9001 - L'amélioration continue est essentielle pour l'efficacité des processus.",
+              id: "eval-proc-1"
+            },
+            // ... Ajoutez toutes les questions de l'évaluation
+          ]
+        },
+        // ... Ajoutez toutes les autres sections de l'évaluation
+      ]
+    }
+  };
+
+  // Calculs des statistiques
+  const stats = useMemo(() => {
+    const calculateSectionStats = (section: typeof auditSections.analyse | typeof auditSections.evaluation) => {
+      let totalQuestions = 0;
+      let answeredQuestions = 0;
+      let conformeCount = 0;
+
+      section.sections.forEach(s => {
+        s.questions.forEach(q => {
+          totalQuestions++;
+          if (results[q.id]?.status) {
+            answeredQuestions++;
+            if (results[q.id]?.status === 'conforme') {
+              conformeCount++;
+            }
+          }
+        });
+      });
+
+      return {
+        completion: (answeredQuestions / totalQuestions) * 100,
+        conformity: answeredQuestions > 0 ? (conformeCount / answeredQuestions) * 100 : 0
+      };
+    };
+
+    return {
+      analyse: calculateSectionStats(auditSections.analyse),
+      evaluation: calculateSectionStats(auditSections.evaluation)
+    };
+  }, [results]);
+
+  const handleAnswer = (questionId: string, status: 'conforme' | 'non-conforme') => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], id: questionId, status }
+    }));
+  };
+
+  const handleCommentChange = (questionId: string, comment: string) => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], id: questionId, comments: comment }
+    }));
+  };
+
+  const currentSection = auditSections[activeMainSection];
+  const currentStats = stats[activeMainSection];
+
+  return (
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          Audit Opérationnel
+        </h1>
+
+        {/* Statistiques globales */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Progression
+            </h3>
+            <Progress value={currentStats.completion} className="h-2 mb-2" />
+            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {currentStats.completion.toFixed(1)}% complété
+            </p>
+          </Card>
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Conformité
+            </h3>
+            <Progress 
+              value={currentStats.conformity} 
+              className="h-2 mb-2"
+              indicatorClassName={
+                currentStats.conformity >= 75 ? 'bg-green-500' :
+                currentStats.conformity >= 50 ? 'bg-yellow-500' :
+                'bg-red-500'
+              }
+            />
+            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {currentStats.conformity.toFixed(1)}% conforme
+            </p>
+          </Card>
+        </div>
+
+        {/* Navigation principale */}
+        <div className="flex gap-4 mb-6">
+          {Object.entries(auditSections).map(([key, section]) => (
+            <button
+              key={key}
+              onClick={() => {
+                setActiveMainSection(key as 'analyse' | 'evaluation');
+                setActiveTab(0);
+              }}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                activeMainSection === key
+                  ? isDarkMode 
+                    ? 'bg-[#CC7A00] text-white' 
+                    : 'bg-[#FF9900] text-white'
+                  : isDarkMode
+                    ? 'bg-[#002B47] text-[#E0E0E0]'
+                    : 'bg-white text-[#003366]'
+              }`}
+            >
+              {section.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Contenu principal */}
+        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
+          {/* ... Reste du code pour l'affichage des questions ... */}
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AuditOperationnel;

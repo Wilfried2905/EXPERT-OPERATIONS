@@ -1,0 +1,103 @@
+SOMMAIRE OFFRE TECHNIQUE 
+
+1. Introduction
+   - Présentation de 3R TECHNOLOGIE
+   - Expertise en datacenters
+   - Certifications TIA-942
+   - Équipe projet et qualifications
+
+2. Analyse des Besoins
+   - Contexte et enjeux client
+   - Objectifs de conformité TIA-942
+   - Contraintes techniques et opérationnelles
+   - Exigences de performance
+
+3. Architecture Technique TIA-942
+   - Classification Tier visée
+   - Architecture générale
+   - Redondance N+1/2N selon Tier
+   - Points de défaillance unique (SPOF)
+
+4. Infrastructures Critiques
+   - Alimentation électrique
+   - Système de refroidissement
+   - Sécurité physique
+   - Connectivité
+
+5. Conformité et Certification
+   - Analyse des écarts TIA-942
+   - Plan de mise en conformité
+   - Processus de certification
+   - Documentation requise
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SOMMAIRE CAHIER DES CHARGES 
+
+1. Présentation du Projet
+   - Contexte général
+   - Objectifs du projet
+   - Périmètre d'intervention
+   - Classification Tier visée
+
+2. Exigences TIA-942
+   - Conformité architecturale
+   - Conformité électrique
+   - Conformité climatisation
+   - Conformité sécurité
+   - Niveaux de redondance requis
+
+3. Spécifications Techniques
+   - Architecture physique
+   - Infrastructure électrique
+   - Système de refroidissement
+   - Sécurité et monitoring
+   - Infrastructure réseau
+
+4. Exigences Opérationnelles
+   - Disponibilité et SLA
+   - Maintenance préventive
+   - Documentation technique
+   - Formation du personnel
+
+5. Contraintes et Prérequis
+   - Contraintes site et bâtiment
+   - Contraintes réglementaires
+   - Contraintes techniques spécifiques
+   - Prérequis d'installation
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SOMMAIRE RAPPORT D'AUDIT
+
+1. Résumé Exécutif
+   - Objectifs de l'audit
+   - Méthodologie d'évaluation
+   - Synthèse des conclusions majeures
+   - Recommandations prioritaires
+
+2. Présentation du Site Audité
+   - Informations client
+   - Description des installations
+   - Configuration des salles techniques
+   - Inventaire des équipements critiques
+
+3. Analyse de Conformité TIA-942
+   - Architecture et Structure
+   - Système Électrique
+   - Système de Refroidissement
+   - Sécurité et Contrôle d'Accès
+   - Conformité des Infrastructures
+   - Points d'Amélioration
+
+4. Recommandations
+   - Améliorations Prioritaires
+   - Plan d'Action Détaillé
+   - Estimations Budgétaires
+   - Calendrier de Mise en Œuvre
+
+5. Annexes
+   - Rapports de Tests
+   - Documentation Technique
+   - Photos et Schémas
+   - Références Normatives

@@ -1,0 +1,204 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Plus, Trash2 } from 'lucide-react';
+
+const ClientInfo = () => {
+  const [surveyDate] = useState(new Date().toISOString().split('T')[0]);
+  const [formData, setFormData] = useState({
+    companyName: '',
+    location: '',
+    clients: [{
+      name: '',
+      phone: '',
+      email: ''
+    }],
+    technicians: [{
+      name: '',
+      phone: '',
+      email: window.userEmail || '' // Assuming userEmail is set during login
+    }],
+    rooms: []
+  });
+
+  const roomTypes = ['Salle Serveur', 'Salle Énergie', 'Salle Supervision'];
+
+  const addPerson = (type) => {
+    if (formData[type].length < 5) {
+      setFormData({
+        ...formData,
+        [type]: [...formData[type], { name: '', phone: '', email: type === 'technicians' ? window.userEmail : '' }]
+      });
+    }
+  };
+
+  const removePerson = (type, index) => {
+    const newArray = formData[type].filter((_, i) => i !== index);
+    setFormData({ ...formData, [type]: newArray });
+  };
+
+  const handlePersonChange = (type, index, field, value) => {
+    const newArray = formData[type].map((person, i) => {
+      if (i === index) {
+        return { ...person, [field]: value };
+      }
+      return person;
+    });
+    setFormData({ ...formData, [type]: newArray });
+  };
+
+  const addRoom = (type) => {
+    const roomCount = formData.rooms.filter(room => room.type === type).length;
+    if (roomCount < 5) {
+      setFormData({
+        ...formData,
+        rooms: [...formData.rooms, {
+          type,
+          name: '',
+          dimensions: { length: 0, width: 0, height: 0 },
+          surface: 0,
+          volume: 0,
+          equipment: []
+        }]
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <Label>Date du survey</Label>
+              <Input type="date" value={surveyDate} disabled />
+            </div>
+            <div>
+              <Label>Nom de l'entreprise</Label>
+              <Input 
+                value={formData.companyName}
+                onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+              />
+            </div>
+          </div>
+
+          {/* Clients Section */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-[#003366]">Contacts Client</h3>
+              <Button 
+                onClick={() => addPerson('clients')}
+                disabled={formData.clients.length >= 5}
+                className="bg-[#FF9900]"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Ajouter Client
+              </Button>
+            </div>
+            {formData.clients.map((client, index) => (
+              <div key={index} className="grid grid-cols-3 gap-4 mb-4 items-end">
+                <div>
+                  <Label>Nom et prénom</Label>
+                  <Input
+                    value={client.name}
+                    onChange={(e) => handlePersonChange('clients', index, 'name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Téléphone</Label>
+                  <Input
+                    value={client.phone}
+                    onChange={(e) => handlePersonChange('clients', index, 'phone', e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label>Email</Label>
+                    <Input
+                      value={client.email}
+                      onChange={(e) => handlePersonChange('clients', index, 'email', e.target.value)}
+                    />
+                  </div>
+                  {index > 0 && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => removePerson('clients', index)}
+                      className="mb-0.5"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Technicians Section */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-[#003366]">Techniciens 3RT</h3>
+              <Button 
+                onClick={() => addPerson('technicians')}
+                disabled={formData.technicians.length >= 5}
+                className="bg-[#FF9900]"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Ajouter Technicien
+              </Button>
+            </div>
+            {formData.technicians.map((tech, index) => (
+              <div key={index} className="grid grid-cols-3 gap-4 mb-4 items-end">
+                <div>
+                  <Label>Nom et prénom</Label>
+                  <Input
+                    value={tech.name}
+                    onChange={(e) => handlePersonChange('technicians', index, 'name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Téléphone</Label>
+                  <Input
+                    value={tech.phone}
+                    onChange={(e) => handlePersonChange('technicians', index, 'phone', e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label>Email</Label>
+                    <Input
+                      value={tech.email}
+                      disabled
+                    />
+                  </div>
+                  {index > 0 && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => removePerson('technicians', index)}
+                      className="mb-0.5"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <Label>Situation géographique</Label>
+            <Input
+              value={formData.location}
+              onChange={(e) => setFormData({...formData, location: e.target.value})}
+              className="w-full"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ClientInfo;

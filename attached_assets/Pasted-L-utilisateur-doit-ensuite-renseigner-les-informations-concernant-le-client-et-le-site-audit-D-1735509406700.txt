@@ -1,0 +1,46 @@
+L’utilisateur doit ensuite renseigner les informations concernant le client et le site audité :
+•	Date du survey : Ce champ est rempli automatiquement avec la date du jour.
+•	Nom de l’entreprise : [Champ à remplir].
+•	Nom et prénoms du représentant : [Champ à remplir] en face Contact téléphonique : [Champ à remplir] en face Adresse email : [Champ à remplir].
+•	Nom et prénoms 3RT : [Champ à remplir] avec en face le contact téléphonique Contact téléphonique : [Champ à remplir] en face Adresse email : [Champ à remplir utiliser le mail de connexion].
+•	Situation géographique : [Champ à remplir]
+Rajouter les boutons “Ajouter Client” et “Ajouter Technicien” afin de rajouter de Nouvelles personnes limite de 5 pour chacun, l’adresse email du techncien doit être automatiquement rempli en fonction de son login utilise à la page de connexion
+
+La personne en charge renseigne les informations sur les salles visitées dans le cadre du survey. Les informations sont spécifiques à chaque salle :
+•	Nom de la salle : [Salle Serveur] [Salle Énergie] [Salle Supervision] (sélection dans une liste déroulante).
+•	Dimensions de la salle : Longueur, largeur, hauteur (les champs à remplir pour chaque salle).
+•	Calcul automatique : La surface et le volume de la salle sont automatiquement calculés à partir des dimensions saisies.
+•	Équipements présents dans la salle :
+o	Désignation des équipements (liste déroulante en fonction du type de salle) en face Quantité d’équipements (champ numérique pour chaque équipement) et aussi le choix des éditeurs et constructeurs (liste déroulante en fonction du type de salle) par rapport à la désignation de l’équipement
+o	Ajout dynamique d’équipements : Le technicien peut ajouter de nouveaux équipements spécifiques en cliquant sur "Ajouter un équipement", ce qui fait apparaître un nouveau champ pour désignation et quantité.
+o	Ajout le bouton « Ajouter une salle » 
+Le technicien peut ajouter une salle selon le même processus :
+•	Nom de la salle : [Salle Serveur] [Salle Énergie] [Salle Supervision] (sélection dans une liste déroulante).
+•	Dimensions de la salle : Longueur, largeur, hauteur (les champs à remplir pour chaque salle).
+•	Calcul automatique : La surface et le volume de la salle sont automatiquement calculés à partir des dimensions saisies.
+•	Équipements présents dans la salle :
+o	Désignation des équipements (liste déroulante en fonction du type de salle) en face Quantité d’équipements (champ numérique pour chaque équipement) et aussi le choix des éditeurs et constructeurs (liste déroulante en fonction du type de salle) par rapport à la désignation de l’équipement
+Salle Servers	Éditeurs et Constructeurs	Salle d'Énergie	Éditeurs et Constructeurs Énergie	Salle de Supervision	Éditeurs et Constructeurs Supervision
+Serveurs (rack, lame, tour)	Dell, HP, IBM, Lenovo, Huawei	Onduleurs (UPS)	APC by Schneider Electric, Eaton, Vertiv	Moniteurs de surveillance haute résolution	Samsung, LG, Dell
+Onduleurs (UPS)	APC, Eaton, Vertiv, Legrand	Onduleurs (UPS)	APC by Schneider Electric, Eaton, Vertiv	Postes de travail avec logiciels DCIM et de supervision	IBM, SolarWinds, Schneider Electric
+Onduleurs (UPS) modulaires avec redondance N+1 ou 2N	APC by Schneider Electric, Eaton, Vertiv	Onduleurs (UPS) avec redondance N+1 ou 2N	APC by Schneider Electric, Eaton, Vertiv	Systèmes de communication unifiés	Cisco, Avaya, Microsoft
+Baies de stockage	NetApp, EMC, IBM, Hitachi	Batteries de secours	Exide, EnerSys, C&D Technologies	Pupitres de contrôle ergonomiques	Winsted, Evans, Knürr
+Switches réseau redondants	Cisco, Juniper, Huawei, Arista	Distributeurs d'énergie	Schneider Electric, ABB, Siemens	Caméras de surveillance IP	Axis Communications, Hikvision, Dahua
+Routeurs avec redondance	Cisco, Huawei, Fortinet, Palo Alto Networks	Transformateurs	ABB, Siemens, Schneider Electric	Systèmes d'alerte multicanaux	Everbridge, Alertus, Singlewire
+Systèmes de refroidissement en rangée	Schneider Electric, Vertiv, Rittal	Systèmes de gestion de l'énergie avancés	Schneider Electric, ABB, Siemens	Systèmes de gestion des incidents (ITSM)	ServiceNow, BMC, Atlassian
+Équipements de climatisation de précision	Schneider Electric, Stulz, Vertiv	Tableaux électriques intelligents	Schneider Electric, ABB, Siemens	Écrans muraux LED grand format	Samsung, LG, NEC
+Racks et armoires avec confinement d'allées	APC, Rittal, Panduit	Générateurs avec commutation automatique	Cummins, Caterpillar, Kohler	Stations de travail ergonomiques	Herman Miller, Steelcase, Knoll
+Câblage réseau structuré (Cat 6a/7/8)	Commscope, Panduit, Belden	Compteurs d'énergie intelligents	Schneider Electric, ABB, Siemens	Consoles de contrôle opérateurs multi-écrans	Winsted, Evans, Knürr
+Systèmes de sécurité biométriques	HID Global, Suprema, ZKTeco	Systèmes d'éclairage de secours LED	Philips, Eaton, Acuity Brands	Systèmes d'affichage pour KPI en temps réel	Splunk, Datadog, Grafana
+Systèmes de détection et d'extinction d'incendie (VESDA)	Xtralis, Siemens, Honeywell	Systèmes de ventilation et de refroidissement efficaces	Carrier, Trane, Johnson Controls	Systèmes de vidéoconférence HD	Cisco, Zoom, Poly
+Systèmes de contrôle d'accès RFID	HID Global, Honeywell, Lenel	Panneaux de distribution électrique redondants	Schneider Electric, ABB, Eaton	Systèmes de sonorisation d'urgence	Bosch, TOA, Biamp
+Systèmes de gestion de câbles aériens et sous plancher	Panduit, Legrand, HellermannTyton	Systèmes de surveillance de la qualité de l'énergie	Fluke, Schneider Electric, Eaton	Tableaux de bord et interfaces graphiques personnalisables	Tableau, Power BI, Qlik
+Équipements KVM over IP	Raritan, Vertiv, Aten	Systèmes de protection contre la foudre	DEHN, Schneider Electric, ABB	Systèmes d'analyse prédictive et de Machine Learning	IBM Watson, SAS, Splunk
+Systèmes de monitoring environnemental IoT	APC, Vertiv, Raritan	Systèmes de récupération de chaleur	Schneider Electric, ABB, Siemens	Systèmes de gestion des accès et de l'identité (IAM)	Okta, Microsoft, IBM
+PDU intelligents avec mesure par prise	APC, Raritan, Vertiv	Systèmes de stockage d'énergie avancés	Tesla, ABB, Schneider Electric	Outils de gestion des changements et de la configuration	ServiceNow, BMC, Atlassian
+Systèmes de détection de fuites d'eau	APC, Vertiv, RLE Technologies	Systèmes de gestion de l'énergie renouvelable	ABB, Schneider Electric, Siemens	Systèmes de surveillance environnementale avancés	APC, Vertiv, Raritan
+Chemins de câbles suspendus	Legrand, Panduit, Snake Tray	Systèmes de refroidissement liquide	Vertiv, Schneider Electric, Asetek	Outils de conformité RGPD et de sécurité des données	OneTrust, IBM, SAP
+Planchers surélevés avec circulation d'air optimisée	Tate, Kingspan, ASM	Systèmes de distribution électrique modulaires	Schneider Electric, ABB, Eaton	Systèmes de gestion des incidents	ServiceNow, BMC, Atlassian
+
+o	Ajout dynamique d’équipements : Le technicien peut ajouter de nouveaux équipements spécifiques en cliquant sur "Ajouter un équipement", ce qui fait apparaître un nouveau champ pour désignation et quantité.
+La limite pour les ajouts des salles c’est 5 salles Serveur, 5 salles Energie, 5 salles Supervision

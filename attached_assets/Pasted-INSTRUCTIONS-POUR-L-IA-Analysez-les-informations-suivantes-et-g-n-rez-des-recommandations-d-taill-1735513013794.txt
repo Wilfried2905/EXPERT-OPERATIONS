@@ -1,0 +1,83 @@
+INSTRUCTIONS POUR L'IA :
+Analysez les informations suivantes et générez des recommandations détaillées. Incluez des visualisations et diagrammes pertinents quand nécessaire.
+
+CONTEXTE CLIENT :
+- Entreprise : [CompanyName]
+- Localisation : [Location]
+- Contraintes spécifiques : [Specific_Constraints]
+
+INFRASTRUCTURE EXISTANTE :
+1. Configuration des Salles :
+   - Détails par salle : [dimensions, surface, volume]
+   - Disposition actuelle : [layout]
+   - Contraintes physiques : [physical_constraints]
+
+2. Inventaire Équipements :
+   - Par salle : [équipements, quantités, fabricants]
+   - État actuel : [age, performance]
+   - Points de vigilance : [warnings]
+
+RÉSULTATS D'AUDIT :
+1. Infrastructure Électrique :
+   - Conformité : [compliance_results]
+   - Observations : [observations]
+   - Documents associés : [attached_docs]
+   - Images : [attached_images]
+
+2. Système de Refroidissement :
+   [même structure]
+
+3. Sécurité Physique :
+   [même structure]
+
+4. Architecture Réseau :
+   [même structure]
+
+5. Gestion Opérationnelle :
+   [même structure]
+
+FORMAT DE SORTIE REQUIS :
+
+1. Synthèse Exécutive :
+   - Points critiques
+   - Risques majeurs
+   - Opportunités d'amélioration
+   [Inclure graphique de synthèse]
+
+2. Analyse Détaillée par Domaine :
+   - Non-conformités identifiées
+   - Impact sur les opérations
+   - Interdépendances avec autres systèmes
+   [Inclure diagrammes techniques]
+
+3. Plan d'Action Hiérarchisé :
+   - Actions immédiates (0-3 mois)
+   - Court terme (3-6 mois)
+   - Moyen terme (6-18 mois)
+   - Long terme (18+ mois)
+   [Inclure chronologie visuelle]
+
+4. Recommandations Techniques :
+   - Solutions proposées
+   - Alternatives possibles
+   - Références normes TIA-942
+   - Schémas et diagrammes explicatifs
+   [Inclure visualisations techniques]
+
+5. Impact sur les Performances :
+   - Disponibilité
+   - Efficacité énergétique
+   - Sécurité
+   [Inclure graphiques comparatifs]
+
+6. Annexes :
+   - Références normatives détaillées
+   - Schémas techniques
+   - Visualisations explicatives
+   - Graphiques d'analyse
+
+FORMAT DES VISUALISATIONS :
+- Utiliser des diagrammes SVG pour les schémas techniques
+- Inclure des graphiques pour les analyses comparatives
+- Fournir des visualisations de flux pour les processus
+- Proposer des maquettes pour les modifications physiques

@@ -1,0 +1,168 @@
+# Analyse du flux d'authentification
+
+## 1. HomePage.tsx - Sélection des profils et transition vers le formulaire
+```tsx
+export default function HomePage() {
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const roles: RoleCard[] = [
+    {
+      role: 'guest',
+      title: 'Invité',
+      icon: <Users className="w-8 h-8 text-[#003366]" />,
+      email: 'invite@3rtechnologie.com',
+      bgColor: 'bg-blue-100'
+    },
+    // ... autres rôles ...
+  ];
+
+  // Point critique 1: La transition vers le formulaire de connexion
+  if (selectedRole) {
+    const selectedEmail = roles.find(r => r.role === selectedRole)?.email;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md space-y-4">
+          <LoginForm selectedEmail={selectedEmail} />
+          <Button onClick={() => setSelectedRole(null)}>
+            Retour à la sélection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Point critique 2: L'affichage des cartes de sélection de profil
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {roles.map((role) => (
+        <Card
+          key={role.role}
+          onClick={() => setSelectedRole(role.role)}
+          className="cursor-pointer hover:shadow-lg"
+        >
+          {/* ... contenu de la carte ... */}
+        </Card>
+      ))}
+    </div>
+  );
+}
+```
+
+## 2. LoginForm.tsx - Gestion du formulaire de connexion
+```tsx
+export function LoginForm({ selectedEmail }: LoginFormProps) {
+  const { login } = useUser();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  // Point critique 3: Configuration du formulaire avec l'email présélectionné
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+    defaultValues: {
+      email: selectedEmail || '',
+      password: ''
+    }
+  });
+
+  // Point critique 4: Soumission du formulaire et navigation
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const result = await login(data);
+      if (!result.ok) {
+        throw new Error(result.message);
+      }
+      setLocation('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Une erreur est survenue lors de la connexion",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Input
+        {...register("email")}
+        disabled={!!selectedEmail}
+        defaultValue={selectedEmail}
+      />
+      <Input
+        {...register("password")}
+        type="password"
+      />
+      <Button 
+        type="submit"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Connexion en cours...' : 'Se connecter'}
+      </Button>
+    </form>
+  );
+}
+```
+
+## 3. App.tsx - Gestion des routes et états d'authentification
+```tsx
+function App() {
+  const { user, isLoading } = useUser();
+
+  // Point critique 5: Gestion du chargement
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // Point critique 6: Redirection vers la page d'accueil si non authentifié
+  if (!user) {
+    return (
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="*" component={HomePage} />
+      </Switch>
+    );
+  }
+
+  // Point critique 7: Routes authentifiées
+  return (
+    <MainLayout>
+      <Switch>
+        <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/operations" component={OperationsPage} />
+        {/* ... autres routes ... */}
+      </Switch>
+    </MainLayout>
+  );
+}
+```
+
+## Points d'attention pour le débogage :
+
+1. Dans HomePage.tsx :
+   - Vérifier que setSelectedRole est bien appelé lors du clic sur une carte
+   - Confirmer que la condition if (selectedRole) fonctionne correctement
+   - S'assurer que selectedEmail est bien extrait du tableau roles
+
+2. Dans LoginForm.tsx :
+   - Vérifier que selectedEmail est bien reçu comme prop
+   - Confirmer que defaultValues initialise correctement l'email
+   - Vérifier que l'Input est bien disabled quand selectedEmail est présent
+
+3. Dans App.tsx :
+   - S'assurer que la redirection vers HomePage fonctionne pour les utilisateurs non authentifiés
+   - Vérifier que useUser() renvoie correctement l'état de l'utilisateur
+
+## Tests à effectuer :
+
+1. Cliquer sur une carte de profil devrait :
+   - Mettre à jour selectedRole
+   - Afficher le formulaire de connexion
+   - Pré-remplir l'email correctement
+
+2. Le formulaire de connexion devrait :
+   - Avoir l'email désactivé et pré-rempli
+   - Permettre la saisie du mot de passe
+   - Afficher les erreurs de validation
+   - Rediriger vers le tableau de bord après une connexion réussie
+
+3. Les routes devraient :
+   - Rediriger vers la page d'accueil si non authentifié
+   - Permettre l'accès aux pages protégées si authentifié

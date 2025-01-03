@@ -1,0 +1,148 @@
+AUDITS OPERATIONNELS
+
+Onglet 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+Les questions ci-dessous servent à obtenir une vue d'ensemble de la gestion opérationnelle existante chez le client, afin d'évaluer la performance et d'identifier les domaines nécessitant des améliorations.
+
+1. Objectifs et stratégie opérationnelle
+Quels sont les principaux objectifs du client en matière de performance opérationnelle ?
+
+Cette question permet de comprendre les priorités du client en matière d'efficacité et de performance dans ses opérations.
+Avez-vous déjà réalisé un audit opérationnel ou une évaluation de la performance des processus internes ?
+
+Permet de connaître l’historique des audits et des évaluations précédentes réalisés sur les opérations internes.
+Quels sont les indicateurs de performance (KPI) actuellement suivis pour évaluer l’efficacité des opérations ?
+
+Cela permet d’évaluer les mesures de performance utilisées et leur pertinence dans le cadre des objectifs du client.
+Quelles ressources ou outils utilisez-vous pour gérer vos opérations au quotidien (logiciels, ERP, etc.) ?
+
+Cette question permet de comprendre les outils en place pour la gestion des processus opérationnels.
+
+2. Gestion des processus opérationnels
+Comment vos processus opérationnels sont-ils structurés et documentés ?
+
+Permet d’évaluer la maturité des processus en place et leur capacité à être suivis et améliorés.
+Les processus sont-ils régulièrement évalués et améliorés pour garantir leur efficacité ?
+
+Cette question permet de vérifier si des processus d'amélioration continue sont en place.
+Y a-t-il une gestion centralisée ou décentralisée des opérations au sein de l'organisation ?
+
+Permet de déterminer si la gestion des opérations est centralisée ou déléguée à différentes équipes.
+Quelles méthodes de gestion de projet utilisez-vous pour garantir l'efficacité des projets opérationnels ?
+
+Cette question évalue les approches et méthodes (Agile, Scrum, Lean, etc.) utilisées pour piloter les projets.
+
+3. Gestion des ressources humaines
+Le personnel est-il suffisamment formé et sensibilisé aux processus opérationnels ?
+
+Permet d’évaluer la compétence du personnel dans la gestion des opérations quotidiennes.
+Comment la performance des équipes opérationnelles est-elle mesurée et suivie ?
+
+Cette question permet de comprendre les mécanismes de suivi de la performance individuelle et collective.
+Avez-vous un système de gestion des talents pour assurer le développement des compétences des collaborateurs ?
+
+Permet de déterminer si un système est en place pour gérer les compétences et favoriser la montée en compétence des équipes.
+Les équipes sont-elles structurées de manière à favoriser la collaboration et l’efficacité des processus ?
+
+Évalue l’organisation des équipes et leur capacité à collaborer efficacement dans le cadre des opérations.
+
+4. Gestion des risques opérationnels
+Avez-vous une cartographie des risques opérationnels identifiés au sein de vos processus ?
+
+Cette question permet de comprendre si le client a une vue claire des risques potentiels et leur gestion.
+Les risques identifiés sont-ils correctement gérés et atténués dans vos processus opérationnels ?
+
+Permet d’évaluer la capacité de l’organisation à gérer et atténuer les risques.
+Existe-t-il un plan de gestion de crise pour faire face à des perturbations dans les opérations ?
+
+Vérifie si l'organisation est préparée à réagir en cas de crise qui pourrait perturber ses opérations.
+Les processus de gestion des risques sont-ils régulièrement réévalués pour garantir leur pertinence ?
+
+Évalue la capacité de l’organisation à ajuster ses processus face à des évolutions internes ou externes.
+
+5. Performance et contrôle
+Quelles sont les principales méthodes de suivi et de contrôle utilisées pour évaluer les performances opérationnelles ?
+
+Permet de comprendre les mécanismes en place pour surveiller la performance des opérations.
+Les résultats des audits opérationnels sont-ils régulièrement analysés et partagés avec les équipes concernées ?
+
+Cette question permet d’évaluer la réactivité de l’organisation face aux résultats d’audits et leur capacité à les mettre en œuvre.
+Les objectifs de performance sont-ils alignés avec les stratégies globales de l’entreprise ?
+
+Permet de vérifier l’alignement des objectifs opérationnels avec les objectifs stratégiques de l’organisation.
+Des mesures correctives sont-elles prises lorsque les performances ne répondent pas aux attentes ?
+
+Cette question permet d’évaluer l’efficacité du système de gestion de la performance et la capacité à réagir face aux écarts.
+
+
+Onglet 2 : Questionnaire d'évaluation basé sur les bonnes pratiques en matière d’audit opérationnel
+Ce questionnaire évalue l’organisation des opérations chez le client, en référence aux bonnes pratiques et aux standards en matière de gestion opérationnelle.
+
+1. Structuration des processus opérationnels
+Les processus sont-ils régulièrement modifiés ou optimisés en fonction des retours des équipes et des résultats des audits ?
+
+Référence : ISO 9001 - L'amélioration continue est essentielle pour l'efficacité des processus.
+Les processus opérationnels sont-ils alignés avec les objectifs stratégiques de l'entreprise ?
+
+Référence : Balanced Scorecard - L'alignement des processus avec les objectifs stratégiques permet d'assurer une exécution cohérente de la stratégie.
+Les processus sont-ils documentés de manière à garantir leur transparence et leur suivi ?
+
+Référence : ISO 9001 - Une documentation rigoureuse des processus permet une meilleure gestion et un suivi précis des opérations.
+Les processus sont-ils standardisés à travers l'organisation ou y a-t-il des variations selon les équipes ?
+
+Référence : Lean Six Sigma - La standardisation des processus est clé pour assurer l'efficacité et la qualité dans toutes les équipes.
+
+2. Gestion des ressources humaines et de la performance
+Les rôles et responsabilités des équipes sont-ils clairement définis pour éviter les chevauchements et les lacunes ?
+
+Référence : RACI Matrix - La clarification des responsabilités permet d'optimiser la gestion des ressources humaines.
+Les équipes opérationnelles disposent-elles des ressources nécessaires (compétences, technologies, etc.) pour atteindre les objectifs ?
+
+Référence : ISO 9001 - L’allocation appropriée des ressources est essentielle pour atteindre les objectifs de performance.
+Les performances des collaborateurs sont-elles évaluées régulièrement à l'aide d'indicateurs objectifs ?
+
+Référence : OKRs, KPIs - Une évaluation continue de la performance permet de maintenir un haut niveau d'efficacité opérationnelle.
+Les formations et le développement des compétences sont-ils adaptés aux besoins des équipes ?
+
+Référence : ISO 9001 - La formation continue est essentielle pour garantir que les équipes sont préparées à gérer efficacement les opérations.
+
+3. Gestion des risques opérationnels
+Les risques opérationnels sont-ils intégrés dans la stratégie globale de gestion des risques de l'organisation ?
+
+Référence : ISO 31000 - Une gestion intégrée des risques garantit la résilience et la continuité des opérations.
+Existe-t-il un processus formalisé pour évaluer les risques associés aux nouveaux projets ou initiatives ?
+
+Référence : Project Management Institute (PMI) - L’évaluation des risques avant le lancement de projets permet de minimiser les perturbations futures.
+Les plans de continuité des opérations (PCA) sont-ils testés régulièrement ?
+
+Référence : ISO 22301 - Des tests réguliers du PCA permettent de garantir une réaction efficace en cas de crise.
+Les incidents et défaillances sont-ils documentés et analysés pour éviter leur récurrence ?
+
+Référence : ISO 9001 - La documentation des incidents et l'analyse des causes permet d'améliorer continuellement les processus.
+
+4. Suivi de la performance et gestion des résultats
+Les indicateurs de performance (KPI) utilisés sont-ils mesurables, pertinents et alignés avec les objectifs ?
+
+Référence : SMART Goals - L’utilisation d’indicateurs SMART assure la pertinence et l’efficacité du suivi de la performance.
+Des audits internes sont-ils régulièrement réalisés pour évaluer l’efficacité des processus opérationnels ?
+
+Référence : ISO 9001 - Les audits internes permettent d’identifier les lacunes et de proposer des améliorations.
+Les résultats des audits sont-ils suivis par des actions correctives et préventives ?
+
+Référence : ISO 9001 - Un suivi rigoureux des audits permet de corriger les erreurs et de prévenir leur réapparition.
+Les performances des opérations sont-elles communiquées clairement à toutes les parties prenantes (collaborateurs, direction, etc.) ?
+
+Référence : Balanced Scorecard - La communication des performances est essentielle pour garantir l’engagement des équipes et des parties prenantes.
+
+5. Gestion des projets et des initiatives opérationnelles
+Les projets sont-ils correctement planifiés, suivis et exécutés pour respecter les délais et les objectifs ?
+
+Référence : PRINCE2 - Une gestion rigoureuse des projets garantit leur succès dans les délais et budgets impartis.
+Les leçons tirées des projets précédents sont-elles systématiquement intégrées dans les nouveaux projets ?
+
+Référence : Lean Six Sigma - Intégrer les leçons apprises permet d’améliorer la gestion future des projets.
+Les projets sont-ils régulièrement évalués pour mesurer leur impact sur les opérations ?
+
+Référence : PMI - L’évaluation continue des projets permet d’assurer qu'ils contribuent positivement aux objectifs opérationnels.
+Les ressources sont-elles allouées de manière optimale pour maximiser les résultats des projets ?
+
+Référence : Agile - L’allocation flexible et optimale des ressources garantit la réussite des projets avec des résultats mesurables.

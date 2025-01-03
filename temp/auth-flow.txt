@@ -1,0 +1,138 @@
+1. HomePage.tsx - Sélection des profils et transition vers le formulaire de connexion :
+```tsx
+export default function HomePage() {
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  
+  // Si un rôle est sélectionné, afficher le formulaire de connexion
+  if (selectedRole) {
+    const selectedEmail = roles.find(r => r.role === selectedRole)?.email;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md space-y-4">
+          <LoginForm selectedEmail={selectedEmail} />
+          <Button
+            variant="ghost"
+            onClick={() => setSelectedRole(null)}
+            className="w-full text-[#003366]"
+          >
+            Retour à la sélection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage de la sélection des rôles
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {roles.map((role) => (
+          <Card
+            key={role.role}
+            className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+            onClick={() => setSelectedRole(role.role)}
+          >
+            {/* ... Contenu de la carte ... */}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+2. LoginForm.tsx - Gestion du formulaire de connexion :
+```tsx
+export function LoginForm({ selectedEmail }: LoginFormProps) {
+  const { login } = useUser();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+    defaultValues: {
+      email: selectedEmail || '',
+      password: ''
+    }
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const result = await login(data);
+      if (!result.ok) {
+        throw new Error(result.message);
+      }
+      setLocation('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Une erreur est survenue lors de la connexion",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <Card className="w-full border-2 border-[#003366]/10">
+      <CardHeader>
+        <CardTitle>3R EXPERT OPERATIONS</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Input
+            {...register("email")}
+            type="email"
+            disabled={!!selectedEmail}
+            defaultValue={selectedEmail}
+          />
+          <Input
+            {...register("password")}
+            type="password"
+          />
+          <Button 
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Connexion en cours...' : 'Se connecter'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+3. App.tsx - Gestion des routes authentifiées/non-authentifiées :
+```tsx
+function App() {
+  const { user, isLoading } = useUser();
+  const { t } = useTranslation();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  // Routes non authentifiées - toujours montrer HomePage
+  if (!user) {
+    return (
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="*" component={HomePage} />
+      </Switch>
+    );
+  }
+
+  // Routes authentifiées avec MainLayout
+  return (
+    <MainLayout>
+      <Switch>
+        <Route path="/dashboard" component={DashboardPage} />
+        {/* ... autres routes ... */}
+      </Switch>
+    </MainLayout>
+  );
+}
+```

@@ -1,0 +1,346 @@
+import React, { useState } from 'react';
+import { 
+  ArrowLeft, Search, Clipboard, Users, Wrench, Box, Sun, Moon, 
+  Building, BarChart, Map, Radio, Activity, RefreshCw, Shield,
+  CheckSquare, Award, Server, Lock, Settings, Leaf, Network,
+  FileText, Folder, GraduationCap, Share2, Heart, PackageCheck, List,
+  LineChart, Zap, UserPlus, Lightbulb, Hammer, BookOpen, Scale
+} from 'lucide-react';
+
+const categoryStyles = {
+  survey: {
+    primary: "#1E40AF",
+    secondary: "#3B82F6",
+    gradientAngle: "45"
+  },
+  audit: {
+    primary: "#9333EA",
+    secondary: "#A855F7",
+    gradientAngle: "60"
+  },
+  conseil: {
+    primary: "#059669",
+    secondary: "#10B981",
+    gradientAngle: "30"
+  },
+  support: {
+    primary: "#0369A1",
+    secondary: "#0EA5E9",
+    gradientAngle: "15"
+  },
+  ngridd: {
+    primary: "#BE123C",
+    secondary: "#E11D48",
+    gradientAngle: "75"
+  }
+};
+
+const CategoryIcon = ({ category }) => {
+  const style = categoryStyles[category];
+  const iconSize = "w-20 h-20"; // Icône plus grande
+
+  const getIconComponent = (category) => {
+    switch(category) {
+      case 'survey': return Search;
+      case 'audit': return Clipboard;
+      case 'conseil': return Users;
+      case 'support': return Wrench;
+      case 'ngridd': return Box;
+      default: return Search;
+    }
+  };
+
+  const IconComponent = getIconComponent(category);
+
+  return (
+    <svg viewBox="0 0 200 160" className="w-full h-full">
+      <defs>
+        <linearGradient id={`gradient-${category}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={style.primary} stopOpacity="0.9"/>
+          <stop offset="50%" stopColor={style.secondary} stopOpacity="0.95"/>
+          <stop offset="100%" stopColor={style.primary} stopOpacity="0.9"/>
+        </linearGradient>
+        <filter id={`glow-${category}`}>
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id={`shadow-${category}`}>
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.2"/>
+        </filter>
+      </defs>
+      <rect 
+        width="200" 
+        height="160" 
+        rx="16" 
+        fill={`url(#gradient-${category})`} 
+        filter={`url(#shadow-${category})`}
+      />
+      <g 
+        transform="translate(80, 50)" 
+        filter={`url(#glow-${category})`}
+        className="transition-transform duration-300"
+      >
+        <IconComponent className={`text-white ${iconSize} opacity-95`}/>
+      </g>
+    </svg>
+  );
+};
+
+const SubcategoryIcon = ({ icon: Icon, category }) => {
+  const style = categoryStyles[category];
+  
+  return (
+    <svg viewBox="0 0 100 80" className="w-full h-full">
+      <defs>
+        <linearGradient id={`gradient-sub-${category}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={style.secondary} stopOpacity="0.9"/>
+          <stop offset="50%" stopColor={style.primary} stopOpacity="0.95"/>
+          <stop offset="100%" stopColor={style.secondary} stopOpacity="0.9"/>
+        </linearGradient>
+        <pattern id={`pattern-${category}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="1" fill="white" fillOpacity="0.1"/>
+        </pattern>
+        <filter id={`glow-sub-${category}`}>
+          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <rect 
+        width="100" 
+        height="80" 
+        rx="10" 
+        fill={`url(#gradient-sub-${category})`}
+      />
+      <rect 
+        width="100" 
+        height="80" 
+        rx="10" 
+        fill={`url(#pattern-${category})`}
+        fillOpacity="0.4"
+      />
+      <g 
+        transform="translate(38, 28)" 
+        filter={`url(#glow-sub-${category})`}
+        className="opacity-95"
+      >
+        <Icon className="text-white w-6 h-6"/>
+      </g>
+    </svg>
+  );
+};
+
+const CategoryCard = ({ icon: Icon, category, title, description, onClick }) => (
+  <div 
+    onClick={onClick}
+    className="group flex flex-col items-center p-6 rounded-xl shadow-lg transition-all duration-500 cursor-pointer m-4 w-80 bg-white dark:bg-gray-800 hover:shadow-2xl dark:hover:shadow-lg dark:hover:shadow-gray-700 hover:-translate-y-1"
+  >
+    <div className="w-full h-40 mb-4 rounded-lg overflow-hidden transition-transform duration-500 group-hover:scale-105">
+      <CategoryIcon category={category} />
+    </div>
+    <div className="mt-2 transition-all duration-300 group-hover:translate-y-1">
+      <h3 className="text-xl font-bold mb-3 text-center font-sans text-gray-900 dark:text-gray-100">
+        {title}
+      </h3>
+      <p className="text-center text-gray-600 dark:text-gray-300 font-sans leading-relaxed">
+        {description}
+      </p>
+    </div>
+  </div>
+);
+
+const SubcategoryCard = ({ title, description, icon: Icon, category, specs }) => (
+  <div className="rounded-xl shadow-lg overflow-hidden bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-300">
+    <div className="relative">
+      <div className="w-full h-40">
+        <SubcategoryIcon icon={Icon} category={category} />
+      </div>
+      <div className="absolute top-4 right-4 p-2 rounded-full bg-white bg-opacity-20 backdrop-blur-sm">
+        <Icon size={24} className="text-white" />
+      </div>
+    </div>
+    <div className="p-6">
+      <h4 className="text-lg font-bold font-sans mb-3 text-gray-900 dark:text-gray-100">
+        {title}
+      </h4>
+      <p className="whitespace-pre-line mb-3 font-sans text-gray-600 dark:text-gray-300 leading-relaxed">
+        {description}
+      </p>
+      {specs && (
+        <p className="text-sm italic mt-4 font-sans text-gray-500 dark:text-gray-400">
+          {specs}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
+const EnhancedOperations = () => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleCategoryChange = (category) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSelectedCategory(category);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const categories = {
+    survey: {
+      icon: Search,
+      title: "Survey",
+      description: "Évaluations et études approfondies",
+      subcategories: [
+        { title: "Évaluation de l'Infrastructure", description: "Analyse complète des installations existantes et futures", icon: Building },
+        { title: "Études de faisabilité", description: "Analyse approfondie de la viabilité technique et économique", icon: BarChart },
+        { title: "Études de localisation", description: "Identification et évaluation des sites optimaux", icon: Map },
+        { title: "Évaluations spécialisées", description: "Expertise technique pointue sur des aspects spécifiques", icon: Radio },
+        { title: "Études comparatives", description: "Analyse détaillée des différentes solutions disponibles", icon: Activity },
+        { title: "Études de modernisation", description: "Planification stratégique des mises à niveau", icon: RefreshCw },
+        { title: "Études de résilience", description: "Évaluation complète de la robustesse des systèmes", icon: Shield }
+      ]
+    },
+    audit: {
+      icon: Clipboard,
+      title: "Audits",
+      description: "Évaluations normatives et réglementaires",
+      subcategories: [
+        { title: "Audit de conformité TIA 942", description: "Vérification approfondie des standards TIA", icon: CheckSquare },
+        { title: "Pré-audit de certification", description: "Préparation détaillée à la certification", icon: Award },
+        { title: "Audit Tier Certification", description: "Évaluation complète du niveau Tier", icon: Server },
+        { title: "Audits de sécurité", description: "Analyse exhaustive des mesures de sécurité", icon: Lock },
+        { title: "Audits Opérationnels", description: "Évaluation détaillée des processus", icon: Settings },
+        { title: "Audits Environnementaux", description: "Analyse de l'impact environnemental", icon: Leaf },
+        { title: "Audits multisites", description: "Évaluation coordonnée sur plusieurs sites", icon: Network }
+      ]
+    },
+    conseil: {
+      icon: Users,
+      title: "Conseil",
+      description: "Accompagnement stratégique et technique",
+      subcategories: [
+        { title: "Optimisation Energétique", description: "Stratégies d'amélioration de l'efficacité énergétique", icon: Zap },
+        { title: "Formation des équipes", description: "Programmes de développement des compétences", icon: UserPlus },
+        { title: "Planification stratégique", description: "Définition des objectifs et de la roadmap", icon: Lightbulb },
+        { title: "Consulting technique spécialisé", description: "Expertise technique approfondie", icon: Hammer },
+        { title: "Consulting opérationnel", description: "Optimisation des processus opérationnels", icon: Settings },
+        { title: "Consulting stratégique", description: "Conseil en orientation stratégique", icon: Activity },
+        { title: "Consulting réglementaire", description: "Accompagnement en conformité réglementaire", icon: Scale }
+      ]
+    },
+    support: {
+      icon: Wrench,
+      title: "Support",
+      description: "Assistance technique et documentaire",
+      subcategories: [
+        { title: "Production Documentaire", description: "Création de documentation technique complète", icon: FileText },
+        { title: "Gestion documentaire", description: "Organisation et maintenance des documents", icon: Folder },
+        { title: "Formation des équipes", description: "Programmes d'apprentissage continu", icon: GraduationCap },
+        { title: "Transfert de Compétences", description: "Transmission structurée du savoir-faire", icon: Share2 },
+        { title: "Support Technique Continu", description: "Assistance technique permanente", icon: Heart },
+        { title: "Accompagnement Projet", description: "Suivi personnalisé des projets", icon: PackageCheck },
+        { title: "Suivi des Recommandations", description: "Application et suivi des conseils", icon: List },
+        { title: "Évaluations Périodiques", description: "Contrôles réguliers de performance", icon: LineChart }
+      ]
+    },
+    ngridd: {
+      icon: Box,
+      title: "NGRIDD",
+      description: "Solutions de datacenters innovantes",
+      subcategories: [
+        { 
+          title: "Micro Datacenter",
+          description: "• Espace optimal < 10m²\n• Déploiement rapide et flexible\n• Solutions de refroidissement intégrées",
+          icon: Server,
+          specs: "Idéal pour les petites installations"
+        },
+        { 
+          title: "Modular Datacenter",
+          description: "• Extensible de 10m² à 50m²\n• Architecture standardisée et modulaire\n• Haute efficacité énergétique",
+          icon: Building,
+          specs: "Solution évolutive pour entreprises"
+        },
+        { 
+          title: "Container Datacenter",
+          description: "• Mobilité et déploiement rapide\n• Configuration standardisée\n• Solutions clés en main",
+          icon: Box,
+          specs: "Flexibilité maximale"
+        }
+      ]
+    }
+  };
+
+  return (
+    <div className={`min-h-screen p-8 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className={`fixed top-6 right-6 p-3 rounded-full transition-colors duration-300
+          ${darkMode 
+            ? 'bg-gray-700 text-yellow-500 hover:bg-gray-600' 
+            : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'}`}
+      >
+        {darkMode ? <Sun size={24} /> : <Moon size={24} />}
+      </button>
+
+      <div className={`max-w-7xl mx-auto ${isTransitioning ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+        {selectedCategory ? (
+          <>
+            <button 
+              onClick={() => handleCategoryChange(null)}
+              className={`mb-8 flex items-center font-sans group
+                ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+            >
+              <ArrowLeft className="mr-2 transition-transform duration-300 group-hover:-translate-x-2" />
+              <span className="font-medium">Retour aux opérations</span>
+            </button>
+            
+            <h2 className={`text-3xl font-bold mb-8 font-sans ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+              {categories[selectedCategory].title}
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+              {categories[selectedCategory].subcategories.map((sub, index) => (
+                <SubcategoryCard 
+                  key={index} 
+                  {...sub} 
+                  category={selectedCategory}
+                  icon={sub.icon || categories[selectedCategory].icon}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className={`text-4xl font-bold mb-12 text-center font-sans
+              ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+              Opérations
+            </h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+              {Object.entries(categories).map(([key, category]) => (
+                <CategoryCard
+                  key={key}
+                  category={key}
+                  icon={category.icon}
+                  title={category.title}
+                  description={category.description}
+                  onClick={() => handleCategoryChange(key)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedOperations;

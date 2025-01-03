@@ -1,0 +1,1703 @@
+
+
+tableau de bord générale
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, 
+  AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis 
+} from 'recharts';
+import { AlertCircle, Activity, Users, Target, Clock, Calendar } from 'lucide-react';
+
+// Constantes de couleurs
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545",
+  info: "#4A90E2"
+};
+
+// Assistant IA pour la vue générale
+const GeneralAIAssistant = () => {
+  const [query, setQuery] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+
+  const generalSuggestions = [
+    "Analyser les tendances de performance globale",
+    "Identifier les corrélations entre KPIs",
+    "Prévoir les pics d'activité",
+    "Optimiser l'allocation des ressources",
+    "Détecter les anomalies dans les métriques"
+  ];
+
+  const handleAnalyze = () => {
+    // Simulation d'analyse IA
+    setAnalysis({
+      trends: "Tendance positive détectée dans la performance globale",
+      recommendations: [
+        "Augmenter les ressources pendant les pics d'activité",
+        "Renforcer le suivi des projets à risque",
+        "Optimiser la répartition géographique des équipes"
+      ],
+      alerts: [
+        "Pic d'activité prévu pour le mois prochain",
+        "Certaines régions approchent de leur capacité maximale"
+      ]
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          Assistant IA - Analyse Globale
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Posez votre question ou demandez une analyse..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleAnalyze}>Analyser</Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">Suggestions d'analyses :</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {generalSuggestions.map((suggestion, index) => (
+                <li key={index} className="text-sm cursor-pointer hover:text-blue-600">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {analysis && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2">Analyse des tendances :</h4>
+                <p className="text-sm">{analysis.trends}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Recommandations :</h4>
+                <ul className="list-disc pl-4 space-y-1">
+                  {analysis.recommendations.map((rec, index) => (
+                    <li key={index} className="text-sm">{rec}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-orange-600">Alertes :</h4>
+                <ul className="list-disc pl-4 space-y-1">
+                  {analysis.alerts.map((alert, index) => (
+                    <li key={index} className="text-sm text-orange-600">{alert}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Données pour les graphiques
+const generalData = {
+  performance: [
+    { month: 'Jan', revenue: 100, operations: 80, satisfaction: 90, target: 95 },
+    { month: 'Fév', revenue: 110, operations: 85, satisfaction: 92, target: 95 },
+    { month: 'Mar', revenue: 120, operations: 88, satisfaction: 91, target: 95 },
+    { month: 'Avr', revenue: 125, operations: 92, satisfaction: 94, target: 95 },
+    { month: 'Mai', revenue: 135, operations: 95, satisfaction: 93, target: 95 },
+    { month: 'Jun', revenue: 140, operations: 98, satisfaction: 95, target: 95 }
+  ],
+  resources: [
+    { type: 'Consultants', interne: 65, externe: 35 },
+    { type: 'Experts', interne: 75, externe: 25 },
+    { type: 'Support', interne: 85, externe: 15 }
+  ],
+  geographical: [
+    { region: 'Nord', value: 30, color: COLORS.primary },
+    { region: 'Sud', value: 25, color: COLORS.secondary },
+    { region: 'Est', value: 20, color: COLORS.success },
+    { region: 'Ouest', value: 25, color: COLORS.warning }
+  ],
+  topClients: [
+    { name: 'Client A', projects: 12, satisfaction: 95 },
+    { name: 'Client B', projects: 10, satisfaction: 92 },
+    { name: 'Client C', projects: 8, satisfaction: 94 },
+    { name: 'Client D', projects: 7, satisfaction: 90 },
+    { name: 'Client E', projects: 6, satisfaction: 93 }
+  ],
+  kpis: [
+    { category: 'Performance', value: 92, target: 90, trend: '+5%' },
+    { category: 'Qualité', value: 95, target: 95, trend: '+2%' },
+    { category: 'Délais', value: 88, target: 85, trend: '+3%' },
+    { category: 'Budget', value: 94, target: 90, trend: '+4%' }
+  ]
+};
+
+const GeneralView = () => {
+  // KPIs principaux
+  const mainKPIs = [
+    { 
+      title: "Performance Globale",
+      value: "92%",
+      trend: "+5%",
+      icon: <Activity className="h-5 w-5" />,
+      color: "text-blue-600"
+    },
+    {
+      title: "Ressources Actives",
+      value: "45",
+      trend: "+8",
+      icon: <Users className="h-5 w-5" />,
+      color: "text-green-600"
+    },
+    {
+      title: "Objectifs Atteints",
+      value: "95%",
+      trend: "+3%",
+      icon: <Target className="h-5 w-5" />,
+      color: "text-orange-600"
+    },
+    {
+      title: "Temps Moyen",
+      value: "12j",
+      trend: "-2j",
+      icon: <Clock className="h-5 w-5" />,
+      color: "text-purple-600"
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Métriques principales */}
+      <div className="grid grid-cols-4 gap-4">
+        {mainKPIs.map((kpi, index) => (
+          <Card key={index}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className={`rounded-full p-3 ${kpi.color} bg-opacity-10`}>
+                  {kpi.icon}
+                </div>
+                <div className={`text-sm ${kpi.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {kpi.trend}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500">{kpi.title}</p>
+                <h3 className="text-2xl font-bold">{kpi.value}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Graphiques principaux */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Performance Générale */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Générale</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={generalData.performance}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" stroke={COLORS.primary} name="Revenus" />
+                <Line type="monotone" dataKey="operations" stroke={COLORS.secondary} name="Opérations" />
+                <Line type="monotone" dataKey="satisfaction" stroke={COLORS.success} name="Satisfaction" />
+                <Line type="monotone" dataKey="target" stroke={COLORS.danger} strokeDasharray="5 5" name="Objectif" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Répartition des Ressources */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Répartition des Ressources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={generalData.resources}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="type" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="interne" stackId="a" fill={COLORS.primary} name="Ressources Internes" />
+                <Bar dataKey="externe" stackId="a" fill={COLORS.secondary} name="Ressources Externes" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Répartition Géographique */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Répartition Géographique</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={generalData.geographical}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                >
+                  {generalData.geographical.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Top Clients */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Top 5 Clients</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={generalData.topClients}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis yAxisId="left" orientation="left" stroke={COLORS.primary} />
+                <YAxis yAxisId="right" orientation="right" stroke={COLORS.success} />
+                <Tooltip />
+                <Legend />
+                <Bar yAxisId="left" dataKey="projects" fill={COLORS.primary} name="Projets" />
+                <Bar yAxisId="right" dataKey="satisfaction" fill={COLORS.success} name="Satisfaction %" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* KPIs détaillés */}
+      <Card>
+        <CardHeader>
+          <CardTitle>KPIs Détaillés</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-4 gap-4">
+            {generalData.kpis.map((kpi, index) => (
+              <div key={index} className="p-4 rounded-lg bg-gray-50">
+                <div className="text-sm text-gray-500">{kpi.category}</div>
+                <div className="text-2xl font-bold mt-1">{kpi.value}%</div>
+                <div className="text-sm mt-1">
+                  <span className="text-gray-500">Objectif: {kpi.target}%</span>
+                  <span className={`ml-2 ${kpi.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                    {kpi.trend}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Assistant IA */}
+      <GeneralAIAssistant />
+    </div>
+  );
+};
+
+export default GeneralView;
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { AlertCircle, TrendingUp, Users, Target } from 'lucide-react';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, 
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, AreaChart, Area 
+} from 'recharts';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545",
+  info: "#4A90E2"
+};
+
+// Données pour les graphiques
+const performanceData = {
+  teamPerformance: [
+    { metric: 'Rapidité', equipeA: 90, equipeB: 85, equipeC: 88 },
+    { metric: 'Qualité', equipeA: 85, equipeB: 92, equipeC: 87 },
+    { metric: 'Efficacité', equipeA: 88, equipeB: 86, equipeC: 90 },
+    { metric: 'Satisfaction', equipeA: 92, equipeB: 90, equipeC: 89 }
+  ],
+  workloadTrend: [
+    { day: 'Lun', charge: 85, capacity: 100 },
+    { day: 'Mar', charge: 90, capacity: 100 },
+    { day: 'Mer', charge: 95, capacity: 100 },
+    { day: 'Jeu', charge: 88, capacity: 100 },
+    { day: 'Ven', charge: 82, capacity: 100 }
+  ],
+  incidentTypes: [
+    { type: 'Technique', count: 5, resolved: 4 },
+    { type: 'Process', count: 3, resolved: 3 },
+    { type: 'Resource', count: 4, resolved: 3 },
+    { type: 'Client', count: 2, resolved: 2 }
+  ],
+  operationProgress: [
+    { month: 'Jan', completed: 45, ongoing: 30, pending: 15 },
+    { month: 'Fév', completed: 50, ongoing: 28, pending: 12 },
+    { month: 'Mar', completed: 55, ongoing: 25, pending: 10 },
+    { month: 'Avr', completed: 60, ongoing: 22, pending: 8 }
+  ]
+};
+
+// Assistant IA avec suggestions et analyses
+const OperationsAIAssistant = () => {
+  const [query, setQuery] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+
+  const suggestedAnalyses = [
+    "Optimiser la répartition des charges de travail",
+    "Identifier les risques de retard potentiels",
+    "Analyser les tendances de performance par équipe",
+    "Prédire les besoins en ressources",
+    "Détecter les anomalies dans les processus"
+  ];
+
+  const handleAnalyze = () => {
+    setAnalysis({
+      insights: [
+        "Performance des équipes au-dessus des objectifs",
+        "Charge de travail optimale atteinte",
+        "Baisse significative des incidents"
+      ],
+      recommendations: [
+        "Renforcer la formation sur les nouveaux outils",
+        "Optimiser la répartition des tâches",
+        "Mettre en place un suivi préventif"
+      ],
+      alerts: [
+        "Pic d'activité prévu la semaine prochaine",
+        "3 opérations nécessitent une attention particulière"
+      ]
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          Assistant IA - Analyses et Recommandations
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Posez votre question sur les opérations..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleAnalyze}>Analyser</Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">Analyses suggérées :</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {suggestedAnalyses.map((suggestion, index) => (
+                <li key={index} className="text-sm cursor-pointer hover:text-blue-600">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {analysis && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-600">Insights :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.insights.map((insight, index) => (
+                    <li key={index} className="text-sm">{insight}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-green-600">Recommandations :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.recommendations.map((rec, index) => (
+                    <li key={index} className="text-sm">{rec}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-orange-600">Alertes :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.alerts.map((alert, index) => (
+                    <li key={index} className="text-sm text-orange-600">{alert}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Graphiques de performance
+const OperationsAnalytics = () => {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
+        {/* Performance des équipes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Performance par Équipe
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart data={performanceData.teamPerformance}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="metric" />
+                <Radar name="Équipe A" dataKey="equipeA" stroke={COLORS.primary} fill={COLORS.primary} fillOpacity={0.5} />
+                <Radar name="Équipe B" dataKey="equipeB" stroke={COLORS.secondary} fill={COLORS.secondary} fillOpacity={0.5} />
+                <Radar name="Équipe C" dataKey="equipeC" stroke={COLORS.success} fill={COLORS.success} fillOpacity={0.5} />
+                <Legend />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Évolution de la charge de travail */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Charge de Travail
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={performanceData.workloadTrend}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area type="monotone" dataKey="charge" stroke={COLORS.primary} fill={COLORS.primary} fillOpacity={0.2} name="Charge" />
+                <Area type="monotone" dataKey="capacity" stroke={COLORS.danger} strokeDasharray="3 3" fill="none" name="Capacité" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Types d'incidents */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Analyse des Incidents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={performanceData.incidentTypes}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="type" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill={COLORS.warning} name="Total" />
+                <Bar dataKey="resolved" fill={COLORS.success} name="Résolus" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Progression des opérations */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Progression des Opérations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={performanceData.operationProgress}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area type="monotone" dataKey="completed" stackId="1" stroke={COLORS.success} fill={COLORS.success} fillOpacity={0.5} name="Terminées" />
+                <Area type="monotone" dataKey="ongoing" stackId="1" stroke={COLORS.primary} fill={COLORS.primary} fillOpacity={0.5} name="En cours" />
+                <Area type="monotone" dataKey="pending" stackId="1" stroke={COLORS.warning} fill={COLORS.warning} fillOpacity={0.5} name="En attente" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Assistant IA */}
+      <OperationsAIAssistant />
+    </div>
+  );
+};
+
+export default OperationsAnalytics;
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  AreaChart, Area, ComposedChart
+} from 'recharts';
+import { 
+  TrendingUp, Wallet, 
+  DollarSign, AlertCircle, Target, BarChart2, PieChart 
+} from 'lucide-react';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545",
+  info: "#4A90E2"
+};
+
+// Données financières
+const financeData = {
+  performance: [
+    { month: 'Jan', revenus: 100, couts: 60, marge: 40, objectif: 45 },
+    { month: 'Fév', revenus: 120, couts: 65, marge: 55, objectif: 50 },
+    { month: 'Mar', revenus: 115, couts: 62, marge: 53, objectif: 52 },
+    { month: 'Avr', revenus: 130, couts: 70, marge: 60, objectif: 55 },
+    { month: 'Mai', revenus: 140, couts: 75, marge: 65, objectif: 58 },
+    { month: 'Jun', revenus: 135, couts: 72, marge: 63, objectif: 60 }
+  ],
+  budget: [
+    { name: 'Personnel', value: 45, color: COLORS.primary },
+    { name: 'Équipement', value: 25, color: COLORS.secondary },
+    { name: 'Marketing', value: 15, color: COLORS.info },
+    { name: 'R&D', value: 15, color: COLORS.success }
+  ],
+  costs: [
+    { name: 'T1', fixe: 300, variable: 200, exceptionnel: 100 },
+    { name: 'T2', fixe: 320, variable: 220, exceptionnel: 90 },
+    { name: 'T3', fixe: 310, variable: 240, exceptionnel: 110 },
+    { name: 'T4', fixe: 330, variable: 260, exceptionnel: 95 }
+  ],
+  objectives: [
+    { name: 'T1 2024', objectif: 100, realise: 95, ecart: -5 },
+    { name: 'T2 2024', objectif: 110, realise: 115, ecart: 5 },
+    { name: 'T3 2024', objectif: 120, realise: 125, ecart: 5 },
+    { name: 'T4 2024', objectif: 130, realise: 128, ecart: -2 }
+  ],
+  roi: [
+    { service: 'Conseil', roi: 215, volume: 450 },
+    { service: 'Audit', roi: 185, volume: 380 },
+    { service: 'Formation', roi: 165, volume: 280 },
+    { service: 'Support', roi: 145, volume: 320 }
+  ]
+};
+
+// Assistant IA pour l'analyse financière
+const FinanceAIAssistant = () => {
+  const [query, setQuery] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+
+  const suggestedAnalyses = [
+    "Analyser les tendances de rentabilité",
+    "Identifier les opportunités d'optimisation des coûts",
+    "Prédire les performances financières",
+    "Évaluer l'efficacité des investissements",
+    "Analyser les écarts budgétaires"
+  ];
+
+  const handleAnalyze = () => {
+    setAnalysis({
+      insights: [
+        "Marge en progression de 8% ce trimestre",
+        "ROI des services de conseil en hausse",
+        "Optimisation des coûts fixes efficace"
+      ],
+      recommendations: [
+        "Augmenter l'investissement en formation",
+        "Optimiser la structure des coûts variables",
+        "Renforcer le développement des services à forte marge"
+      ],
+      alerts: [
+        "Dépassement budgétaire prévu au T3",
+        "Baisse de rentabilité sur le segment Support"
+      ]
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          Assistant IA - Analyse Financière
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Posez votre question d'analyse financière..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleAnalyze}>Analyser</Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">Analyses suggérées :</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {suggestedAnalyses.map((suggestion, index) => (
+                <li key={index} className="text-sm cursor-pointer hover:text-blue-600">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {analysis && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-600">Insights :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.insights.map((insight, index) => (
+                    <li key={index} className="text-sm">{insight}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-green-600">Recommandations :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.recommendations.map((rec, index) => (
+                    <li key={index} className="text-sm">{rec}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-orange-600">Alertes :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.alerts.map((alert, index) => (
+                    <li key={index} className="text-sm text-orange-600">{alert}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// KPIs principaux
+const mainKPIs = [
+  {
+    title: "Chiffre d'Affaires",
+    value: "125M",
+    trend: "+12%",
+    icon: <DollarSign className="h-5 w-5" />,
+    color: "text-blue-600"
+  },
+  {
+    title: "Marge Brute",
+    value: "32%",
+    trend: "+3%",
+    icon: <TrendingUp className="h-5 w-5" />,
+    color: "text-green-600"
+  },
+  {
+    title: "ROI",
+    value: "215%",
+    trend: "+15%",
+    icon: <Target className="h-5 w-5" />,
+    color: "text-orange-600"
+  },
+  {
+    title: "Budget Utilisé",
+    value: "85%",
+    trend: "-2%",
+    icon: <Wallet className="h-5 w-5" />,
+    color: "text-purple-600"
+  }
+];
+
+const FinanceView = () => {
+  return (
+    <div className="space-y-6">
+      {/* KPIs principaux */}
+      <div className="grid grid-cols-4 gap-4">
+        {mainKPIs.map((kpi, index) => (
+          <Card key={index}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className={`rounded-full p-3 ${kpi.color} bg-opacity-10`}>
+                  {kpi.icon}
+                </div>
+                <div className={`text-sm ${kpi.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {kpi.trend}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500">{kpi.title}</p>
+                <h3 className="text-2xl font-bold">{kpi.value}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Graphiques financiers */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Performance Financière */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Performance Financière
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={financeData.performance}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="revenus" fill={COLORS.success} name="Revenus" />
+                <Bar dataKey="couts" fill={COLORS.danger} name="Coûts" />
+                <Line 
+                  type="monotone" 
+                  dataKey="marge" 
+                  stroke={COLORS.primary} 
+                  name="Marge"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="objectif" 
+                  stroke={COLORS.secondary}
+                  strokeDasharray="5 5" 
+                  name="Objectif"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Répartition Budget */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="h-5 w-5" />
+              Répartition Budget
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={financeData.budget}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                >
+                  {financeData.budget.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Analyse des Coûts */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5" />
+              Analyse des Coûts
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={financeData.costs}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area 
+                  type="monotone" 
+                  dataKey="fixe" 
+                  stackId="1"
+                  stroke={COLORS.primary} 
+                  fill={COLORS.primary} 
+                  fillOpacity={0.5}
+                  name="Coûts Fixes"
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="variable" 
+                  stackId="1"
+                  stroke={COLORS.secondary} 
+                  fill={COLORS.secondary} 
+                  fillOpacity={0.5}
+                  name="Coûts Variables"
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="exceptionnel" 
+                  stackId="1"
+                  stroke={COLORS.warning} 
+                  fill={COLORS.warning} 
+                  fillOpacity={0.5}
+                  name="Coûts Exceptionnels"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* ROI par Service */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              ROI par Service
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={financeData.roi}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="service" />
+                <YAxis yAxisId="left" orientation="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Legend />
+                <Bar 
+                  yAxisId="left"
+                  dataKey="roi" 
+                  fill={COLORS.primary}
+                  name="ROI (%)" 
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="volume" 
+                  stroke={COLORS.secondary}
+                  name="Volume"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Assistant IA */}
+      <FinanceAIAssistant />
+    </div>
+  );
+};
+
+export default FinanceView;
+
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, 
+  AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis
+} from 'recharts';
+import { 
+  Users, TrendingUp, AlertCircle, Heart,
+  BarChart2, Target, Award, UserPlus
+} from 'lucide-react';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545",
+  info: "#4A90E2"
+};
+
+// Données client
+const clientData = {
+  satisfaction: [
+    { month: 'Jan', satisfaction: 4.5, nps: 65, fidelisation: 92 },
+    { month: 'Fév', satisfaction: 4.6, nps: 68, fidelisation: 93 },
+    { month: 'Mar', satisfaction: 4.7, nps: 70, fidelisation: 94 },
+    { month: 'Avr', satisfaction: 4.8, nps: 72, fidelisation: 95 },
+    { month: 'Mai', satisfaction: 4.7, nps: 71, fidelisation: 94 },
+    { month: 'Jun', satisfaction: 4.9, nps: 74, fidelisation: 96 }
+  ],
+  segments: [
+    { name: 'Grandes Entreprises', value: 45, color: COLORS.primary },
+    { name: 'PME', value: 35, color: COLORS.secondary },
+    { name: 'Startups', value: 20, color: COLORS.success }
+  ],
+  acquisition: [
+    { name: 'T1', recommendation: 30, publicite: 20, direct: 15, partenaires: 10 },
+    { name: 'T2', recommendation: 35, publicite: 25, direct: 18, partenaires: 12 },
+    { name: 'T3', recommendation: 40, publicite: 30, direct: 20, partenaires: 15 },
+    { name: 'T4', recommendation: 45, publicite: 35, direct: 25, partenaires: 18 }
+  ],
+  interactions: [
+    { type: 'Support', positif: 85, neutre: 10, negatif: 5 },
+    { type: 'Commercial', positif: 90, neutre: 8, negatif: 2 },
+    { type: 'Technique', positif: 82, neutre: 12, negatif: 6 },
+    { type: 'SAV', positif: 88, neutre: 9, negatif: 3 }
+  ],
+  lifecycle: [
+    { name: 'Prospection', value: 120, growth: '+15%' },
+    { name: 'Acquisition', value: 85, growth: '+10%' },
+    { name: 'Activation', value: 75, growth: '+8%' },
+    { name: 'Rétention', value: 65, growth: '+12%' },
+    { name: 'Référence', value: 45, growth: '+20%' }
+  ]
+};
+
+// Assistant IA pour l'analyse client
+const ClientAIAssistant = () => {
+  const [query, setQuery] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+
+  const suggestedAnalyses = [
+    "Analyser les tendances de satisfaction client",
+    "Identifier les risques de churn",
+    "Optimiser le parcours client",
+    "Évaluer l'efficacité des campagnes d'acquisition",
+    "Segmenter la base client"
+  ];
+
+  const handleAnalyze = () => {
+    setAnalysis({
+      insights: [
+        "Hausse de la satisfaction client de 8%",
+        "Augmentation du taux de référencement",
+        "Amélioration du NPS sur tous les segments"
+      ],
+      recommendations: [
+        "Renforcer le programme de fidélisation PME",
+        "Optimiser le processus d'onboarding",
+        "Développer les partenariats stratégiques"
+      ],
+      alerts: [
+        "Risque de churn détecté sur 3 comptes majeurs",
+        "Baisse de satisfaction sur le support technique"
+      ]
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          Assistant IA - Analyse Client
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Posez votre question sur les clients..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleAnalyze}>Analyser</Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">Analyses suggérées :</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {suggestedAnalyses.map((suggestion, index) => (
+                <li key={index} className="text-sm cursor-pointer hover:text-blue-600">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {analysis && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-600">Insights :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.insights.map((insight, index) => (
+                    <li key={index} className="text-sm">{insight}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-green-600">Recommandations :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.recommendations.map((rec, index) => (
+                    <li key={index} className="text-sm">{rec}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-orange-600">Alertes :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.alerts.map((alert, index) => (
+                    <li key={index} className="text-sm text-orange-600">{alert}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// KPIs principaux
+const mainKPIs = [
+  {
+    title: "Nouveaux Clients",
+    value: "12",
+    trend: "+4",
+    icon: <UserPlus className="h-5 w-5" />,
+    color: "text-blue-600"
+  },
+  {
+    title: "Satisfaction",
+    value: "4.8/5",
+    trend: "+0.3",
+    icon: <Heart className="h-5 w-5" />,
+    color: "text-green-600"
+  },
+  {
+    title: "NPS",
+    value: "72",
+    trend: "+5",
+    icon: <Award className="h-5 w-5" />,
+    color: "text-orange-600"
+  },
+  {
+    title: "Fidélisation",
+    value: "95%",
+    trend: "+2%",
+    icon: <Target className="h-5 w-5" />,
+    color: "text-purple-600"
+  }
+];
+
+const ClientView = () => {
+  return (
+    <div className="space-y-6">
+      {/* KPIs principaux */}
+      <div className="grid grid-cols-4 gap-4">
+        {mainKPIs.map((kpi, index) => (
+          <Card key={index}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className={`rounded-full p-3 ${kpi.color} bg-opacity-10`}>
+                  {kpi.icon}
+                </div>
+                <div className={`text-sm ${kpi.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {kpi.trend}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500">{kpi.title}</p>
+                <h3 className="text-2xl font-bold">{kpi.value}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Graphiques d'analyse client */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Évolution Satisfaction */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Évolution Satisfaction Client
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={clientData.satisfaction}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" orientation="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Legend />
+                <Line 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="satisfaction" 
+                  stroke={COLORS.primary} 
+                  name="Satisfaction"
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="nps" 
+                  stroke={COLORS.secondary} 
+                  name="NPS"
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="fidelisation" 
+                  stroke={COLORS.success} 
+                  name="Fidélisation"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Répartition par Segment */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Répartition par Segment
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={clientData.segments}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                >
+                  {clientData.segments.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Sources d'Acquisition */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5" />
+              Sources d'Acquisition
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={clientData.acquisition}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area 
+                  type="monotone" 
+                  dataKey="recommendation" 
+                  stackId="1" 
+                  stroke={COLORS.primary} 
+                  fill={COLORS.primary} 
+                  name="Recommandation"
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="publicite" 
+                  stackId="1" 
+                  stroke={COLORS.secondary} 
+                  fill={COLORS.secondary} 
+                  name="Publicité"
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="direct" 
+                  stackId="1" 
+                  stroke={COLORS.success} 
+                  fill={COLORS.success} 
+                  name="Direct"
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="partenaires" 
+                  stackId="1" 
+                  stroke={COLORS.info} 
+                  fill={COLORS.info} 
+                  name="Partenaires"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Cycle de Vie Client */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Cycle de Vie Client
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart data={clientData.lifecycle}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" />
+                <Radar 
+                  name="Clients" 
+                  dataKey="value" 
+                  stroke={COLORS.primary}
+                  fill={COLORS.primary} 
+                  fillOpacity={0.6}
+                />
+                <Legend />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Assistant IA */}
+      <ClientAIAssistant />
+    </div>
+  );
+};
+
+export default ClientView;
+
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, 
+  AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis
+} from 'recharts';
+import { 
+  TrendingUp, AlertCircle, Target, 
+  BarChart2, Brain, AlertTriangle 
+} from 'lucide-react';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545",
+  info: "#4A90E2"
+};
+
+// Données prédictives
+const predictiveData = {
+  predictions: [
+    { month: 'Jan', prevision: 100, realise: 98, precision: 98, tendance: 97 },
+    { month: 'Fév', prevision: 110, realise: 105, precision: 95, tendance: 108 },
+    { month: 'Mar', prevision: 115, realise: 112, precision: 97, tendance: 114 },
+    { month: 'Avr', prevision: 120, realise: 118, precision: 98, tendance: 119 },
+    { month: 'Mai', prevision: 125, realise: 122, precision: 97, tendance: 124 },
+    { month: 'Jun', prevision: 130, realise: 128, precision: 98, tendance: 129 }
+  ],
+  risks: [
+    { name: 'Faible', value: 60, color: COLORS.success },
+    { name: 'Moyen', value: 30, color: COLORS.warning },
+    { name: 'Élevé', value: 10, color: COLORS.danger }
+  ],
+  indicators: [
+    { name: 'T1', performance: 85, qualite: 90, satisfaction: 88, fiabilite: 87 },
+    { name: 'T2', performance: 88, qualite: 92, satisfaction: 90, fiabilite: 89 },
+    { name: 'T3', performance: 92, qualite: 94, satisfaction: 93, fiabilite: 91 },
+    { name: 'T4', performance: 95, qualite: 95, satisfaction: 94, fiabilite: 93 }
+  ],
+  factors: [
+    { name: 'Marché', impact: 85, confiance: 90, risque: 15 },
+    { name: 'Technologie', impact: 75, confiance: 85, risque: 25 },
+    { name: 'Client', impact: 90, confiance: 88, risque: 12 },
+    { name: 'Opérationnel', impact: 70, confiance: 82, risque: 30 }
+  ]
+};
+
+// Assistant IA prédictif
+const PredictiveAIAssistant = () => {
+  const [query, setQuery] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+
+  const suggestedAnalyses = [
+    "Prédire les tendances futures",
+    "Identifier les facteurs de risque",
+    "Optimiser les modèles prédictifs",
+    "Analyser les corrélations",
+    "Évaluer les scénarios possibles"
+  ];
+
+  const handleAnalyze = () => {
+    setAnalysis({
+      predictions: [
+        "Croissance stable prévue pour le prochain trimestre",
+        "Amélioration continue de la précision des modèles",
+        "Tendance positive sur les indicateurs clés"
+      ],
+      opportunities: [
+        "Potentiel d'expansion sur le segment PME",
+        "Optimisation des ressources possible",
+        "Nouveaux marchés émergents identifiés"
+      ],
+      risks: [
+        "Facteurs externes pouvant impacter la croissance",
+        "Zones de vigilance sur certains segments"
+      ]
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Brain className="h-5 w-5" />
+          Assistant IA - Analyses Prédictives
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Posez votre question sur les prédictions..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleAnalyze}>Analyser</Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">Analyses suggérées :</h4>
+            <ul className="list-disc pl-4 space-y-1">
+              {suggestedAnalyses.map((suggestion, index) => (
+                <li key={index} className="text-sm cursor-pointer hover:text-blue-600">
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {analysis && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-600">Prédictions :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.predictions.map((pred, index) => (
+                    <li key={index} className="text-sm">{pred}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-green-600">Opportunités :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.opportunities.map((opp, index) => (
+                    <li key={index} className="text-sm">{opp}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-orange-600">Risques :</h4>
+                <ul className="list-disc pl-4">
+                  {analysis.risks.map((risk, index) => (
+                    <li key={index} className="text-sm text-orange-600">{risk}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// KPIs principaux
+const mainKPIs = [
+  {
+    title: "Prévisions",
+    value: "+25%",
+    trend: "+5%",
+    icon: <TrendingUp className="h-5 w-5" />,
+    color: "text-blue-600"
+  },
+  {
+    title: "Précision",
+    value: "92%",
+    trend: "+2%",
+    icon: <Target className="h-5 w-5" />,
+    color: "text-green-600"
+  },
+  {
+    title: "Alertes",
+    value: "3",
+    trend: "-2",
+    icon: <AlertTriangle className="h-5 w-5" />,
+    color: "text-orange-600"
+  },
+  {
+    title: "Score Prédictif",
+    value: "88/100",
+    trend: "+4",
+    icon: <BarChart2 className="h-5 w-5" />,
+    color: "text-purple-600"
+  }
+];
+
+const PredictiveView = () => {
+  return (
+    <div className="space-y-6">
+      {/* KPIs principaux */}
+      <div className="grid grid-cols-4 gap-4">
+        {mainKPIs.map((kpi, index) => (
+          <Card key={index}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className={`rounded-full p-3 ${kpi.color} bg-opacity-10`}>
+                  {kpi.icon}
+                </div>
+                <div className={`text-sm ${kpi.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  {kpi.trend}
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500">{kpi.title}</p>
+                <h3 className="text-2xl font-bold">{kpi.value}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Graphiques prédictifs */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Prévisions vs Réalité */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Prévisions vs Réalité
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={predictiveData.predictions}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="prevision" 
+                  stroke={COLORS.primary} 
+                  strokeDasharray="5 5"
+                  name="Prévision"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="realise" 
+                  stroke={COLORS.success}
+                  name="Réalisé"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="precision" 
+                  stroke={COLORS.secondary}
+                  name="Précision"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Distribution des Risques */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Distribution des Risques
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={predictiveData.risks}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                >
+                  {predictiveData.risks.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Évolution des Indicateurs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5" />
+              Évolution des Indicateurs
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <RadarChart data={predictiveData.indicators}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" />
+                <Radar 
+                  name="Performance" 
+                  dataKey="performance" 
+                  stroke={COLORS.primary} 
+                  fill={COLORS.primary} 
+                  fillOpacity={0.6}
+                />
+                <Radar 
+                  name="Qualité" 
+                  dataKey="qualite" 
+                  stroke={COLORS.secondary} 
+                  fill={COLORS.secondary} 
+                  fillOpacity={0.6}
+                />
+                <Radar 
+                  name="Satisfaction" 
+                  dataKey="satisfaction" 
+                  stroke={COLORS.success} 
+                  fill={COLORS.success} 
+                  fillOpacity={0.6}
+                />
+                <Legend />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Impact des Facteurs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Impact des Facteurs
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={predictiveData.factors}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="impact" fill={COLORS.primary} name="Impact" />
+                <Bar dataKey="confiance" fill={COLORS.success} name="Confiance" />
+                <Line 
+                  type="monotone" 
+                  dataKey="risque" 
+                  stroke={COLORS.danger}
+                  name="Risque"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Assistant IA */}
+      <PredictiveAIAssistant />
+    </div>
+  );
+};
+
+export default PredictiveView;

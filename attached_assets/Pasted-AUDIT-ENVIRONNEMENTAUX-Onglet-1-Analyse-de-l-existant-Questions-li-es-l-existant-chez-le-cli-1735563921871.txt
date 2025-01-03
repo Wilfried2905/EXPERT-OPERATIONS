@@ -1,0 +1,141 @@
+AUDIT ENVIRONNEMENTAUX
+
+Onglet 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+Les questions ci-dessous permettent d’obtenir une vue d'ensemble de la gestion environnementale actuelle chez le client afin d’identifier les domaines où des améliorations peuvent être apportées avant l'audit environnemental.
+
+1. Objectifs et stratégie environnementale
+Quels sont les objectifs du client en matière de durabilité et de réduction de l'impact environnemental ?
+
+Cette question permet de comprendre les priorités du client en matière de gestion environnementale.
+Avez-vous déjà réalisé un audit environnemental ou une évaluation de vos impacts environnementaux ?
+
+Permet de connaître les initiatives précédentes prises par l'entreprise concernant la gestion environnementale.
+Quelles normes ou certifications environnementales suivez-vous actuellement (ISO 14001, EMAS, etc.) ?
+
+Permet de comprendre les référentiels existants qui orientent les actions environnementales de l’entreprise.
+Quel est le niveau d'engagement des parties prenantes (employés, clients, fournisseurs) dans les actions environnementales ?
+
+Cela permet d'évaluer l'implication des différentes parties prenantes dans la gestion environnementale.
+2. Gestion des ressources et des déchets
+Disposez-vous d'une politique de gestion des ressources naturelles et des matières premières ?
+
+Cela permet d’évaluer l'approche du client en matière de gestion durable des ressources.
+Quels types de déchets générez-vous (déchets solides, liquides, dangereux) et comment sont-ils traités ?
+
+Permet de comprendre la gestion des déchets, un aspect clé de l'audit environnemental.
+Avez-vous mis en place des initiatives pour réduire votre consommation d'énergie, d'eau et d'autres ressources ?
+
+Évalue les efforts du client pour optimiser l’utilisation des ressources.
+Comment le recyclage et la réutilisation des matériaux sont-ils intégrés dans vos opérations ?
+
+Cela permet de vérifier si le client met en œuvre des pratiques de recyclage et de réutilisation.
+3. Emissions et impact carbone
+Avez-vous une stratégie de réduction des émissions de gaz à effet de serre (GES) ?
+
+Cette question permet d’évaluer les efforts de réduction de l’empreinte carbone de l'entreprise.
+Disposez-vous de systèmes de suivi des émissions de GES et des autres polluants ?
+
+Permet de vérifier si des outils de suivi sont en place pour mesurer les émissions et les impacts environnementaux.
+Avez-vous un objectif de neutralité carbone et une feuille de route pour y parvenir ?
+
+Cela permet de comprendre les objectifs à long terme de l'entreprise en matière de réduction de son empreinte carbone.
+Quels sont vos principaux leviers pour réduire vos émissions de GES (efficacité énergétique, changement d'énergies, etc.) ?
+
+Cette question permet d’identifier les actions concrètes prises par le client pour réduire ses émissions.
+4. Conformité réglementaire et risques environnementaux
+Êtes-vous en conformité avec la législation environnementale locale, nationale et internationale ?
+
+Vérifie la conformité de l’entreprise avec les obligations légales et réglementaires en matière d’environnement.
+Avez-vous identifié des risques environnementaux spécifiques à votre activité (pollution, dégradation des écosystèmes, etc.) ?
+
+Cette question explore les risques que l'entreprise prend en compte dans sa gestion environnementale.
+Quel est le processus mis en place pour gérer les incidents environnementaux (fuites, pollutions, etc.) ?
+
+Permet de comprendre comment l'entreprise gère les incidents environnementaux et si un plan d'action est en place.
+Est-ce que des audits environnementaux internes ou externes sont réalisés régulièrement pour évaluer votre performance environnementale ?
+
+Cela permet de vérifier la fréquence et l'impact des audits environnementaux dans l’organisation.
+5. Performance et communication
+Comment mesurez-vous l'impact environnemental de vos opérations (indicateurs, rapports, etc.) ?
+
+Permet de comprendre comment l'entreprise évalue l'impact environnemental de ses activités.
+Les résultats des audits environnementaux sont-ils communiqués aux parties prenantes (internes et externes) ?
+
+Évalue la transparence et l’implication des parties prenantes dans la gestion des performances environnementales.
+Quel est le processus de révision et d'amélioration continue de votre stratégie environnementale ?
+
+Cette question permet de vérifier si l’entreprise met en place des processus d’amélioration continue.
+Disposez-vous d’une équipe ou d’un responsable dédié à la gestion environnementale ?
+
+Permet de vérifier si une gouvernance claire et responsable est mise en place pour la gestion de l'environnement.
+
+
+Onglet 2 : Questionnaire d'évaluation basé sur les bonnes pratiques en matière d’audit environnemental
+Ce questionnaire permet d’évaluer la gestion environnementale du client selon les meilleures pratiques et les normes environnementales.
+
+1. Gestion des ressources naturelles
+Les pratiques de gestion des ressources naturelles sont-elles basées sur le principe de durabilité ?
+
+Référence : ISO 14001 - La gestion durable des ressources naturelles est une composante clé de la gestion environnementale.
+Avez-vous mis en place une politique d’approvisionnement responsable et éthique concernant les matières premières ?
+
+Référence : ISO 14001 - L’approvisionnement responsable contribue à une réduction de l’empreinte écologique tout au long de la chaîne de valeur.
+Les processus de fabrication ou d'exploitation sont-ils optimisés pour minimiser la consommation de ressources (énergie, eau, matières premières) ?
+
+Référence : ISO 14001 - L’efficacité des ressources doit être une priorité dans le processus de production.
+Avez-vous mis en œuvre des systèmes de gestion de l’eau et de l'énergie pour réduire les consommations ?
+
+Référence : ISO 50001 - La gestion de l’eau et de l'énergie est essentielle pour limiter les impacts environnementaux.
+2. Gestion des déchets et du recyclage
+Les déchets sont-ils triés à la source et envoyés à des centres de recyclage certifiés ?
+
+Référence : ISO 14001 - La gestion des déchets est un aspect important de la gestion environnementale pour éviter leur impact négatif.
+Les déchets dangereux sont-ils stockés et éliminés selon des normes strictes ?
+
+Référence : ISO 14001 - Le stockage et l’élimination des déchets dangereux doivent respecter des normes pour éviter toute contamination.
+Avez-vous mis en place des initiatives pour réduire la production de déchets à la source ?
+
+Référence : ISO 14001 - Réduire la production de déchets à la source permet de diminuer les impacts environnementaux.
+Les déchets recyclables sont-ils utilisés pour créer de nouveaux produits ou matériaux ?
+
+Référence : ISO 14001 - Le recyclage et la réutilisation des matériaux permettent de réduire la demande de nouvelles ressources naturelles.
+3. Réduction des émissions et gestion du carbone
+Avez-vous mis en place une politique d'efficacité énergétique pour réduire la consommation d'énergie dans vos installations ?
+
+Référence : ISO 50001 - La gestion de l'énergie est un levier essentiel pour la réduction des émissions de gaz à effet de serre (GES).
+Les émissions de gaz à effet de serre (GES) sont-elles mesurées et suivies de manière régulière ?
+
+Référence : ISO 14064 - La mesure et le suivi des émissions sont des outils clés pour les entreprises cherchant à réduire leur impact carbone.
+Des initiatives sont-elles mises en place pour utiliser des sources d'énergie renouvelable dans vos activités ?
+
+Référence : ISO 50001 - L’utilisation d’énergies renouvelables contribue à réduire l’empreinte carbone de l'entreprise.
+Avez-vous une stratégie pour réduire l'empreinte carbone de vos produits ou services ?
+
+Référence : ISO 14067 - Réduire l'empreinte carbone des produits permet de contribuer à un environnement plus sain.
+4. Conformité réglementaire et gestion des risques environnementaux
+Êtes-vous conforme à toutes les réglementations environnementales locales, nationales et internationales ?
+
+Référence : ISO 14001 - La conformité réglementaire est une exigence fondamentale pour les entreprises cherchant à minimiser leur impact environnemental.
+Avez-vous évalué les risques environnementaux liés à vos activités et mis en place des actions pour les atténuer ?
+
+Référence : ISO 14001 - L’évaluation et l'atténuation des risques sont essentielles pour éviter les impacts négatifs sur l'environnement.
+Les processus d'audit et de contrôle sont-ils régulièrement effectués pour vérifier la conformité environnementale ?
+
+Référence : ISO 14001 - Les audits environnementaux internes et externes permettent de garantir que l’entreprise respecte les normes environnementales.
+Avez-vous un plan d'urgence en cas de catastrophe environnementale (pollution, fuite, etc.) ?
+
+Référence : ISO 14001 - Un plan d’urgence est essentiel pour une réaction rapide et efficace en cas de situation critique.
+5. Communication et engagement des parties prenantes
+Les résultats environnementaux sont-ils partagés avec les parties prenantes (employés, clients, investisseurs) ?
+
+Référence : ISO 14001 - La transparence vis-à-vis des parties prenantes est un élément clé pour renforcer l’engagement environnemental.
+L'engagement environnemental est-il intégré dans la culture d'entreprise et communiqué régulièrement aux employés ?
+
+Référence : ISO 14001 - L’implication des employés dans les initiatives environnementales renforce la durabilité des actions.
+Les fournisseurs sont-ils évalués en fonction de leur performance environnementale ?
+
+Référence : ISO 14001 - Évaluer les fournisseurs en fonction de leur performance environnementale permet de s’assurer qu’ils respectent les mêmes normes que l’entreprise.
+Avez-vous mis en place des partenariats avec des organisations environnementales ou des autorités locales pour promouvoir la durabilité ?
+
+Référence : ISO 14001 - Les partenariats externes permettent de renforcer l’impact positif sur l’environnement à l’échelle locale ou globale.
+

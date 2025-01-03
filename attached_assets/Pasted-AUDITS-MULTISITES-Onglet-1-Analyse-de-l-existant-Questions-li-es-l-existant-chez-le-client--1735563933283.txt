@@ -1,0 +1,140 @@
+AUDITS MULTISITES 
+
+Onglet 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+Les questions ci-dessous permettent d’obtenir une vue d'ensemble des opérations multisites du client, en identifiant les pratiques actuelles et les besoins en matière d’audit.
+
+1. Objectifs et stratégie de gestion multisites
+Quels sont les objectifs globaux de l'entreprise pour la gestion de ses sites ?
+
+Cette question permet de comprendre les objectifs à long terme et les priorités de l'entreprise en matière de gestion de plusieurs sites.
+Comment vos différents sites sont-ils actuellement intégrés dans la stratégie globale de l'entreprise ?
+
+Permet d’évaluer si les sites sont alignés avec la stratégie centrale de l’entreprise ou s'ils fonctionnent de manière isolée.
+Avez-vous un cadre standardisé pour la gestion des sites, ou chaque site fonctionne-t-il de manière indépendante ?
+
+Cette question permet de comprendre si une approche centralisée ou décentralisée est utilisée dans la gestion des sites.
+Quels sont les critères de succès que vous appliquez à l'échelle de vos sites (performance, rentabilité, satisfaction client, etc.) ?
+
+Cela permet de déterminer comment la performance des sites est mesurée et quelles priorités sont définies.
+2. Structure organisationnelle et gouvernance multisites
+Qui est responsable de la gestion des sites et comment la responsabilité est-elle répartie ?
+
+Cette question permet de déterminer l'organisation interne et les niveaux de responsabilité pour la gestion multisite.
+Avez-vous une équipe dédiée à la gestion de vos sites, ou cette responsabilité est-elle partagée entre différents départements ?
+
+Permet d’évaluer la centralisation ou la décentralisation de la gestion et la coordination entre les différents sites.
+Les processus décisionnels sont-ils centralisés ou décentralisés au sein des différents sites ?
+
+Cela permet de comprendre le modèle de gouvernance appliqué pour la gestion des décisions à l’échelle des sites.
+Comment la communication et la coordination entre les différents sites sont-elles gérées ?
+
+Permet d’évaluer l’efficacité de la communication et de la collaboration entre les sites et les équipes.
+3. Gestion des ressources et des opérations multisites
+Quelles ressources sont partagées entre les sites (financières, humaines, matérielles, technologiques) ?
+
+Cette question permet d’identifier les ressources communes entre les sites et de comprendre les processus de gestion partagée.
+Les sites ont-ils des processus d’opérations standardisés ou y a-t-il des pratiques spécifiques à chaque site ?
+
+Permet d’évaluer si des processus uniformes sont en place ou si chaque site suit des pratiques distinctes.
+Avez-vous un système de gestion intégré pour suivre les opérations des différents sites ?
+
+Cela permet de vérifier si un système centralisé est utilisé pour suivre les performances des sites et la gestion des ressources.
+Les sites partagent-ils des données en temps réel, et comment ces données sont-elles intégrées dans les processus décisionnels ?
+
+Permet de vérifier si la collecte et l'intégration des données entre les sites sont centralisées et efficaces.
+4. Performance et contrôle de la qualité multisites
+Comment évaluez-vous la performance de chaque site (KPI, audits, évaluations, etc.) ?
+
+Permet de savoir comment chaque site est évalué, en termes de performance et de résultats.
+Les performances des sites sont-elles comparées entre elles ? Si oui, comment ces comparaisons sont-elles utilisées pour améliorer la gestion ?
+
+Cette question permet d’évaluer si un processus de benchmarking est en place pour comparer les sites et optimiser les performances.
+Comment la qualité des opérations est-elle contrôlée à travers les sites (audits internes, inspections, contrôles qualité) ?
+
+Permet de déterminer la manière dont la qualité est vérifiée et maintenue à travers les sites.
+Les résultats des audits et contrôles de qualité sont-ils partagés entre les sites pour une amélioration continue ?
+
+Permet de vérifier si des bonnes pratiques sont partagées entre les sites pour renforcer la performance globale.
+5. Conformité et risques multisites
+Les sites respectent-ils des standards et des réglementations communes, ou existe-t-il des spécificités locales qui les affectent ?
+
+Permet de comprendre si les sites suivent les mêmes normes et standards ou s'ils sont soumis à des règles locales distinctes.
+Comment la conformité réglementaire est-elle suivie à travers tous les sites ?
+
+Cette question permet de vérifier si des contrôles de conformité sont réalisés régulièrement et de manière uniforme entre les sites.
+Avez-vous un système de gestion des risques qui couvre tous les sites ?
+
+Permet de savoir si les risques spécifiques à chaque site sont identifiés et gérés au niveau global.
+Les incidents ou les problèmes majeurs rencontrés sur un site sont-ils partagés et traités de manière centralisée ?
+
+Permet de vérifier si un processus de gestion des incidents commun est appliqué à tous les sites.
+
+
+Onglet 2 : Questionnaire d'évaluation basé sur les bonnes pratiques pour un audit multisite
+Ce questionnaire permet d’évaluer la gestion des sites de l'entreprise selon des bonnes pratiques en matière d'audit multisite.
+
+1. Gouvernance et gestion des sites
+Les rôles et responsabilités pour la gestion multisite sont-ils clairement définis au niveau de l'entreprise ?
+
+Référence : ISO 9001 - La définition claire des rôles est essentielle pour une gestion efficace des opérations multisites.
+Existe-t-il un comité de gouvernance multisite qui coordonne les actions entre les différents sites ?
+
+Référence : ISO 9001 - Un comité dédié permet une coordination efficace et la mise en place de décisions stratégiques pour l'ensemble des sites.
+Les processus décisionnels sont-ils centralisés, décentralisés ou partagés entre les sites ?
+
+Référence : ISO 9001 - La clarté des processus décisionnels permet de réduire les incohérences entre les sites.
+Y a-t-il une approche standardisée pour la gestion des processus entre les sites, ou chaque site fonctionne-t-il selon ses propres règles ?
+
+Référence : ISO 9001 - L'uniformité des processus entre sites garantit la cohérence des opérations.
+2. Intégration des systèmes et des ressources
+Utilisez-vous une plateforme centralisée pour intégrer les systèmes de gestion des différents sites ?
+
+Référence : ERP (Enterprise Resource Planning) - L’utilisation d’un ERP permet une intégration efficace des données entre sites.
+Les informations sur les ressources (humaines, matérielles, financières) sont-elles partagées entre les sites en temps réel ?
+
+Référence : ISO 9001 - Le partage d'informations en temps réel assure une gestion proactive et une optimisation des ressources.
+Avez-vous une plateforme de collaboration qui facilite la communication entre les différents sites ?
+
+Référence : ISO 9001 - La communication efficace entre les sites permet une meilleure coordination et gestion des ressources.
+Les processus d'approvisionnement sont-ils centralisés ou chaque site gère-t-il ses propres besoins ?
+
+Référence : ISO 9001 - La centralisation des achats permet de rationaliser les coûts et de garantir la conformité des processus.
+3. Contrôle et évaluation de la performance multisite
+Les performances des sites sont-elles évaluées à l'aide d'indicateurs communs ?
+
+Référence : ISO 9001 - L'utilisation d'indicateurs communs permet d’évaluer l’efficacité globale des sites.
+Les comparaisons de performance entre les sites sont-elles effectuées régulièrement pour identifier des axes d'amélioration ?
+
+Référence : Balanced Scorecard - Comparer les performances des sites permet de favoriser l'amélioration continue.
+Les résultats des audits de performance sont-ils utilisés pour améliorer les processus entre les sites ?
+
+Référence : ISO 9001 - Les résultats des audits doivent être intégrés dans un processus d'amélioration continue.
+Les données relatives à la performance des sites sont-elles accessibles à toutes les parties prenantes ?
+
+Référence : ISO 9001 - La transparence des résultats de performance assure une gestion collaborative et un partage des meilleures pratiques.
+4. Conformité et gestion des risques multisites
+La conformité réglementaire est-elle suivie de manière homogène sur tous les sites ?
+
+Référence : ISO 9001, ISO 14001 - La gestion uniforme de la conformité est essentielle pour garantir l'adhérence aux réglementations.
+Les risques spécifiques à chaque site sont-ils identifiés et gérés dans un cadre global de gestion des risques ?
+
+Référence : ISO 31000 - Une approche intégrée de gestion des risques permet de prendre en compte les particularités de chaque site.
+Les incidents environnementaux, financiers ou de sécurité sont-ils partagés et analysés à l'échelle de tous les sites ?
+
+Référence : ISO 9001, ISO 14001 - L’échange d’informations sur les incidents permet de prévenir les risques sur l’ensemble des sites.
+Avez-vous mis en place un système de reporting standardisé pour partager les incidents, les risques et les performances entre les sites ?
+
+Référence : ISO 9001 - Le reporting standardisé facilite la gestion proactive des risques et la mise en œuvre de mesures correctives.
+5. Communication et partage des bonnes pratiques
+Les meilleures pratiques identifiées sur un site sont-elles partagées avec les autres sites ?
+
+Référence : ISO 9001 - Le partage des meilleures pratiques entre sites permet d’uniformiser les standards de qualité.
+Les retours d'expérience sur les opérations et les processus sont-ils systématiquement intégrés dans l'amélioration continue ?
+
+Référence : ISO 9001 - L'intégration des retours d'expérience est cruciale pour un développement opérationnel harmonieux.
+Les employés des différents sites sont-ils formés aux processus et aux standards communs ?
+
+Référence : ISO 9001 - Une formation uniforme permet d’assurer l’alignement des équipes sur les pratiques globales de l’entreprise.
+Les initiatives de développement durable et de responsabilité sociale sont-elles appliquées de manière cohérente sur tous les sites ?
+
+Référence : ISO 26000 - Une approche cohérente du développement durable et de la responsabilité sociale garantit l'alignement des sites sur des objectifs environnementaux et sociaux communs.

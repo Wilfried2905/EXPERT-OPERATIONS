@@ -1,0 +1,70 @@
+Step 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+
+1. Objectifs et stratégie
+Quels sont les principaux objectifs du client pour la certification ?
+
+Cette question permet de comprendre les attentes du client et de guider l'audit en fonction de ses priorités.
+Quelles sont les principales applications et services en production dans votre centre de données ?
+
+Cela permet de mieux comprendre les enjeux métiers du client.
+Avez-vous effectué des audits de sécurité ou de conformité précédemment ?
+
+Cela permet de connaître les antécédents et les actions déjà entreprises par le client.
+Avez-vous des fournisseurs externes qui gèrent des parties de votre infrastructure ?
+
+Cette question examine la gestion des partenaires externes et leurs impacts sur la certification.
+
+2. Infrastructure et équipements
+Quelle est la taille de l'infrastructure informatique actuelle ?
+
+Cela permet de déterminer l'ampleur de l'audit à réaliser.
+Quels équipements sont actuellement utilisés pour les systèmes critiques ?
+
+Permet de comprendre l’équipement et sa robustesse pour la continuité des services.
+Avez-vous une cartographie complète des infrastructures de votre centre de données ?
+
+Cela permet de savoir si le client dispose d’une vue d’ensemble de son environnement.
+Comment gérez-vous la capacité et l’évolution de l’infrastructure ?
+
+Cette question permet d’analyser la gestion de la croissance du système.
+
+3. Sécurité et gestion des risques
+Comment les accès au centre de données sont-ils contrôlés ?
+
+Cette question s'intéresse à la sécurité des accès physiques et numériques.
+Comment les incidents sont-ils actuellement gérés ?
+
+Permet de juger de la réactivité et de l’efficacité des processus en place.
+Y a-t-il des processus de gestion des risques en place pour les systèmes critiques ?
+
+Permet d’évaluer la gestion proactive des risques.
+Les informations sensibles sont-elles protégées par des systèmes de chiffrement et de gestion des accès ?
+
+Cette question porte sur la gestion des informations sensibles et leur protection.
+
+4. Continuité et résilience
+Le centre de données dispose-t-il d’un plan de continuité des activités (PCA) et de reprise après sinistre (DRP) ?
+
+Vérifier la préparation en cas d’événements imprévus.
+Quels types de solutions de sauvegarde et de récupération des données sont en place ?
+
+Cette question évalue la résilience des processus de gestion des données.
+Les équipements sont-ils protégés contre les pannes, et existe-t-il une redondance pour les systèmes critiques ?
+
+Cela permet de vérifier si des mesures sont en place pour maintenir les services en cas de défaillance.
+Le centre de données dispose-t-il de procédures de reprise après sinistre et de continuité des services ?
+
+Cette question explore la planification et la gestion des interruptions potentielles des services.
+
+5. Surveillance et gestion des performances
+Comment le centre de données est-il surveillé (en termes de performance et de sécurité) ?
+
+Cette question évalue la surveillance des infrastructures pour garantir leur bon fonctionnement.
+Comment les incidents sont-ils suivis et rapportés ?
+
+Évaluer les mécanismes de suivi des incidents pour garantir la réactivité.
+Quel est le niveau de compétence et de formation des équipes en charge de l’infrastructure ?
+
+Cela permet de déterminer si les équipes disposent des compétences nécessaires pour assurer la conformité.
+Utilisez-vous des technologies de virtualisation ou de cloud dans votre infrastructure ?
+

@@ -1,0 +1,126 @@
+TIER CERTIFICATION AUDIT
+
+Onglet 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+Les questions ci-dessous permettent d'obtenir une vue d'ensemble des pratiques et de l’infrastructure existante du client, en identifiant les domaines d'amélioration avant de procéder à un audit pour la certification TIER.
+
+1. Objectifs et stratégie de certification
+Quels sont les objectifs de l'entreprise en termes de certification TIER ?
+
+Cette question permet de comprendre les attentes du client concernant la certification TIER et les raisons pour lesquelles il cherche à l'obtenir.
+Avez-vous une évaluation initiale de l’infrastructure et des services pour la certification TIER ?
+
+Permet de savoir si une analyse préliminaire a été réalisée pour évaluer l'écart entre l'infrastructure actuelle et les exigences de la certification TIER.
+Quel niveau de certification TIER visez-vous (TIER I, II, III, IV) ?
+
+Cela permet de cibler le niveau de certification TIER que le client cherche à obtenir et d’adapter l’audit en conséquence.
+Quels sont les principaux défis ou obstacles que vous avez rencontrés jusqu'à présent dans le processus de certification ?
+
+Permet d'identifier les difficultés rencontrées par le client dans la préparation à l'audit et à la certification.
+2. Infrastructure du centre de données
+Votre centre de données a-t-il été conçu selon les principes TIER ?
+
+Cette question permet de savoir si la conception du centre de données respecte déjà certains des principes de la certification TIER.
+Quelles sont les configurations actuelles de redondance de l'infrastructure (électricité, refroidissement, réseau, etc.) ?
+
+Cela permet d'évaluer si les aspects fondamentaux de la redondance sont bien présents selon les critères TIER.
+Avez-vous un plan d’expansion ou de mise à niveau de l’infrastructure pour atteindre les exigences TIER ?
+
+Permet d’identifier les projets futurs pour aligner l'infrastructure sur les exigences du niveau de certification TIER visé.
+Les équipements critiques (UPS, générateurs, refroidissement, etc.) sont-ils redondants et capables de supporter des défaillances sans impact sur les opérations ?
+
+Cette question permet de vérifier les exigences de redondance et de disponibilité des équipements critiques pour respecter les standards TIER.
+3. Gestion des risques et continuité
+Avez-vous un plan de gestion des risques détaillé, y compris les risques liés à la continuité des activités ?
+
+Cela permet d’évaluer si le client a un plan structuré en place pour répondre aux risques qui pourraient affecter la disponibilité et la résilience des services.
+Quels sont les processus en place pour gérer les pannes et assurer la reprise après sinistre ?
+
+Permet de comprendre comment le client gère les incidents majeurs et leur résolution pour garantir la continuité des services.
+Les services critiques disposent-ils de mécanismes de basculement et de reprise en cas de panne ?
+
+Cette question permet de vérifier la résilience des services et des systèmes en place, en particulier pour les infrastructures TIER II et supérieures.
+Avez-vous des tests réguliers de vos plans de continuité et de reprise après sinistre ?
+
+Permet de déterminer si des tests de ces plans sont réalisés régulièrement pour valider leur efficacité.
+4. Surveillance et gestion de la performance
+Comment est supervisée la performance de l’infrastructure (surveillance de l’énergie, du refroidissement, des équipements) ?
+
+Permet de vérifier les systèmes de surveillance mis en place pour assurer la performance et la stabilité de l’infrastructure.
+Les systèmes de surveillance sont-ils redondants pour garantir qu'une défaillance ne laisse pas le centre de données sans surveillance ?
+
+Cela permet de vérifier si des systèmes de surveillance redondants sont utilisés, conformément aux exigences de redondance pour la certification TIER.
+Avez-vous mis en place des indicateurs de performance pour mesurer la disponibilité et la fiabilité des services du centre de données ?
+
+Permet d’évaluer les processus de suivi de la performance pour garantir la conformité aux critères de certification TIER.
+Les performances de votre centre de données sont-elles réévaluées régulièrement pour assurer qu’elles respectent les normes TIER ?
+
+Cette question permet de vérifier si le client procède à des audits internes ou des réévaluations régulières pour maintenir la conformité TIER.
+5. Conformité et réglementation
+Êtes-vous conforme aux exigences réglementaires locales et internationales liées à l'infrastructure du centre de données ?
+
+Cette question permet de déterminer si le centre de données respecte les exigences légales en matière de sécurité, d’environnement et de gestion des infrastructures critiques.
+Les tests de conformité aux normes de sécurité (physique et logique) sont-ils réalisés régulièrement ?
+
+Permet de vérifier si des audits ou tests réguliers sont effectués pour garantir que le centre de données respecte les normes de sécurité et de conformité.
+Les résultats des audits de sécurité et de conformité sont-ils utilisés pour améliorer la gestion du centre de données ?
+
+Cette question permet de vérifier si les retours des audits sont intégrés dans un processus d'amélioration continue pour maintenir la conformité.
+Le personnel est-il formé pour gérer des situations d'urgence et assurer la conformité aux exigences TIER ?
+
+Permet d’évaluer si le personnel est bien préparé à maintenir les opérations en conformité avec les exigences de certification TIER.
+
+Onglet 2 : Questionnaire d'évaluation basé sur les bonnes pratiques pour un audit de certification TIER
+Ce questionnaire permet d’évaluer l’infrastructure et les processus du client en fonction des critères définis pour la certification TIER.
+
+1. Conception de l’infrastructure et redondance
+Votre centre de données dispose-t-il d’un système d’alimentation électrique redondant (UPS, générateurs, etc.) ?
+
+Référence : TIER I, II, III, IV - La redondance de l’alimentation est une exigence clé pour les certifications TIER, en particulier pour les niveaux III et IV.
+Les systèmes de refroidissement sont-ils conçus pour permettre un fonctionnement continu en cas de défaillance d’un composant ?
+
+Référence : TIER II, III, IV - La gestion des pannes de refroidissement doit garantir la continuité des opérations sans impact sur les services.
+Les équipements critiques ont-ils des chemins de distribution d’alimentation et de refroidissement redondants ?
+
+Référence : TIER III, IV - Les certifications TIER III et IV exigent une redondance dans les chemins de distribution pour éviter toute interruption des services.
+Le centre de données est-il conçu pour permettre des travaux de maintenance sans interrompre les services (maintenance sans coupure) ?
+
+Référence : TIER IV - La maintenance sans coupure est une exigence spécifique pour les certifications TIER IV, garantissant une disponibilité de 99,99%.
+2. Gestion des risques et continuité
+Avez-vous une stratégie de gestion des risques pour minimiser les impacts des pannes sur la continuité des services ?
+
+Référence : TIER II, III, IV - La gestion des risques est essentielle pour assurer une reprise rapide et réduire l'impact des incidents majeurs.
+Le centre de données dispose-t-il d’un plan de reprise après sinistre pour les services critiques ?
+
+Référence : TIER II, III, IV - Un plan de reprise après sinistre est crucial pour garantir la continuité des services en cas d'incidents.
+Les équipements critiques sont-ils géographiquement et physiquement séparés pour éviter les risques de défaillance simultanée ?
+
+Référence : TIER III, IV - La séparation physique des équipements garantit que des défaillances dans un domaine n’affectent pas l’ensemble du centre de données.
+Les tests de reprise après sinistre sont-ils effectués régulièrement pour assurer la conformité ?
+
+Référence : TIER II, III, IV - Les tests réguliers garantissent l'efficacité des plans de reprise et leur capacité à répondre aux exigences de disponibilité.
+3. Surveillance et gestion des performances
+Les systèmes de surveillance couvrent-ils tous les aspects critiques du centre de données (énergie, refroidissement, sécurité, réseau, etc.) ?
+
+Référence : TIER I, II, III, IV - Une surveillance exhaustive est essentielle pour détecter toute anomalie avant qu'elle n'affecte les services.
+Les systèmes de gestion de la performance permettent-ils une évaluation en temps réel de la disponibilité et des performances du centre de données ?
+
+Référence : TIER III, IV - La surveillance en temps réel permet une gestion proactive et une résolution rapide des problèmes de performance.
+Les performances de l'infrastructure sont-elles réévaluées régulièrement pour garantir qu’elles répondent aux normes TIER ?
+
+Référence : TIER II, III, IV - Les évaluations régulières assurent la conformité continue avec les exigences de certification.
+Les indicateurs de performance clés (KPI) sont-ils utilisés pour surveiller la disponibilité, la sécurité et la performance des services ?
+
+Référence : TIER II, III, IV - L’utilisation de KPI permet de suivre l'efficacité opérationnelle et d’identifier rapidement toute déviation par rapport aux attentes.
+4. Sécurité et conformité
+Le centre de données respecte-t-il les normes de sécurité physique et logique exigées pour la certification TIER ?
+
+Référence : TIER II, III, IV - Les exigences de sécurité physique et logique sont cruciales pour la certification TIER, garantissant la protection des actifs et des données.
+Des audits réguliers de sécurité sont-ils réalisés pour garantir que le centre de données respecte les normes TIER ?
+
+Référence : TIER II, III, IV - Les audits de sécurité permettent de vérifier que les contrôles et procédures sont en place pour maintenir la conformité.
+Les accès physiques et logiques au centre de données sont-ils strictement contrôlés et surveillés ?
+
+Référence : TIER II, III, IV - La gestion des accès est essentielle pour maintenir un environnement sécurisé et protéger contre les menaces internes et externes.
+Les employés et les prestataires sont-ils formés pour répondre aux exigences de sécurité et de continuité des services ?
+
+Référence : TIER II, III, IV - La formation continue des employés garantit qu'ils sont prêts à maintenir les normes de sécurité et de continuité dans le centre de données.

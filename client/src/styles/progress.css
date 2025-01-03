@@ -1,0 +1,25 @@
+.progress-bar {
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.progress-bar-indicator {
+  transition: width 0.3s ease-in-out;
+  border-radius: 9999px;
+  height: 100%;
+}
+
+.progress-bar-indicator.green {
+  background-color: #22c55e;
+}
+
+.progress-bar-indicator.yellow {
+  background-color: #eab308;
+}
+
+.progress-bar-indicator.red {
+  background-color: #ef4444;
+}

@@ -1,0 +1,241 @@
+l'application s'appelle "3R EXPERT OPERATIONS"
+
+Les principes de developpement de l'application : 
+
+la palette des couleurs 
+
+Couleurs Mode Jour : Bleu foncé : #003366 (en-tête, pied de page, accentuation), Blanc : #FFFFFF (fond principal), Orange : #FF9900 (boutons d'appel à l'action), - Polices : Arial, Helvetica, sans-serif pour le texte principal, avec variantes plus grasses pour les titres.
+
+Couleurs Mode Nuit :Bleu très foncé : #001F33 (en-tête, pied de page, accentuation), Gris clair : #E0E0E0 (fond principal), Orange foncé : #CC7A00 (boutons d'appel à l'action) Polices : Arial, Helvetica, sans-serif pour le texte principal, avec variantes plus grasses pour les titres.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Tout le Frontend doit être en "Français" seul le mot "SURVEY" Seul peut rester en anglais
+
+Il faut créer un bouton multilingue ou la deuxième langue est l'Anglais"
+
+l'application à 3 onglets : "Tableau de Bord" "Opérations" "Administration"
+
+Page d'accueil: Crée un pictogramme avec les images représentant les profils (Invité/Technicien/Administrateur) Après sélection de son profil
+
+Accès à la page de connexion, pour le developpement, les login et mot des passe par défaut seront :
+
+login : admin@3rtechnologie.com / Mot de passe : test
+
+login : invite@3rtechnologie.com / Mot de passe : test
+
+login : technicien@3rtechnologie.com / Mot de passe : test
+
+Après la connexion, on accède directement au "Tableau de bord" avec au dessus, au nom de l'application avec une barre de menu avec les onglets et les boutons du changement de langue et de "Déconnexion", la page de déconnexion nous ramène à la page d'accueil où se trouve les profils (Invité/Technicien/Administrateur)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+les droits par profils : 
+
+Accès et Sécurité
+
+Accès restreint uniquement aux utilisateurs avec le rôle 'admin'
+Redirection automatique vers la page de connexion si non authentifié
+Message d'erreur "Access restricted to administrators only" pour les non-admins
+Gestion des Utilisateurs (UserManagement)
+Fonctionnalités implémentées :
+Affichage de la liste des utilisateurs
+Création de nouveaux utilisateurs
+Modification des utilisateurs existants
+Suppression d'utilisateurs
+Réinitialisation de mot de passe
+
+Par utilisateur :
+
+Email
+Rôle (Invité/Technicien/Administrateur)
+Statut actif/inactif
+Interface
+Tableau avec colonnes : Email, Rôle, Actions
+Bouton "Ajouter un utilisateur"
+Actions par utilisateur :
+Modifier
+Réinitialiser MDP
+Supprimer
+Formulaires
+Formulaire d'ajout/modification avec :
+Champ email (obligatoire)
+
+Sélection du rôle (Invité/Technicien/Administrateur)
+
+Validation des données
+
+La réinitialisation de mot de passe (uniquement UI)
+L'envoi d'email de confirmation
+La gestion des permissions détaillées
+Les logs d'audit des actions administratives
+La gestion des groupes d'utilisateurs
+La configuration système
+La gestion des paramètres de l'application
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+La Barre de Menu
+
+Onglet "Tableau de bord"
+
+Par profil:
+
+l'invité a sur sa barre de menu l'onglet "Tableau de Bord" avec une "vue générale" des ses activités  et l'onglet "Opérations"
+ 
+le technicien a sur sa barre de menu l'onglet "Tableau de Bord" avec une "vue générale" des ses activités  et l'onglet "Opérations"
+
+l'administrateur à toutes les autres vues et à tous les onglets sur sa barre de menu, il voit les activités de "Invité" et du "Technicien"
+
+Vue Générale (GeneralView)
+
+Métriques principales :
+
+Surveys Réalisés : 45/50 (+5%)
+Taux de Complétion : 92% (+3%)
+Satisfaction Client : 4.8/5 (+0.2)
+ROI Global : 185% (+15%)
+Graphiques :
+
+Performance Globale (données mensuelles)
+Surveys
+Satisfaction
+Completion
+Répartition des Activités
+Surveys
+Analyses
+Support
+Évolution Mensuelle
+Projets
+Support
+Maintenance
+Comparaison par Service
+Service A vs précédent
+Service B vs précédent
+Service C vs précédent
+Service D vs précédent
+Vue Financière (FinancierView) - Réservée aux admins
+
+Chiffre d'affaires par catégorie
+Marge opérationnelle
+Coûts par projet
+Prévisions financières
+Vue Client (ClientView) - Réservée aux admins
+
+Satisfaction client par service
+Nombre de clients actifs
+Taux de rétention
+Opportunités commerciales
+
+Vue Opérations (OperationsView)
+
+Taux de complétion des projets
+Temps moyen par intervention
+Charge de travail par équipe
+État des interventions en cours
+
+Liste des opérations selon leurs statuts, la date, le type d'opérations par catégorie avec les sous-catégories, l'évolution etc.... et selon le profil
+l'invité peut voir la liste de ses opérations, les modifier  
+le technicien peut voir la liste de ses opérations, les modifier et des opérations attribuée par l'administrateur
+l'administrateur peut voir toutes les opérations les modifier, les attribuer aux techniciens et les supprimer 
+
+Vue Analyses Prédictives (PredictifView) - Réservée aux admins
+
+Prévisions de charge
+Tendances d'utilisation
+Alertes préventives
+Analyses de risques
+
+toutes les données actuelles sont pour des tests
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+Onglet "Opérations"
+
+Crée un pictogramme avec les images pour représentent chaque catégorie avec des images et des textes explicatifs et quand on clique sur la catégorie, cela affiche la page des sous-catégories, elle aussi représentée par les pictogrammes et les images et des textes explicatifs
+
+Survey
+
+Évaluation de l'Infrastructure
+Études de faisabilité
+Études de localisation
+Évaluations spécialisées
+Études comparatives
+Études de modernisation
+Études de résilience
+
+
+Audits
+
+Audit de conformité TIA 942
+Pré-audit de certification
+Audit Tier Certification
+Audits de sécurité
+Audits Opérationnels
+Audits Environnementaux
+Audits multisites
+
+Conseil
+
+Optimisation Energétique
+Formation des équipes
+Planification stratégique
+Consulting technique spécialisé
+Consulting opérationnel
+Consulting stratégique
+Consulting réglementaire
+
+
+Support
+
+Production Documentaire Technique
+Gestion de la documentation
+Formation des équipes
+Transfert de Compétences
+Support Technique Continu
+Accompagnement Projet
+Suivi des Recommandations
+Évaluations Périodiques
+
+NGRIDD
+
+Micro Datacenter : Espace optimal < 10m² Déploiement rapide et flexible Solutions de refroidissement intégrées
+Modular Datacenter : Extensible de 10m² à 50m² Architecture standardisée et modulaire Haute efficacité énergétique
+Container Datacenter : Mobilité et déploiement rapide Configuration standardisée Solutions clés en main
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ADMINISTRATION
+
+
+Admin (Administrateur)
+
+Droits:
+Accès complet à toutes les fonctionnalités
+Gestion des utilisateurs (création, modification, suppression)
+Attribution des opérations aux techniciens
+Suppression des opérations
+Accès à toutes les opérations
+Validation des rapports
+Accès aux statistiques et KPIs
+Gestion de la configuration système
+Export des données
+
+Technicien (Technicien)
+
+Droits:
+Accès aux opérations qui lui sont attribuées
+Création de nouvelles opérations
+Modification des opérations dont il est responsable
+Génération des rapports pour ses opérations
+Accès limité aux statistiques (uniquement ses opérations)
+Upload de documents
+Utilisation de l'IA pour les recommandations
+
+
+Invité (Invité/Client)
+
+Droits:
+Création de nouvelles demandes d'opérations
+Visualisation uniquement de ses propres opérations
+Marquage d'une opération comme terminée
+Consultation des rapports de ses opérations
+Accès en lecture seule aux documents partagés
+Pas d'accès aux fonctionnalités d'administration
+Pas d'accès aux statistiques globales
+

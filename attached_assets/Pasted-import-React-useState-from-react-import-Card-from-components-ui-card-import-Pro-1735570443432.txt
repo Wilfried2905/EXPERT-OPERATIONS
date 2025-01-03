@@ -1,0 +1,318 @@
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Upload, Info } from 'lucide-react';
+
+const AuditOperationnel = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeMainSection, setActiveMainSection] = useState<'analyse' | 'evaluation'>('analyse');
+  const [activeTab, setActiveTab] = useState(0);
+  const [conformityData, setConformityData] = useState({});
+
+  const auditSections = {
+    analyse: {
+      title: "Analyse de l'existant",
+      description: "Questions liées à l'existant chez le client",
+      sections: [
+        {
+          title: "Objectifs et stratégie opérationnelle",
+          questions: [
+            {
+              question: "Quels sont les principaux objectifs en matière de performance opérationnelle ?",
+              norm: "Cette question permet de comprendre les priorités du client en matière d'efficacité et de performance dans ses opérations.",
+              id: "obj-1"
+            },
+            {
+              question: "Avez-vous déjà réalisé un audit opérationnel ?",
+              norm: "Permet de connaître l'historique des audits et des évaluations précédentes réalisés sur les opérations internes.",
+              id: "obj-2"
+            },
+            {
+              question: "Quels sont les indicateurs de performance (KPI) actuellement suivis ?",
+              norm: "Cela permet d'évaluer les mesures de performance utilisées et leur pertinence dans le cadre des objectifs du client.",
+              id: "obj-3"
+            }
+          ]
+        },
+        {
+          title: "Gestion des processus opérationnels",
+          questions: [
+            {
+              question: "Comment vos processus opérationnels sont-ils structurés et documentés ?",
+              norm: "Permet d'évaluer la maturité des processus en place et leur capacité à être suivis et améliorés.",
+              id: "proc-1"
+            },
+            {
+              question: "Les processus sont-ils régulièrement évalués et améliorés ?",
+              norm: "Cette question permet de vérifier si des processus d'amélioration continue sont en place.",
+              id: "proc-2"
+            },
+            {
+              question: "Y a-t-il une gestion centralisée ou décentralisée des opérations ?",
+              norm: "Permet de déterminer si la gestion des opérations est centralisée ou déléguée à différentes équipes.",
+              id: "proc-3"
+            }
+          ]
+        },
+        {
+          title: "Gestion des risques opérationnels",
+          questions: [
+            {
+              question: "Avez-vous une cartographie des risques opérationnels ?",
+              norm: "Cette question permet de comprendre si le client a une vue claire des risques potentiels et leur gestion.",
+              id: "risk-1"
+            },
+            {
+              question: "Les risques identifiés sont-ils correctement gérés ?",
+              norm: "Permet d'évaluer la capacité de l'organisation à gérer et atténuer les risques.",
+              id: "risk-2"
+            },
+            {
+              question: "Existe-t-il un plan de gestion de crise ?",
+              norm: "Vérifie si l'organisation est préparée à réagir en cas de crise qui pourrait perturber ses opérations.",
+              id: "risk-3"
+            }
+          ]
+        }
+      ]
+    },
+    evaluation: {
+      title: "Questionnaire d'évaluation",
+      description: "Évaluation basée sur les bonnes pratiques en matière d'audit opérationnel",
+      sections: [
+        {
+          title: "Structuration des processus opérationnels",
+          questions: [
+            {
+              question: "Les processus sont-ils régulièrement optimisés ?",
+              norm: "Référence : ISO 9001 - L'amélioration continue est essentielle pour l'efficacité des processus.",
+              id: "eval-proc-1"
+            },
+            {
+              question: "Les processus sont-ils alignés avec les objectifs stratégiques ?",
+              norm: "Référence : Balanced Scorecard - L'alignement des processus avec les objectifs stratégiques permet d'assurer une exécution cohérente.",
+              id: "eval-proc-2"
+            },
+            {
+              question: "Les processus sont-ils documentés de manière transparente ?",
+              norm: "Référence : ISO 9001 - Une documentation rigoureuse des processus permet une meilleure gestion et un suivi précis.",
+              id: "eval-proc-3"
+            }
+          ]
+        },
+        {
+          title: "Gestion des ressources humaines",
+          questions: [
+            {
+              question: "Les rôles et responsabilités sont-ils clairement définis ?",
+              norm: "Référence : RACI Matrix - La clarification des responsabilités permet d'optimiser la gestion des ressources humaines.",
+              id: "eval-rh-1"
+            },
+            {
+              question: "Les équipes ont-elles les ressources nécessaires ?",
+              norm: "Référence : ISO 9001 - L'allocation appropriée des ressources est essentielle pour atteindre les objectifs.",
+              id: "eval-rh-2"
+            },
+            {
+              question: "Les formations sont-elles adaptées aux besoins ?",
+              norm: "Référence : ISO 9001 - La formation continue est essentielle pour garantir l'efficacité des équipes.",
+              id: "eval-rh-3"
+            }
+          ]
+        },
+        {
+          title: "Suivi de la performance",
+          questions: [
+            {
+              question: "Les KPIs sont-ils mesurables et pertinents ?",
+              norm: "Référence : SMART Goals - L'utilisation d'indicateurs SMART assure la pertinence du suivi.",
+              id: "eval-perf-1"
+            },
+            {
+              question: "Des audits internes sont-ils régulièrement réalisés ?",
+              norm: "Référence : ISO 9001 - Les audits internes permettent d'identifier les lacunes et améliorations.",
+              id: "eval-perf-2"
+            },
+            {
+              question: "Les résultats sont-ils suivis d'actions correctives ?",
+              norm: "Référence : ISO 9001 - Un suivi rigoureux permet de corriger les erreurs et prévenir leur réapparition.",
+              id: "eval-perf-3"
+            }
+          ]
+        }
+      ]
+    }
+  };
+
+  const currentMainSection = auditSections[activeMainSection];
+  const currentSections = currentMainSection.sections;
+
+  const calculateProgress = () => {
+    const totalQuestions = Object.values(auditSections).reduce(
+      (acc, mainSection) => acc + mainSection.sections.reduce(
+        (sectionAcc, section) => sectionAcc + section.questions.length, 0
+      ), 0
+    );
+    const answeredQuestions = Object.keys(conformityData).length;
+    return (answeredQuestions / totalQuestions) * 100;
+  };
+
+  return (
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          Audit Opérationnel
+        </h1>
+        
+        {/* Navigation principale */}
+        <div className="flex mb-6 gap-4">
+          {Object.entries(auditSections).map(([key, section]) => (
+            <button
+              key={key}
+              onClick={() => {
+                setActiveMainSection(key as 'analyse' | 'evaluation');
+                setActiveTab(0);
+              }}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                activeMainSection === key
+                  ? isDarkMode 
+                    ? 'bg-[#CC7A00] text-white' 
+                    : 'bg-[#FF9900] text-white'
+                  : isDarkMode
+                    ? 'bg-[#002B47] text-[#E0E0E0]'
+                    : 'bg-white text-[#003366]'
+              }`}
+            >
+              {section.title}
+            </button>
+          ))}
+        </div>
+
+        <div className="bg-white rounded-lg p-4 shadow">
+          <Progress value={calculateProgress()} className="w-full h-2" />
+          <p className="text-sm mt-2">Progression : {calculateProgress().toFixed(2)}%</p>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto">
+        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
+          <div className="p-4 border-b border-gray-200">
+            <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              {currentMainSection.title}
+            </h2>
+            <p className={`mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {currentMainSection.description}
+            </p>
+          </div>
+
+          <div className="flex border-b border-gray-200">
+            {currentSections.map((section, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`flex-1 px-4 py-3 text-center font-medium transition-colors
+                  ${activeTab === index 
+                    ? isDarkMode 
+                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]' 
+                      : 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
+                    : isDarkMode
+                      ? 'text-[#E0E0E0] hover:bg-[#001F33]'
+                      : 'text-[#003366] hover:bg-gray-50'
+                  }`}
+              >
+                {section.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6">
+            {currentSections[activeTab].questions.map((q) => (
+              <div key={q.id} className="mb-8 last:mb-0">
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-2">
+                    <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+                      {q.question}
+                    </h3>
+                    <div className={`text-sm p-3 rounded ${
+                      isDarkMode ? 'bg-[#001F33] text-[#E0E0E0]' : 'bg-blue-50 text-[#003366]'
+                    }`}>
+                      <Info className="inline mr-2" size={16} />
+                      {q.norm}
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setConformityData(prev => ({...prev, [q.id]: 'conforme'}))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        conformityData[q.id] === 'conforme'
+                          ? 'bg-green-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Conforme
+                    </button>
+                    <button
+                      onClick={() => setConformityData(prev => ({...prev, [q.id]: 'non-conforme'}))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        conformityData[q.id] === 'non-conforme'
+                          ? 'bg-red-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Non Conforme
+                    </button>
+                  </div>
+
+                  <textarea
+                    placeholder="Commentaires et observations..."
+                    className={`w-full p-3 rounded border ${
+                      isDarkMode 
+                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]' 
+                        : 'bg-white border-gray-200 text-[#003366]'
+                    }`}
+                    rows={3}
+                  />
+
+                  <div className="flex items-center space-x-4">
+                    <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
+                      isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+                    } text-white`}>
+                      <Upload size={20} />
+                      <span>Ajouter des fichiers</span>
+                      <input type="file" multiple className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div className="mt-6 flex justify-between">
+          <button 
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode 
+                ? 'bg-[#002B47] text-white' 
+                : 'bg-[#003366] text-white'
+            }`} 
+            disabled={activeTab === 0}
+            onClick={() => setActiveTab(prev => prev - 1)}
+          >
+            Précédent
+          </button>
+          <button 
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+            } text-white`}
+            disabled={activeTab === currentSections.length - 1}
+            onClick={() => setActiveTab(prev => prev + 1)}
+          >
+            Suivant
+          </button>
+        </div>
+      </div>

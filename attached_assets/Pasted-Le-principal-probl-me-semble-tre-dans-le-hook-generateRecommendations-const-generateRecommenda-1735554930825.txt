@@ -1,0 +1,88 @@
+Le principal problème semble être dans le hook generateRecommendations :
+
+const generateRecommendations = async (context: any): Promise<AnthropicResponse> => {
+  console.log('useAnthropic: Démarrage de generateRecommendations');
+  // Problème: setIsLoading n'est pas défini correctement
+  try {
+    const response = await fetch('/api/anthropic/recommendations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(context)
+    });
+    if (!response.ok) {
+      // Au lieu de retourner un objet, on devrait throw l'erreur
+      throw new Error(`Erreur ${response.status}`);
+    }
+    const result = await response.json();
+    // Vérifier si result contient une erreur
+    if (result.error) {
+      throw new Error(result.error);
+    }
+    return result;
+  } catch (error) {
+    // Ne pas transformer l'erreur en retour normal
+    throw error;
+  }
+};
+
+Dans la route API, il manque l'async/await :
+
+app.post("/api/anthropic/recommendations", async (req, res) => {
+  console.log("=== Nouvelle requête de recommandations ===");
+  console.log("Corps de la requête:", req.body);
+  console.log("Headers:", req.headers);
+  await generateRecommendations(req, res);
+});
+
+Dans le service Anthropic, il faut définir le prompt :
+
+export async function generateRecommendations(req: Request, res: Response) {
+  try {
+    const { auditData } = req.body;
+    
+    if (!auditData || !auditData.infrastructure || !auditData.infrastructure.questionnaire) {
+      return res.status(400).json({ 
+        error: "Aucune donnée d'audit n'a été fournie."
+      });
+    }
+
+    // Définir le prompt en fonction des données d'audit
+    const prompt = `Analyser les données d'audit suivantes et fournir des recommandations : ${JSON.stringify(auditData)}`;
+
+    const message = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      max_tokens: 4096
+    });
+
+    const content = message.content[0].type === 'text' ? message.content[0].text : '';
+    res.json({ text: content });
+  } catch (error) {
+    console.error('Erreur Anthropic:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Une erreur est survenue' });
+  }
+}
+
+Je recommande d'ajouter plus de logs pour le debugging :
+
+const handleGenerateRecommendations = async () => {
+  console.log("RecommendationsView: Clic sur le bouton Voir les Recommandations");
+  console.log("Données d'audit:", auditData);
+  setIsLoading(true);
+  try {
+    // …
+
+
+
+Pour déboguer ce problème :
+
+Vérifiez que tous les console.log apparaissent dans la console du navigateur
+Assurez-vous que le bouton déclenche bien l'événement onClick
+Vérifiez que les données d'audit sont correctement formées
+Surveillez les erreurs dans la console du navigateur et les logs du serveur
+Utilisez les DevTools pour vérifier que la requête HTTP est bien envoyée

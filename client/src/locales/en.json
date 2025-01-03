@@ -1,0 +1,20 @@
+{
+  "dashboard": "Dashboard",
+  "general": "General View",
+  "financial": "Financial View",
+  "client": "Client View",
+  "operations": "Operations View",
+  "predictive": "Predictive Analysis",
+  "metrics": {
+    "surveys": "Completed Surveys",
+    "completion": "Completion Rate",
+    "satisfaction": "Client Satisfaction",
+    "roi": "Global ROI"
+  },
+  "charts": {
+    "performance": "Global Performance",
+    "activities": "Activities Distribution",
+    "monthly": "Monthly Evolution",
+    "comparison": "Service Comparison"
+  }
+}

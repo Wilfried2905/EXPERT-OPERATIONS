@@ -1,0 +1,257 @@
+3. auth.ts (Configuration de l'authentification côté serveur) :
+```typescript
+import passport from "passport";
+import { IVerifyOptions, Strategy as LocalStrategy } from "passport-local";
+import { type Express } from "express";
+import session from "express-session";
+import createMemoryStore from "memorystore";
+import bcrypt from 'bcrypt';
+import { users, authLogs } from "@db/schema";
+import { db } from "@db";
+import { eq } from "drizzle-orm";
+
+// Password hashing configuration
+const SALT_ROUNDS = 10;
+
+// Simplified crypto functions
+const crypto = {
+  hash: async (password: string): Promise<string> => {
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
+    console.log('Génération du hash pour le mot de passe:', {
+      password,
+      salt
+    });
+    const hash = await bcrypt.hash(password, salt);
+    console.log('Hash généré:', {
+      hashLength: hash.length,
+      hash
+    });
+    return hash;
+  },
+  compare: async (password: string, hash: string): Promise<boolean> => {
+    console.log('Comparaison détaillée du mot de passe:', {
+      password,
+      hash,
+      passwordLength: password.length,
+      hashLength: hash.length
+    });
+    const result = await bcrypt.compare(password, hash);
+    console.log('Résultat de la comparaison bcrypt:', result);
+    return result;
+  }
+};
+
+// Fonction pour enregistrer les logs d'authentification
+async function logAuthEvent(event: string, details: any, userId?: number, req?: Express.Request) {
+  try {
+    await db.insert(authLogs).values({
+      userId: userId,
+      event: event,
+      details: details,
+      ipAddress: req?.ip,
+      userAgent: req?.headers['user-agent'],
+    });
+    console.log(`Log d'authentification enregistré:`, {
+      event,
+      userId,
+      details,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement du log:', error);
+  }
+}
+
+// Reset password function (for development only)
+async function resetPasswords() {
+  const password = 'test';
+  const hash = await crypto.hash(password);
+  console.log('Resetting passwords with hash:', hash);
+
+  await db.update(users)
+    .set({ password: hash })
+    .where(eq(users.role, 'admin'))
+    .returning({ email: users.email, role: users.role });
+}
+
+export function setupAuth(app: Express) {
+  const MemoryStore = createMemoryStore(session);
+  const sessionSettings: session.SessionOptions = {
+    secret: process.env.REPL_ID || "3r-expert-operations",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {},
+    store: new MemoryStore({
+      checkPeriod: 86400000,
+    }),
+  };
+
+  if (app.get("env") === "production") {
+    app.set("trust proxy", 1);
+    sessionSettings.cookie = {
+      secure: true,
+    };
+  }
+
+  app.use(session(sessionSettings));
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  passport.use(
+    new LocalStrategy(
+      {
+        usernameField: 'email',
+        passwordField: 'password',
+      },
+      async (email, password, done) => {
+        try {
+          console.log('\n=== Nouvelle tentative de connexion ===');
+          console.log('Email:', email);
+          console.log('Mot de passe fourni:', {
+            value: password,
+            length: password.length
+          });
+
+          const [user] = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+
+          if (!user) {
+            console.log('❌ Utilisateur non trouvé dans la base de données');
+            return done(null, false, { message: "Email incorrect" });
+          }
+
+          console.log('✅ Utilisateur trouvé:', {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            hashedPasswordLength: user.password.length,
+            hashedPasswordPrefix: user.password.substring(0, 20) + '...'
+          });
+
+          const isMatch = await crypto.compare(password, user.password);
+
+          if (!isMatch) {
+            console.log('❌ Échec de la vérification du mot de passe');
+            return done(null, false, { message: "Mot de passe incorrect" });
+          }
+
+          console.log('✅ Connexion réussie pour:', {
+            email,
+            role: user.role
+          });
+
+          return done(null, user);
+        } catch (err) {
+          console.error('🚨 Erreur d\'authentification:', err);
+          return done(err);
+        }
+      }
+    )
+  );
+
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      done(null, user);
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  // Reset passwords for development (temporary)
+  resetPasswords().catch(console.error);
+
+  // Login endpoint
+  app.post("/api/login", async (req, res, next) => {
+    try {
+      console.log('\n=== Nouvelle requête de connexion ===');
+      console.log('Corps de la requête:', {
+        email: req.body.email,
+        password: req.body.password,
+        passwordLength: req.body.password?.length
+      });
+
+      // Log de la tentative de connexion
+      await logAuthEvent('login_attempt', {
+        email: req.body.email,
+        timestamp: new Date()
+      }, undefined, req);
+
+      if (!req.body.email || !req.body.password) {
+        return res.status(400).json({ message: "Email et mot de passe requis" });
+      }
+
+      passport.authenticate("local", async (err: any, user: Express.User | false, info: IVerifyOptions) => {
+        if (err) {
+          console.error('🚨 Erreur d\'authentification:', err);
+          await logAuthEvent('login_failure', {
+            error: err.message,
+            email: req.body.email,
+            timestamp: new Date()
+          }, undefined, req);
+          return res.status(500).json({ message: "Erreur interne du serveur" });
+        }
+
+        if (!user) {
+          console.log('❌ Authentification échouée:', info.message);
+          await logAuthEvent('login_failure', {
+            reason: info.message,
+            email: req.body.email,
+            timestamp: new Date()
+          }, undefined, req);
+          return res.status(400).json({ message: info.message ?? "La connexion a échoué" });
+        }
+
+        req.logIn(user, async (err) => {
+          if (err) {
+            console.error('🚨 Erreur lors de la connexion:', err);
+            await logAuthEvent('login_failure', {
+              error: err.message,
+              email: req.body.email,
+              timestamp: new Date()
+            }, undefined, req);
+            return res.status(500).json({ message: "Erreur lors de la connexion" });
+          }
+
+          console.log('✅ Utilisateur connecté avec succès:', {
+            id: (user as any).id,
+            email: (user as any).email,
+            role: (user as any).role
+          });
+
+          await logAuthEvent('login_success', {
+            userId: (user as any).id,
+            email: (user as any).email,
+            role: (user as any).role,
+            timestamp: new Date()
+          }, (user as any).id, req);
+
+          return res.json({
+            message: "Connexion réussie",
+            user: {
+              id: (user as any).id,
+              email: (user as any).email,
+              role: (user as any).role
+            }
+          });
+        });
+      })(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Autres endpoints d'authentification...
+}
+```

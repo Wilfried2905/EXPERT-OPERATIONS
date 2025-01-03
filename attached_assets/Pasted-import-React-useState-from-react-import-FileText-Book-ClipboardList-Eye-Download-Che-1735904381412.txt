@@ -1,0 +1,306 @@
+import React, { useState } from 'react';
+import { FileText, Book, ClipboardList, Eye, Download, ChevronDown } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+const DocumentNavigation = () => {
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [previewMode, setPreviewMode] = useState(false);
+
+  const documents = {
+    offreTechnique: {
+      title: "Offre Technique",
+      icon: FileText,
+      previewImage: "/api/placeholder/800/400",
+      description: "Document détaillant l'offre technique et les solutions proposées",
+      sections: [
+        {
+          title: "1. Introduction",
+          items: [
+            "Présentation de 3R TECHNOLOGIE",
+            "Expertise en datacenters",
+            "Certifications TIA-942",
+            "Équipe projet et qualifications"
+          ]
+        },
+        {
+          title: "2. Analyse des Besoins",
+          items: [
+            "Contexte et enjeux client",
+            "Objectifs de conformité TIA-942",
+            "Contraintes techniques et opérationnelles",
+            "Exigences de performance"
+          ]
+        },
+        {
+          title: "3. Architecture Technique TIA-942",
+          items: [
+            "Classification Tier visée",
+            "Architecture générale",
+            "Redondance N+1/2N selon Tier",
+            "Points de défaillance unique (SPOF)"
+          ]
+        },
+        {
+          title: "4. Infrastructures Critiques",
+          items: [
+            "Alimentation électrique",
+            "Système de refroidissement",
+            "Sécurité physique",
+            "Connectivité"
+          ]
+        },
+        {
+          title: "5. Conformité et Certification",
+          items: [
+            "Analyse des écarts TIA-942",
+            "Plan de mise en conformité",
+            "Processus de certification",
+            "Documentation requise"
+          ]
+        }
+      ]
+    },
+    cahierCharges: {
+      title: "Cahier des Charges",
+      icon: Book,
+      previewImage: "/api/placeholder/800/400",
+      description: "Spécifications détaillées et exigences du projet",
+      sections: [
+        {
+          title: "1. Présentation du Projet",
+          items: [
+            "Contexte général",
+            "Objectifs du projet",
+            "Périmètre d'intervention",
+            "Classification Tier visée"
+          ]
+        },
+        {
+          title: "2. Exigences TIA-942",
+          items: [
+            "Conformité architecturale",
+            "Conformité électrique",
+            "Conformité climatisation",
+            "Conformité sécurité",
+            "Niveaux de redondance requis"
+          ]
+        },
+        {
+          title: "3. Spécifications Techniques",
+          items: [
+            "Architecture physique",
+            "Infrastructure électrique",
+            "Système de refroidissement",
+            "Sécurité et monitoring",
+            "Infrastructure réseau"
+          ]
+        },
+        {
+          title: "4. Exigences Opérationnelles",
+          items: [
+            "Disponibilité et SLA",
+            "Maintenance préventive",
+            "Documentation technique",
+            "Formation du personnel"
+          ]
+        },
+        {
+          title: "5. Contraintes et Prérequis",
+          items: [
+            "Contraintes site et bâtiment",
+            "Contraintes réglementaires",
+            "Contraintes techniques spécifiques",
+            "Prérequis d'installation"
+          ]
+        }
+      ]
+    },
+    rapportAudit: {
+      title: "Rapport d'Audit",
+      icon: ClipboardList,
+      previewImage: "/api/placeholder/800/400",
+      description: "Rapport complet d'audit et recommandations",
+      sections: [
+        {
+          title: "1. Résumé Exécutif",
+          items: [
+            "Objectifs de l'audit",
+            "Méthodologie d'évaluation",
+            "Synthèse des conclusions majeures",
+            "Recommandations prioritaires"
+          ]
+        },
+        {
+          title: "2. Présentation du Site Audité",
+          items: [
+            "Informations client",
+            "Description des installations",
+            "Configuration des salles techniques",
+            "Inventaire des équipements critiques"
+          ]
+        },
+        {
+          title: "3. Analyse de Conformité TIA-942",
+          items: [
+            "Architecture et Structure",
+            "Système Électrique",
+            "Système de Refroidissement",
+            "Sécurité et Contrôle d'Accès",
+            "Conformité des Infrastructures",
+            "Points d'Amélioration"
+          ]
+        },
+        {
+          title: "4. Recommandations",
+          items: [
+            "Améliorations Prioritaires",
+            "Plan d'Action Détaillé",
+            "Estimations Budgétaires",
+            "Calendrier de Mise en Œuvre"
+          ]
+        },
+        {
+          title: "5. Annexes",
+          items: [
+            "Rapports de Tests",
+            "Documentation Technique",
+            "Photos et Schémas",
+            "Références Normatives"
+          ]
+        }
+      ]
+    }
+  };
+
+  const handleDocumentClick = (docKey) => {
+    if (selectedDoc === docKey) {
+      setSelectedDoc(null); // Ferme le sommaire si on clique à nouveau
+    } else {
+      setSelectedDoc(docKey); // Ouvre le sommaire du document cliqué
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col space-y-4">
+          {Object.entries(documents).map(([key, doc]) => {
+            const IconComponent = doc.icon;
+            const isSelected = selectedDoc === key;
+            
+            return (
+              <Card 
+                key={key}
+                className={`transition-all ${
+                  isSelected ? 'ring-2 ring-blue-500' : 'hover:shadow-md'
+                }`}
+              >
+                {/* En-tête du document toujours visible */}
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => handleDocumentClick(key)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <IconComponent size={24} className="text-blue-500" />
+                      <CardTitle className="text-xl font-semibold">{doc.title}</CardTitle>
+                    </div>
+                    <ChevronDown 
+                      className={`transform transition-transform ${
+                        isSelected ? 'rotate-180' : ''
+                      }`} 
+                      size={20}
+                    />
+                  </div>
+                </CardHeader>
+
+                {/* Contenu conditionnel (sommaire) */}
+                {isSelected && (
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-gray-600 mb-4">{doc.description}</p>
+                    
+                    {/* Sommaire détaillé */}
+                    <div className="pl-4">
+                      {doc.sections.map((section, idx) => (
+                        <div key={idx} className="mb-4">
+                          <h3 className="font-semibold text-gray-800 mb-2">
+                            {section.title}
+                          </h3>
+                          <ul className="list-disc pl-6 space-y-1">
+                            {section.items.map((item, itemIdx) => (
+                              <li key={itemIdx} className="text-gray-600 text-sm">
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Boutons d'action */}
+                    <div className="flex justify-end mt-4 space-x-4">
+                      <button 
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+                        onClick={() => setPreviewMode(true)}
+                      >
+                        <Eye size={20} />
+                        Prévisualiser
+                      </button>
+                      <button 
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                        onClick={() => console.log('Téléchargement:', key)}
+                      >
+                        <Download size={20} />
+                        Télécharger
+                      </button>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Modal de prévisualisation */}
+        {previewMode && selectedDoc && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{documents[selectedDoc].title}</span>
+                  <button 
+                    onClick={() => setPreviewMode(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <img 
+                  src={documents[selectedDoc].previewImage} 
+                  alt={`Prévisualisation ${documents[selectedDoc].title}`}
+                  className="w-full rounded-lg shadow-lg mb-6"
+                />
+                <div className="space-y-4">
+                  {documents[selectedDoc].sections.map((section, idx) => (
+                    <div key={idx}>
+                      <h3 className="font-semibold text-lg mb-2">{section.title}</h3>
+                      <ul className="list-disc pl-6 space-y-1">
+                        {section.items.map((item, itemIdx) => (
+                          <li key={itemIdx} className="text-gray-700">{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DocumentNavigation;

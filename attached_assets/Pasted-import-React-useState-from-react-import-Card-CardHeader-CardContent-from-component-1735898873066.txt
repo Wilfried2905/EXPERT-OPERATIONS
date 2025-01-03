@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import {
+  Building2,
+  Users,
+  ClipboardList,
+  CheckCircle2,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  BadgeCheck,
+  BarChart3
+} from 'lucide-react';
+
+const categories = {
+  Survey: [
+    'Evaluation de l\'Infrastructure',
+    'Etude de faisabilité',
+    'Etude de localisation',
+    'Evaluations Spécialisées',
+    'Etudes comparatives',
+    'Etude de modernisation',
+    'Etude de résilience'
+  ],
+  Audits: [
+    'Audit de conformité TIA-942',
+    'Pré-Audit de certification',
+    'Tier certification Audit',
+    'Audits de sécurité',
+    'Audits Opérationnels',
+    'Audits Environnementaux',
+    'Audits multisites'
+  ],
+  Conseil: [
+    'Optimisation Energétique',
+    'Formation des équipes',
+    'Planification stratégique',
+    'Consulting technique spécialisé',
+    'Consulting Personnel',
+    'Consulting stratégique',
+    'Consulting réglementaire'
+  ],
+  Support: [
+    'Production Documentaire technique',
+    'Gestion de la documentation',
+    'Formation des équipes',
+    'Transfert de compétences',
+    'Support Technique Continu',
+    'Accompagnement Projet',
+    'Suivi des recommandations',
+    'Evaluations Périodiques'
+  ],
+  NGRIDD: [
+    'Micro datacenter',
+    'Modular Datacenter',
+    'Container Datacenter'
+  ]
+};
+
+const MainOperationsFlow = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [currentSubStep, setCurrentSubStep] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  
+  const [formData, setFormData] = useState({
+    clientInfo: {},
+    analysis: {},
+    questionnaire: {},
+    recommendations: null,
+    documents: []
+  });
+
+  const mainSteps = [
+    {
+      id: 0,
+      title: "Collecte des Données",
+      icon: ClipboardList
+    },
+    {
+      id: 1,
+      title: "Recommandations",
+      icon: BadgeCheck
+    },
+    {
+      id: 2,
+      title: "Documents",
+      icon: FileText
+    }
+  ];
+
+  const collectionSteps = [
+    {
+      id: 0,
+      title: "Informations Client et Sites",
+      icon: Building2,
+      completed: false
+    },
+    {
+      id: 1,
+      title: "Analyse de l'Existant",
+      icon: BarChart3,
+      completed: false
+    },
+    {
+      id: 2,
+      title: "Questionnaire d'Évaluation",
+      icon: CheckCircle2,
+      completed: false
+    }
+  ];
+
+  const calculateProgress = (step) => {
+    return ((step + 1) / mainSteps.length) * 100;
+  };
+
+  const handleNext = () => {
+    if (currentStep === 0 && currentSubStep < collectionSteps.length - 1) {
+      setCurrentSubStep(prev => prev + 1);
+    } else if (currentStep < mainSteps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+      setCurrentSubStep(0);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep === 0 && currentSubStep > 0) {
+      setCurrentSubStep(prev => prev - 1);
+    } else if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+      setCurrentSubStep(collectionSteps.length - 1);
+    }
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setSelectedSubCategory('');
+  };
+
+  const handleSubCategoryChange = (subCategory) => {
+    setSelectedSubCategory(subCategory);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <Progress 
+                value={calculateProgress(currentStep)}
+                className="h-2"
+                indicatorClassName="bg-[#003366]"
+              />
+              <div className="grid grid-cols-3 gap-4">
+                {mainSteps.map((step, index) => {
+                  const StepIcon = step.icon;
+                  return (
+                    <div 
+                      key={step.id}
+                      className={`flex items-center justify-center flex-col p-4 rounded-lg border-2
+                        ${currentStep >= index 
+                          ? 'border-[#003366] text-[#003366]' 
+                          : 'border-gray-200 text-gray-400'}`}
+                    >
+                      <StepIcon className="h-6 w-6 mb-2" />
+                      <span className="font-semibold">{step.title}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-6">
+          <CardHeader className="bg-[#003366] text-white">
+            <div className="flex items-center space-x-2">
+              {currentStep === 0 && collectionSteps[currentSubStep].icon && (
+                React.createElement(collectionSteps[currentSubStep].icon, { className: "h-6 w-6" })
+              )}
+              <h1 className="text-xl font-bold">
+                {currentStep === 0 
+                  ? collectionSteps[currentSubStep].title 
+                  : mainSteps[currentStep].title}
+              </h1>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="min-h-[400px]">
+              <div className="text-center text-gray-500">
+                {selectedCategory && selectedSubCategory 
+                  ? `${selectedCategory} - ${selectedSubCategory}`
+                  : "Sélectionnez une catégorie et une sous-catégorie"}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-between">
+          <Button
+            onClick={handleBack}
+            disabled={currentStep === 0 && currentSubStep === 0}
+            className="bg-[#003366] hover:bg-[#002347]"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Retour
+          </Button>
+
+          <Button
+            onClick={handleNext}
+            className="bg-[#FF9900] hover:bg-[#e68a00]"
+            disabled={currentStep === mainSteps.length - 1}
+          >
+            {currentStep === mainSteps.length - 2 ? 'Générer les Documents' : 'Suivant'}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MainOperationsFlow;

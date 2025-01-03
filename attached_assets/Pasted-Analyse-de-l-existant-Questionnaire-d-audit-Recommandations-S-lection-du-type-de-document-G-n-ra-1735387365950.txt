@@ -1,0 +1,1923 @@
+Analyse de l'existant
+Questionnaire d'audit
+Recommandations
+Sélection du type de document
+Générateur de rapport
+Informations client
+
+Étape 1 : Analyse de l'Existant
+Fonctionnel :
+Interface avec 5 onglets principaux (Documentation, Infrastructure, Performance, Sécurité, Conformité)
+Sauvegarde automatique des données dans localStorage
+Upload de documents justificatifs
+Saisie des KPIs et observations
+Système de statut (Conforme/Non Conforme/Non Évalué)
+Étape 2 : Questionnaire d'audit
+Fonctionnel :
+Navigation entre les sections du questionnaire
+Système de notation avec 4 niveaux
+Sauvegarde automatique des réponses
+Calcul du score global
+Ajout de commentaires et preuves
+Étape 3 : Recommandations (via IA)
+Fonctionnel :
+Génération automatique via Claude AI
+Analyse des données d'audit
+Structuration des recommandations avec :
+Impact (niveau, financier, opérationnel, sécurité)
+Actions détaillées
+Ressources nécessaires
+Planning de mise en œuvre
+Étape 4 : Sélection du Type de Document
+Fonctionnel :
+Choix entre :
+Offre Technique
+Cahier des Charges
+Rapport d'Audit
+Personnalisation des sections à inclure
+Étape 5 : Informations Client
+Fonctionnel :
+Formulaire de saisie des informations client
+Validation des champs obligatoires
+Sauvegarde des informations
+Étape 6 : Génération du Document
+Partiellement fonctionnel :
+Génération du sommaire selon le type de document
+Intégration des informations client
+Création de graphiques et tableaux
+Mise en page professionnelle
+Ce qui ne fonctionne pas encore :
+
+Export PDF avec mise en page complète
+Historique des versions des documents
+Signature électronique des rapports
+Intégration des images dans le document final
+Envoi automatique par email
+Points d'amélioration identifiés :
+
+Ajout d'un système de validation par un superviseur
+Intégration d'une bibliothèque de modèles de documents
+Système de suivi des modifications
+Export dans différents formats (Word, PDF, HTML)
+Archivage automatique des documents générés
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ANALYSE DE L'EXISTANT 
+
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  Upload, 
+  FileText, 
+  Server, 
+  Activity, 
+  Shield, 
+  CheckCircle,
+  AlertCircle 
+} from "lucide-react";
+
+interface Element {
+  id: string;
+  titre: string;
+  kpis: Array<{
+    nom: string;
+    unite: string;
+  }>;
+  observations: string[];
+}
+
+const elementsInitiaux: Element[] = [
+  {
+    id: 'documentation',
+    titre: 'Documentation',
+    kpis: [
+      { nom: 'Documentation à jour', unite: '%' },
+      { nom: 'Procédures documentées', unite: '%' },
+      { nom: 'Plans disponibles', unite: '%' }
+    ],
+    observations: [
+      'État des documentations techniques',
+      'Mise à jour des procédures',
+      'Disponibilité des plans'
+    ]
+  },
+  {
+    id: 'infrastructure',
+    titre: 'Infrastructure',
+    kpis: [
+      { nom: 'Disponibilité', unite: '%' },
+      { nom: 'Capacité utilisée', unite: '%' },
+      { nom: 'Âge moyen équipements', unite: 'années' }
+    ],
+    observations: [
+      'État général des installations',
+      'Maintenance préventive',
+      'Points critiques identifiés'
+    ]
+  },
+  {
+    id: 'performance',
+    titre: 'Performance',
+    kpis: [
+      { nom: 'Temps de réponse moyen', unite: 'ms' },
+      { nom: 'Taux d\'utilisation', unite: '%' },
+      { nom: 'Efficacité énergétique', unite: 'PUE' }
+    ],
+    observations: [
+      'Performance globale',
+      'Goulots d\'étranglement',
+      'Optimisations possibles'
+    ]
+  },
+  {
+    id: 'securite',
+    titre: 'Sécurité',
+    kpis: [
+      { nom: 'Niveau de sécurité', unite: '/10' },
+      { nom: 'Incidents/mois', unite: 'nombre' },
+      { nom: 'Conformité', unite: '%' }
+    ],
+    observations: [
+      'Sécurité physique',
+      'Sécurité logique',
+      'Gestion des accès'
+    ]
+  },
+  {
+    id: 'conformite',
+    titre: 'Conformité',
+    kpis: [
+      { nom: 'Conformité TIA-942', unite: '%' },
+      { nom: 'Écarts majeurs', unite: 'nombre' },
+      { nom: 'Écarts mineurs', unite: 'nombre' }
+    ],
+    observations: [
+      'Niveau de conformité global',
+      'Non-conformités majeures',
+      'Actions correctives requises'
+    ]
+  }
+];
+
+export function AnalyseExistant() {
+  const [activeTab, setActiveTab] = useState('documentation');
+  const [kpiValues, setKpiValues] = useState<{ [key: string]: string }>({});
+  const [observationValues, setObservationValues] = useState<{ [key: string]: string }>({});
+  const [conformiteStatus, setConformiteStatus] = useState<{ [key: string]: string }>({});
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Charger les données sauvegardées au montage du composant
+    const savedAnalyse = localStorage.getItem('analyseExistant');
+    if (savedAnalyse) {
+      const parsed = JSON.parse(savedAnalyse);
+      setKpiValues(parsed.kpiValues || {});
+      setObservationValues(parsed.observationValues || {});
+      setConformiteStatus(parsed.conformiteStatus || {});
+    }
+  }, []);
+
+  const handleKpiChange = (kpiNom: string, value: string) => {
+    setKpiValues(prev => {
+      const newValues = { ...prev, [kpiNom]: value };
+      saveToLocalStorage(newValues, observationValues, conformiteStatus);
+      return newValues;
+    });
+  };
+
+  const handleObservationChange = (obsKey: string, value: string) => {
+    setObservationValues(prev => {
+      const newValues = { ...prev, [obsKey]: value };
+      saveToLocalStorage(kpiValues, newValues, conformiteStatus);
+      return newValues;
+    });
+  };
+
+  const handleConformiteChange = (element: string, status: string) => {
+    setConformiteStatus(prev => {
+      const newStatus = { ...prev, [element]: status };
+      saveToLocalStorage(kpiValues, observationValues, newStatus);
+      return newStatus;
+    });
+  };
+
+  const saveToLocalStorage = (
+    kpis: { [key: string]: string },
+    observations: { [key: string]: string },
+    statuts: { [key: string]: string }
+  ) => {
+    localStorage.setItem('analyseExistant', JSON.stringify({
+      kpiValues: kpis,
+      observationValues: observations,
+      conformiteStatus: statuts
+    }));
+  };
+
+  const handleSave = () => {
+    toast({
+      title: "Analyse sauvegardée",
+      description: "Les données de l'analyse ont été sauvegardées avec succès.",
+    });
+  };
+
+  const getConformiteIcon = (status: string) => {
+    switch (status) {
+      case 'conforme':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'non-conforme':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getTabIcon = (id: string) => {
+    switch (id) {
+      case 'documentation':
+        return <FileText className="h-5 w-5" />;
+      case 'infrastructure':
+        return <Server className="h-5 w-5" />;
+      case 'performance':
+        return <Activity className="h-5 w-5" />;
+      case 'securite':
+        return <Shield className="h-5 w-5" />;
+      case 'conformite':
+        return <CheckCircle className="h-5 w-5" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Analyse de l'Existant</h2>
+        <Button onClick={handleSave} className="flex items-center gap-2">
+          <Upload className="h-4 w-4" />
+          Sauvegarder l'analyse
+        </Button>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-5 gap-4 bg-transparent">
+          {elementsInitiaux.map(element => (
+            <TabsTrigger
+              key={element.id}
+              value={element.id}
+              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              {getTabIcon(element.id)}
+              {element.titre}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {elementsInitiaux.map(element => (
+          <TabsContent key={element.id} value={element.id}>
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-semibold">{element.titre}</h3>
+                    <Select
+                      value={conformiteStatus[element.id] || ''}
+                      onValueChange={(value) => handleConformiteChange(element.id, value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Statut de conformité" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="conforme">Conforme</SelectItem>
+                        <SelectItem value="non-conforme">Non Conforme</SelectItem>
+                        <SelectItem value="non-evalue">Non Évalué</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium">KPIs</h4>
+                      {element.kpis.map(kpi => (
+                        <div key={kpi.nom} className="space-y-2">
+                          <Label>{kpi.nom}</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="text"
+                              value={kpiValues[`${element.id}_${kpi.nom}`] || ''}
+                              onChange={(e) => handleKpiChange(`${element.id}_${kpi.nom}`, e.target.value)}
+                              placeholder={`Entrez la valeur en ${kpi.unite}`}
+                            />
+                            <span className="flex items-center text-sm text-gray-500">
+                              {kpi.unite}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Observations</h4>
+                      {element.observations.map((obs, index) => (
+                        <div key={index} className="space-y-2">
+                          <Label>{obs}</Label>
+                          <Textarea
+                            value={observationValues[`${element.id}_${index}`] || ''}
+                            onChange={(e) => handleObservationChange(`${element.id}_${index}`, e.target.value)}
+                            placeholder="Entrez vos observations"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
+}
+
+export default AnalyseExistant;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+QESTONNAIRES
+
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { File, Image, Save, CheckCircle, XCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUser } from '@/hooks/use-user';
+
+// Types et interfaces
+interface Question {
+  id: string;
+  question: string;
+  reference: string;
+  aide: string;
+  poids: number;
+}
+
+interface Category {
+  id: string;
+  titre: string;
+  description: string;
+  questions: Question[];
+}
+
+// Définition des catégories
+const categories: Category[] = [
+  {
+    id: "CAT1",
+    titre: "Architecture et Structure",
+    description: "Évaluation de la construction et de l'aménagement selon la TIA-942",
+    questions: [
+      {
+        id: "A1",
+        question: "Le datacenter dispose-t-il d'une salle informatique dédiée avec un accès contrôlé ?",
+        reference: "TIA-942 Section 5.3.2 - Computer Room Requirements",
+        aide: "La salle informatique doit être un espace dédié et sécurisé, séparé des autres zones",
+        poids: 25
+      },
+      {
+        id: "A2",
+        question: "Les murs, le sol et le plafond sont-ils construits avec des matériaux ignifuges (résistance au feu minimale de 1 heure) ?",
+        reference: "TIA-942 Section 5.3.3 - Fire Rating Requirements",
+        aide: "Les matériaux de construction doivent assurer une protection contre les incendies",
+        poids: 25
+      },
+      {
+        id: "A3",
+        question: "Existe-t-il des points d'entrée sécurisés et surveillés pour le personnel et le matériel ?",
+        reference: "TIA-942 Section 5.3.5 - Security and Access Requirements",
+        aide: "Les points d'accès doivent être contrôlés et surveillés 24/7",
+        poids: 25
+      },
+      {
+        id: "A4",
+        question: "La hauteur sous plafond est-elle d'au moins 2,7 mètres (9 pieds) ?",
+        reference: "TIA-942 Section 5.3.2.1 - Architectural Requirements",
+        aide: "La hauteur doit permettre la circulation d'air et l'installation des équipements",
+        poids: 25
+      }
+    ]
+  },
+  {
+    id: "CAT2",
+    titre: "Système Électrique",
+    description: "Évaluation de l'infrastructure électrique selon la TIA-942",
+    questions: [
+      {
+        id: "E1",
+        question: "L'alimentation électrique dispose-t-elle de deux chemins d'alimentation indépendants ?",
+        reference: "TIA-942 Section 6.2.1 - Electrical Power Requirements",
+        aide: "Double alimentation pour assurer la redondance",
+        poids: 25
+      },
+      {
+        id: "E2",
+        question: "Les UPS sont-ils configurés en N+1 minimum ?",
+        reference: "TIA-942 Section 6.2.2 - UPS Systems",
+        aide: "Configuration N+1 pour garantir la continuité en cas de panne",
+        poids: 25
+      },
+      {
+        id: "E3",
+        question: "Un système de groupe électrogène est-il installé et testé régulièrement ?",
+        reference: "TIA-942 Section 6.2.3 - Generator Systems",
+        aide: "Backup électrique avec tests périodiques",
+        poids: 25
+      },
+      {
+        id: "E4",
+        question: "Existe-t-il un système de supervision électrique (DCIM) ?",
+        reference: "TIA-942 Section 6.2.4 - Monitoring Systems",
+        aide: "Surveillance en temps réel des paramètres électriques",
+        poids: 25
+      }
+    ]
+  },
+  {
+    id: "CAT3",
+    titre: "Climatisation",
+    description: "Évaluation des systèmes de refroidissement selon la TIA-942",
+    questions: [
+      {
+        id: "C1",
+        question: "Les unités de climatisation sont-elles redondantes (N+1 minimum) ?",
+        reference: "TIA-942 Section 6.3.1 - HVAC Requirements",
+        aide: "Redondance des systèmes de refroidissement",
+        poids: 25
+      },
+      {
+        id: "C2",
+        question: "Les allées froides et chaudes sont-elles clairement définies et séparées ?",
+        reference: "TIA-942 Section 6.3.2 - Airflow Management",
+        aide: "Séparation des flux d'air pour l'efficacité énergétique",
+        poids: 25
+      },
+      {
+        id: "C3",
+        question: "La température et l'humidité sont-elles surveillées en continu ?",
+        reference: "TIA-942 Section 6.3.3 - Environmental Monitoring",
+        aide: "Monitoring environnemental 24/7",
+        poids: 25
+      },
+      {
+        id: "C4",
+        question: "Existe-t-il un système de détection des fuites d'eau ?",
+        reference: "TIA-942 Section 6.3.4 - Water Detection",
+        aide: "Protection contre les dégâts des eaux",
+        poids: 25
+      }
+    ]
+  },
+  {
+    id: "CAT4",
+    titre: "Réseaux et Télécoms",
+    description: "Évaluation de l'infrastructure réseau selon la TIA-942",
+    questions: [
+      {
+        id: "R1",
+        question: "L'infrastructure réseau est-elle redondante (chemins et équipements) ?",
+        reference: "TIA-942 Section 7.2.1 - Network Redundancy",
+        aide: "Redondance physique et logique du réseau",
+        poids: 25
+      },
+      {
+        id: "R2",
+        question: "Les points d'entrée opérateurs sont-ils diversifiés ?",
+        reference: "TIA-942 Section 7.2.2 - Entrance Facilities",
+        aide: "Diversification des entrées télécoms",
+        poids: 25
+      },
+      {
+        id: "R3",
+        question: "Le câblage est-il correctement étiqueté et documenté ?",
+        reference: "TIA-942 Section 7.2.3 - Cable Management",
+        aide: "Documentation et identification des câbles",
+        poids: 25
+      },
+      {
+        id: "R4",
+        question: "Les équipements réseaux critiques sont-ils alimentés en double ?",
+        reference: "TIA-942 Section 7.2.4 - Power Supply",
+        aide: "Double alimentation des équipements réseaux",
+        poids: 25
+      }
+    ]
+  },
+  {
+    id: "CAT5",
+    titre: "Sécurité et Maintenance",
+    description: "Évaluation des procédures selon la TIA-942",
+    questions: [
+      {
+        id: "S1",
+        question: "Existe-t-il des procédures documentées pour la maintenance ?",
+        reference: "TIA-942 Section 8.2.1 - Maintenance Procedures",
+        aide: "Documentation des procédures d'exploitation",
+        poids: 25
+      },
+      {
+        id: "S2",
+        question: "Un plan de maintenance préventive est-il en place ?",
+        reference: "TIA-942 Section 8.2.2 - Preventive Maintenance",
+        aide: "Programme de maintenance régulière",
+        poids: 25
+      },
+      {
+        id: "S3",
+        question: "Les procédures d'urgence sont-elles documentées et testées ?",
+        reference: "TIA-942 Section 8.2.3 - Emergency Procedures",
+        aide: "Procédures en cas d'incident",
+        poids: 25
+      },
+      {
+        id: "S4",
+        question: "Un registre des interventions est-il maintenu à jour ?",
+        reference: "TIA-942 Section 8.2.4 - Documentation",
+        aide: "Traçabilité des interventions",
+        poids: 25
+      }
+    ]
+  }
+];
+
+interface Preuve {
+  id: number;
+  type: string;
+  nom: string;
+  date: Date;
+}
+
+interface QuestionComponentProps {
+  question: Question;
+  reponses: Record<string, boolean>;
+  commentaires: Record<string, string>;
+  preuves: Record<string, Preuve[]>;
+  handleReponse: (questionId: string, valeur: boolean) => void;
+  handleCommentaire: (questionId: string, texte: string) => void;
+  handleAjoutPreuve: (questionId: string, type: string) => void;
+  handleSuppressionPreuve: (questionId: string, preuveId: number) => void;
+}
+
+const QuestionComponent: React.FC<QuestionComponentProps> = ({
+  question,
+  reponses,
+  commentaires,
+  preuves,
+  handleReponse,
+  handleCommentaire,
+  handleAjoutPreuve,
+  handleSuppressionPreuve
+}) => {
+  return (
+    <Card className="mb-4 hover:shadow-lg transition-shadow duration-200">
+      <CardContent className="p-4">
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium text-lg mb-1 text-[#003366]">{question.question}</h4>
+            <p className="text-sm text-gray-500">Référence: {question.reference}</p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant={reponses[question.id] === true ? "default" : "outline"}
+              onClick={() => handleReponse(question.id, true)}
+              className={`w-20 ${reponses[question.id] === true ? "bg-[#28A745] hover:bg-[#28A745]/90" : ""}`}
+            >
+              <CheckCircle className="w-4 h-4 mr-1" />
+              OUI
+            </Button>
+            <Button
+              variant={reponses[question.id] === false ? "default" : "outline"}
+              onClick={() => handleReponse(question.id, false)}
+              className={`w-20 ${reponses[question.id] === false ? "bg-[#FF9900] hover:bg-[#FF9900]/90" : ""}`}
+            >
+              <XCircle className="w-4 h-4 mr-1" />
+              NON
+            </Button>
+          </div>
+
+          <div className="bg-[#003366]/5 p-2 rounded text-sm text-gray-600">
+            <p>{question.aide}</p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block text-[#003366]">
+              Commentaires et observations
+            </label>
+            <Textarea
+              value={commentaires[question.id] || ''}
+              onChange={(e) => handleCommentaire(question.id, e.target.value)}
+              placeholder="Ajoutez vos commentaires ici..."
+              className="min-h-[100px] focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366]"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium text-[#003366]">
+                Preuves requises
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAjoutPreuve(question.id, 'image')}
+                  className="flex items-center gap-1 hover:bg-[#003366]/10"
+                >
+                  <Image className="w-4 h-4" />
+                  Photo
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAjoutPreuve(question.id, 'document')}
+                  className="flex items-center gap-1 hover:bg-[#003366]/10"
+                >
+                  <File className="w-4 h-4" />
+                  Document
+                </Button>
+              </div>
+            </div>
+
+            {preuves[question.id] && preuves[question.id].length > 0 && (
+              <div className="border rounded p-2">
+                {preuves[question.id].map((preuve, index) => (
+                  <div key={index} className="text-sm flex justify-between items-center p-1">
+                    <span>{preuve.nom}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSuppressionPreuve(question.id, preuve.id)}
+                      className="hover:text-[#FF9900]"
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const QuestionnaireAudit: React.FC = () => {
+  const [reponses, setReponses] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem('audit_reponses');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [commentaires, setCommentaires] = useState<Record<string, string>>(() => {
+    const saved = localStorage.getItem('audit_commentaires');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [preuves, setPreuves] = useState<Record<string, Preuve[]>>(() => {
+    const saved = localStorage.getItem('audit_preuves');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [scores, setScores] = useState({
+    categorieScores: {} as Record<string, number>,
+    scoreGlobal: 0
+  });
+
+  const [, setLocation] = useLocation();
+  const { user } = useUser();
+
+  useEffect(() => {
+    const nouveauxScores = {
+      categorieScores: {} as Record<string, number>,
+      scoreGlobal: 0
+    };
+
+    categories.forEach(categorie => {
+      let scoreCategorie = 0;
+      categorie.questions.forEach(question => {
+        if (reponses[question.id] === true) {
+          scoreCategorie += question.poids;
+        }
+      });
+      nouveauxScores.categorieScores[categorie.id] = scoreCategorie;
+    });
+
+    const totalCategories = categories.length;
+    const sommeScores = Object.values(nouveauxScores.categorieScores).reduce((a, b) => a + b, 0);
+    nouveauxScores.scoreGlobal = sommeScores / totalCategories;
+
+    setScores(nouveauxScores);
+  }, [reponses]);
+
+  const getColorClass = (score: number): string => {
+    if (score >= 80) return 'bg-[#28A745]';
+    if (score >= 50) return 'bg-[#FF9900]';
+    return 'bg-[#FF9900]';
+  };
+
+  const handleReponse = (questionId: string, valeur: boolean) => {
+    setReponses(prev => {
+      const newReponses = { ...prev, [questionId]: valeur };
+      localStorage.setItem('audit_reponses', JSON.stringify(newReponses));
+      return newReponses;
+    });
+  };
+
+  const handleCommentaire = (questionId: string, texte: string) => {
+    setCommentaires(prev => {
+      const newCommentaires = { ...prev, [questionId]: texte };
+      localStorage.setItem('audit_commentaires', JSON.stringify(newCommentaires));
+      return newCommentaires;
+    });
+  };
+
+  const handleAjoutPreuve = (questionId: string, type: string) => {
+    const nouvellePreuve: Preuve = {
+      id: Date.now(),
+      type,
+      nom: `Preuve_${type}_${Date.now()}`,
+      date: new Date()
+    };
+
+    setPreuves(prev => {
+      const newPreuves = {
+        ...prev,
+        [questionId]: [...(prev[questionId] || []), nouvellePreuve]
+      };
+      localStorage.setItem('audit_preuves', JSON.stringify(newPreuves));
+      return newPreuves;
+    });
+  };
+
+  const handleSuppressionPreuve = (questionId: string, preuveId: number) => {
+    setPreuves(prev => {
+      const newPreuves = {
+        ...prev,
+        [questionId]: prev[questionId]?.filter(preuve => preuve.id !== preuveId) || []
+      };
+      localStorage.setItem('audit_preuves', JSON.stringify(newPreuves));
+      return newPreuves;
+    });
+  };
+
+  const handleSauvegardeTemporaire = async () => {
+    try {
+      const donneesAudit = {
+        dateAudit: new Date().toISOString(),
+        questionnaireAudit: {
+          reponses,
+          commentaires,
+          preuves,
+          scores
+        }
+      };
+
+      localStorage.setItem('auditEnCours', JSON.stringify(donneesAudit));
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde temporaire:', error);
+    }
+  };
+
+  useEffect(() => {
+    const saveData = () => {
+      try {
+        localStorage.setItem('audit_reponses', JSON.stringify(reponses));
+        localStorage.setItem('audit_commentaires', JSON.stringify(commentaires));
+        localStorage.setItem('audit_preuves', JSON.stringify(preuves));
+        localStorage.setItem('audit_timestamp', Date.now().toString());
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde automatique:', error);
+      }
+    };
+
+    window.addEventListener('beforeunload', saveData);
+    const autoSaveInterval = setInterval(saveData, 30000);
+
+    return () => {
+      window.removeEventListener('beforeunload', saveData);
+      clearInterval(autoSaveInterval);
+      saveData();
+    };
+  }, [reponses, commentaires, preuves]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setLocation('/operations/audits/analyse-existant')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </Button>
+              <div>
+                <h2 className="text-2xl font-bold text-[#003366]">Audit de Conformité TIA-942</h2>
+                <p className="text-gray-500">Score Global: {scores.scoreGlobal.toFixed(1)}%</p>
+              </div>
+            </div>
+            <Button
+              onClick={handleSauvegardeTemporaire}
+              className="bg-[#FF9900] hover:bg-[#FF9900]/90 text-white flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Sauvegarder l'audit
+            </Button>
+          </div>
+          <Progress
+            value={scores.scoreGlobal}
+            className={`${getColorClass(scores.scoreGlobal)} h-2`}
+          />
+        </CardHeader>
+      </Card>
+
+      <Tabs defaultValue={categories[0]?.id} className="w-full">
+        <TabsList className="w-full bg-[#003366]/5 justify-start flex-wrap">
+          {categories.map((categorie) => (
+            <TabsTrigger
+              key={categorie.id}
+              value={categorie.id}
+              className="flex-1 text-sm hover:bg-[#003366]/10 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
+            >
+              {categorie.titre}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {categories.map((categorie) => (
+          <TabsContent key={categorie.id} value={categorie.id}>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-bold text-[#003366]">{categorie.titre}</h3>
+                <p className="text-gray-600">{categorie.description}</p>
+
+                <div className="mt-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[#003366]">Score de la catégorie</span>
+                    <span className="font-bold text-[#003366]">
+                      {scores.categorieScores[categorie.id] || 0}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={scores.categorieScores[categorie.id] || 0}
+                    className={`${getColorClass(scores.categorieScores[categorie.id] || 0)} h-2`}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {categorie.questions.map((question) => (
+                  <QuestionComponent
+                    key={question.id}
+                    question={question}
+                    reponses={reponses}
+                    commentaires={commentaires}
+                    preuves={preuves}
+                    handleReponse={handleReponse}
+                    handleCommentaire={handleCommentaire}
+                    handleAjoutPreuve={handleAjoutPreuve}
+                    handleSuppressionPreuve={handleSuppressionPreuve}
+                  />
+                ))}
+              </div>
+
+              {categorie.id === 'CAT5' && (
+                <div className="flex justify-end mt-6">
+                  <Button
+                    onClick={() => {
+                      handleSauvegardeTemporaire();
+                      setLocation('/operations/audits/client-info');
+                    }}
+                    className="bg-[#FF9900] hover:bg-[#FF9900]/90 text-white flex items-center gap-2"
+                  >
+                    Informations Client
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
+};
+
+export default QuestionnaireAudit;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+INFORMATIONS CLIENT 
+
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, ArrowRight, Save } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface ClientData {
+  name: string;
+  site: string;
+  address: string;
+  contact: string;
+  phone: string;
+  email: string;
+  tierObjectif: string;
+  commentaires: string;
+}
+
+const ClientInfo: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const [clientData, setClientData] = useState<ClientData>(() => {
+    const saved = localStorage.getItem('audit_client_info');
+    return saved ? JSON.parse(saved) : {
+      name: '',
+      site: '',
+      address: '',
+      contact: '',
+      phone: '',
+      email: '',
+      tierObjectif: '',
+      commentaires: ''
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('audit_client_info', JSON.stringify(clientData));
+  }, [clientData]);
+
+  const handleInputChange = (field: keyof ClientData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setClientData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+
+  const handleTierChange = (value: string) => {
+    setClientData(prev => ({
+      ...prev,
+      tierObjectif: value
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      localStorage.setItem('audit_client_info', JSON.stringify(clientData));
+      setLocation('/operations/audits/document-type');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+    }
+  };
+
+  const isFormValid = () => {
+    return clientData.name && 
+           clientData.site && 
+           clientData.address && 
+           clientData.contact && 
+           clientData.phone && 
+           clientData.email && 
+           clientData.tierObjectif;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setLocation('/operations/audits/questionnaire')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </Button>
+              <h2 className="text-2xl font-bold text-[#003366]">Informations Client</h2>
+            </div>
+            <Button
+              onClick={handleSave}
+              disabled={!isFormValid()}
+              className="bg-[#FF9900] hover:bg-[#FF9900]/90 text-white flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Sauvegarder et Continuer
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nom de l'entreprise</Label>
+                <Input
+                  id="name"
+                  value={clientData.name}
+                  onChange={handleInputChange('name')}
+                  placeholder="Entrez le nom de l'entreprise"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="site">Site audité</Label>
+                <Input
+                  id="site"
+                  value={clientData.site}
+                  onChange={handleInputChange('site')}
+                  placeholder="Nom du site ou de l'installation"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">Adresse complète</Label>
+                <Textarea
+                  id="address"
+                  value={clientData.address}
+                  onChange={handleInputChange('address')}
+                  placeholder="Adresse du site"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tier">Objectif de Tier</Label>
+                <Select
+                  value={clientData.tierObjectif}
+                  onValueChange={handleTierChange}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Sélectionnez un niveau" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TIER_I">TIER I</SelectItem>
+                    <SelectItem value="TIER_II">TIER II</SelectItem>
+                    <SelectItem value="TIER_III">TIER III</SelectItem>
+                    <SelectItem value="TIER_IV">TIER IV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="contact">Personne de contact</Label>
+                <Input
+                  id="contact"
+                  value={clientData.contact}
+                  onChange={handleInputChange('contact')}
+                  placeholder="Nom du contact principal"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Téléphone</Label>
+                <Input
+                  id="phone"
+                  value={clientData.phone}
+                  onChange={handleInputChange('phone')}
+                  placeholder="Numéro de téléphone"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={clientData.email}
+                  onChange={handleInputChange('email')}
+                  placeholder="Adresse email"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="commentaires">Commentaires additionnels</Label>
+                <Textarea
+                  id="commentaires"
+                  value={clientData.commentaires}
+                  onChange={handleInputChange('commentaires')}
+                  placeholder="Commentaires ou notes supplémentaires"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ClientInfo;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+RECOMMANDATIONS
+
+/**
+ * Composant des recommandations pour l'audit de conformité TIA-942.
+ * Ce composant affiche les recommandations de manière claire et facilement copiable.
+ */
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, RefreshCw, Download, Printer } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+
+// Interface pour les données de recommandation
+interface RecommendationData {
+  element: string;
+  description: string;
+  impact: {
+    niveau: string;
+    financier: string;
+    operationnel: string;
+    securite: string;
+    details: string;
+  };
+  actions: Array<{
+    titre: string;
+    details: string;
+    normeReference: string;
+    prerequis: string[];
+    sousActions: string[];
+    indicateurs: string[];
+  }>;
+  ressources: {
+    materiel: Array<{
+      nom: string;
+      specifications: string;
+      quantite: number;
+      cout: string;
+      alternatives: string[];
+    }>;
+    competences: Array<{
+      profil: string;
+      niveau: string;
+      certifications: string[];
+    }>;
+  };
+  planning: {
+    dureeTotal: string;
+    etapes: Array<{
+      phase: string;
+      duree: string;
+      dependances: string[];
+      ressources: string[];
+      jalons: string[];
+    }>;
+  };
+}
+
+// Interface pour la réponse de l'API
+interface RecommendationsResponse {
+  recommandations: RecommendationData[];
+}
+
+const Recommendations: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Fonction pour récupérer les données d'audit du localStorage
+  const getAuditData = () => {
+    try {
+      const savedAnalyse = localStorage.getItem('analyseExistant');
+      const savedQuestionnaire = localStorage.getItem('auditEnCours');
+      const savedClientInfo = localStorage.getItem('audit_client_info');
+
+      return {
+        analyse: savedAnalyse ? JSON.parse(savedAnalyse) : null,
+        questionnaire: savedQuestionnaire ? JSON.parse(savedQuestionnaire) : null,
+        clientInfo: savedClientInfo ? JSON.parse(savedClientInfo) : null
+      };
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+      return null;
+    }
+  };
+
+  // Hook react-query pour gérer l'appel API et le cache
+  const { data: recommendations, refetch, isLoading, error } = useQuery<RecommendationsResponse>({
+    queryKey: ['recommendations'],
+    queryFn: async () => {
+      setIsGenerating(true);
+      try {
+        const auditData = getAuditData();
+        if (!auditData) {
+          throw new Error("Données d'audit non disponibles");
+        }
+
+        const response = await fetch('/api/generate-recommendations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ auditData }),
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        return response.json();
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    enabled: false // Ne pas charger automatiquement
+  });
+
+  // Gestionnaires d'événements
+  const handleGenerateRecommendations = () => {
+    refetch();
+  };
+
+  const handleExportPDF = () => {
+    toast({
+      title: "Export PDF",
+      description: "L'export du rapport en PDF sera bientôt disponible.",
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // Fonction utilitaire pour la couleur des impacts
+  const getImpactColor = (niveau: string) => {
+    switch (niveau.toLowerCase()) {
+      case 'critique':
+        return 'text-red-500';
+      case 'majeur':
+        return 'text-orange-500';
+      case 'modéré':
+        return 'text-yellow-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setLocation('/operations/audits/client-info')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </Button>
+              <h2 className="text-2xl font-bold text-[#003366]">Recommandations</h2>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleGenerateRecommendations}
+                disabled={isGenerating}
+                className="bg-[#FF9900] hover:bg-[#FF9900]/90 text-white"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+                {isGenerating ? 'Génération...' : 'Régénérer'}
+              </Button>
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Exporter PDF
+              </Button>
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Imprimer
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* État de chargement */}
+      {isLoading && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center py-8">
+              <RefreshCw className="w-8 h-8 animate-spin text-[#FF9900] mb-4" />
+              <p className="text-gray-600">Génération des recommandations en cours...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Affichage des erreurs */}
+      {error && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+              Une erreur est survenue lors de la génération des recommandations.
+              Veuillez réessayer ultérieurement.
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Affichage des recommandations */}
+      {recommendations?.recommandations && (
+        <div className="space-y-4">
+          {recommendations.recommandations.map((rec, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-6">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value={`item-${index}`}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-start gap-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-[#003366] text-left">
+                            {rec.element}
+                          </h3>
+                          <p className={`text-sm ${getImpactColor(rec.impact.niveau)}`}>
+                            Impact: {rec.impact.niveau}
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+
+                    <AccordionContent>
+                      <div className="space-y-6 pt-4">
+                        {/* Description */}
+                        <div>
+                          <h4 className="font-medium text-[#003366] mb-2">Description</h4>
+                          <p className="text-gray-600">{rec.description}</p>
+                        </div>
+
+                        {/* Impacts */}
+                        <div>
+                          <h4 className="font-medium text-[#003366] mb-2">Impact</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <p className="font-medium text-[#003366]">Financier</p>
+                              <p className="text-sm text-gray-600">{rec.impact.financier}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <p className="font-medium text-[#003366]">Opérationnel</p>
+                              <p className="text-sm text-gray-600">{rec.impact.operationnel}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <p className="font-medium text-[#003366]">Sécurité</p>
+                              <p className="text-sm text-gray-600">{rec.impact.securite}</p>
+                            </div>
+                          </div>
+                          <p className="mt-2 text-sm text-gray-600">{rec.impact.details}</p>
+                        </div>
+
+                        {/* Actions recommandées */}
+                        <div>
+                          <h4 className="font-medium text-[#003366] mb-2">Actions recommandées</h4>
+                          <div className="space-y-4">
+                            {rec.actions.map((action, actionIndex) => (
+                              <div key={actionIndex} className="bg-gray-50 p-4 rounded-lg">
+                                <p className="font-medium text-[#003366]">{action.titre}</p>
+                                <p className="text-sm text-gray-600 mt-1">{action.details}</p>
+                                <p className="text-sm text-[#FF9900] mt-1">
+                                  Référence: {action.normeReference}
+                                </p>
+
+                                {/* Prérequis */}
+                                {action.prerequis.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Prérequis:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {action.prerequis.map((prereq, i) => (
+                                        <li key={i}>{prereq}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {/* Sous-actions */}
+                                {action.sousActions.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Sous-actions:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {action.sousActions.map((sousAction, i) => (
+                                        <li key={i}>{sousAction}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {/* Indicateurs */}
+                                {action.indicateurs.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Indicateurs:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {action.indicateurs.map((indicateur, i) => (
+                                        <li key={i}>{indicateur}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Ressources nécessaires */}
+                        <div>
+                          <h4 className="font-medium text-[#003366] mb-2">Ressources nécessaires</h4>
+                          <div className="space-y-4">
+                            {/* Matériel */}
+                            <div>
+                              <p className="font-medium text-[#003366] mb-2">Matériel</p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {rec.ressources.materiel.map((mat, matIndex) => (
+                                  <div key={matIndex} className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="font-medium text-[#003366]">{mat.nom}</p>
+                                    <p className="text-sm text-gray-600">{mat.specifications}</p>
+                                    <div className="flex justify-between mt-2 text-sm">
+                                      <span>Quantité: {mat.quantite}</span>
+                                      <span>Coût: {mat.cout}</span>
+                                    </div>
+                                    {/* Alternatives */}
+                                    {mat.alternatives.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className="text-sm font-medium text-[#003366]">
+                                          Alternatives:
+                                        </p>
+                                        <ul className="list-disc list-inside text-sm text-gray-600">
+                                          {mat.alternatives.map((alt, i) => (
+                                            <li key={i}>{alt}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Compétences */}
+                            <div>
+                              <p className="font-medium text-[#003366] mb-2">Compétences requises</p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {rec.ressources.competences.map((comp, compIndex) => (
+                                  <div key={compIndex} className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="font-medium text-[#003366]">{comp.profil}</p>
+                                    <p className="text-sm text-gray-600">Niveau: {comp.niveau}</p>
+                                    {/* Certifications */}
+                                    {comp.certifications.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className="text-sm font-medium text-[#003366]">
+                                          Certifications:
+                                        </p>
+                                        <ul className="list-disc list-inside text-sm text-gray-600">
+                                          {comp.certifications.map((cert, i) => (
+                                            <li key={i}>{cert}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Planning */}
+                        <div>
+                          <h4 className="font-medium text-[#003366] mb-2">Planning</h4>
+                          <p className="text-gray-600 mb-4">
+                            Durée totale estimée: {rec.planning.dureeTotal}
+                          </p>
+                          <div className="space-y-4">
+                            {rec.planning.etapes.map((etape, etapeIndex) => (
+                              <div key={etapeIndex} className="bg-gray-50 p-4 rounded-lg">
+                                <p className="font-medium text-[#003366]">{etape.phase}</p>
+                                <p className="text-sm text-gray-600">Durée: {etape.duree}</p>
+
+                                {/* Dépendances */}
+                                {etape.dependances.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Dépendances:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {etape.dependances.map((dep, i) => (
+                                        <li key={i}>{dep}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {/* Ressources */}
+                                {etape.ressources.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Ressources:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {etape.ressources.map((res, i) => (
+                                        <li key={i}>{res}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {/* Jalons */}
+                                {etape.jalons.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-sm font-medium text-[#003366]">Jalons:</p>
+                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                      {etape.jalons.map((jalon, i) => (
+                                        <li key={i}>{jalon}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Recommendations;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+TYPE DE SELECTON
+
+/**
+ * Composant de sélection du type de document pour l'audit.
+ * Permet de choisir entre Offre Technique, Cahier des Charges et Rapport.
+ */
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const DocumentTypeSelector: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const [selectedType, setSelectedType] = useState<string>('');
+
+  // Gestionnaire pour la sélection du type de document
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
+    localStorage.setItem('audit_document_type', value);
+  };
+
+  // Gestionnaire pour la génération du document
+  const handleGenerateDocument = () => {
+    if (selectedType) {
+      setLocation('/operations/audits/generate');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setLocation('/operations/audits/recommendations')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </Button>
+              <h2 className="text-2xl font-bold text-[#003366]">
+                Sélection du Type de Document
+              </h2>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-md mx-auto space-y-8">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Type de Document
+                </label>
+                <Select
+                  value={selectedType}
+                  onValueChange={handleTypeChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionnez un type de document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technical">Offre Technique</SelectItem>
+                    <SelectItem value="specifications">Cahier des Charges</SelectItem>
+                    <SelectItem value="report">Rapport d'Audit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedType && (
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-medium text-[#003366] mb-2">
+                      Description du Document
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {selectedType === 'technical' && (
+                        "L'offre technique détaille notre proposition de services, notre méthodologie, et nos solutions techniques pour répondre aux besoins du client."
+                      )}
+                      {selectedType === 'specifications' && (
+                        "Le cahier des charges définit les spécifications techniques, les exigences fonctionnelles et les contraintes du projet."
+                      )}
+                      {selectedType === 'report' && (
+                        "Le rapport d'audit présente l'analyse détaillée de l'infrastructure existante, les non-conformités identifiées et les recommandations d'amélioration."
+                      )}
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerateDocument}
+                    className="w-full bg-[#FF9900] hover:bg-[#FF9900]/90 text-white"
+                  >
+                    Générer le Document
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default DocumentTypeSelector;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------GENERATION DES DOCUMENTS 
+
+/**
+ * Composant de génération des documents pour l'audit.
+ * Génère les documents selon le type sélectionné (Offre Technique, Cahier des Charges, Rapport).
+ */
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+
+const DocumentGenerator: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Récupérer le type de document sélectionné
+  const documentType = localStorage.getItem('audit_document_type') || '';
+
+  // Fonction pour récupérer toutes les données nécessaires
+  const getAuditData = () => {
+    try {
+      const savedAnalyse = localStorage.getItem('analyseExistant');
+      const savedQuestionnaire = localStorage.getItem('auditEnCours');
+      const savedClientInfo = localStorage.getItem('audit_client_info');
+
+      return {
+        analyse: savedAnalyse ? JSON.parse(savedAnalyse) : null,
+        questionnaire: savedQuestionnaire ? JSON.parse(savedQuestionnaire) : null,
+        clientInfo: savedClientInfo ? JSON.parse(savedClientInfo) : null,
+        documentType
+      };
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+      return null;
+    }
+  };
+
+  // Hook react-query pour la génération du document
+  const { data: documentUrl, refetch, isLoading, error } = useQuery({
+    queryKey: ['generate-document'],
+    queryFn: async () => {
+      setIsGenerating(true);
+      try {
+        const auditData = getAuditData();
+        if (!auditData) {
+          throw new Error("Données d'audit non disponibles");
+        }
+
+        const response = await fetch('/api/generate-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(auditData),
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    enabled: false // Ne pas charger automatiquement
+  });
+
+  // Gestionnaire pour le téléchargement du document
+  const handleDownload = () => {
+    if (documentUrl) {
+      const link = document.createElement('a');
+      link.href = documentUrl;
+      link.download = `${documentType}_${new Date().toISOString()}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(documentUrl);
+    }
+  };
+
+  // Gestionnaire pour la génération du document
+  const handleGenerate = () => {
+    refetch();
+  };
+
+  // Titre selon le type de document
+  const getDocumentTitle = () => {
+    switch (documentType) {
+      case 'technical':
+        return 'Offre Technique';
+      case 'specifications':
+        return 'Cahier des Charges';
+      case 'report':
+        return "Rapport d'Audit";
+      default:
+        return 'Document';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setLocation('/operations/audits/document-type')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </Button>
+              <h2 className="text-2xl font-bold text-[#003366]">
+                Génération du {getDocumentTitle()}
+              </h2>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-2xl mx-auto space-y-8">
+            {/* Informations sur le document */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-medium text-[#003366] mb-4">
+                Informations sur le Document
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Type de Document</p>
+                  <p className="mt-1 text-sm text-gray-900">{getDocumentTitle()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Contenu Inclus</p>
+                  <ul className="mt-1 text-sm text-gray-900 list-disc list-inside">
+                    <li>Informations client</li>
+                    <li>Analyse de l'existant</li>
+                    <li>Résultats du questionnaire</li>
+                    <li>Recommandations détaillées</li>
+                    <li>Planning et ressources</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-4">
+              {!documentUrl && (
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  className="w-full bg-[#FF9900] hover:bg-[#FF9900]/90 text-white"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Génération en cours...
+                    </>
+                  ) : (
+                    'Générer le Document'
+                  )}
+                </Button>
+              )}
+
+              {documentUrl && (
+                <Button
+                  onClick={handleDownload}
+                  className="w-full bg-[#003366] hover:bg-[#003366]/90 text-white"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Télécharger le Document
+                </Button>
+              )}
+            </div>
+
+            {/* Messages d'erreur */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
+                Une erreur est survenue lors de la génération du document.
+                Veuillez réessayer ultérieurement.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default DocumentGenerator;

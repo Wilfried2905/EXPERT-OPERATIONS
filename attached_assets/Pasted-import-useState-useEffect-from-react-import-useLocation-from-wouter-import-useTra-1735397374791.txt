@@ -1,0 +1,102 @@
+import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { useTranslation } from 'react-i18next';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '../../hooks/use-user';
+
+const LoginPage = () => {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const { login } = useUser();
+
+  useEffect(() => {
+    // Get email from URL query parameter
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    if (emailParam) {
+      setEmail(emailParam);
+    } else {
+      // If no email parameter, redirect to profile selection
+      setLocation('/');
+    }
+  }, [setLocation]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const result = await login({ email, password });
+      if (result.ok) {
+        setLocation('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login Error",
+          description: result.message
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login Error",
+        description: "An error occurred during login"
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-[#003366] text-center">
+            3R Datacenter Pro
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            {t('welcome')}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled
+                />
+              </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  En phase de test, le mot de passe est "test" pour tous les profils
+                </p>
+              </div>
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-[#FF9900] hover:bg-[#FF9900]/90"
+            >
+              {t('login')}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default LoginPage;

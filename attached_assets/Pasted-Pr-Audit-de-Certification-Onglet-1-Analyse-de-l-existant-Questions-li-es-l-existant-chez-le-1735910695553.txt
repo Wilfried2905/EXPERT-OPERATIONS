@@ -1,0 +1,144 @@
+Pré-Audit de Certification
+
+Onglet 1 : Analyse de l'existant (Questions liées à l'existant chez le client)
+
+1. Objectifs et stratégie
+Quels sont les principaux objectifs du client pour la certification ?
+
+Cette question permet de comprendre les attentes du client et de guider l'audit en fonction de ses priorités.
+Quelles sont les principales applications et services en production dans votre centre de données ?
+
+Cela permet de mieux comprendre les enjeux métiers du client.
+Avez-vous effectué des audits de sécurité ou de conformité précédemment ?
+
+Cela permet de connaître les antécédents et les actions déjà entreprises par le client.
+Avez-vous des fournisseurs externes qui gèrent des parties de votre infrastructure ?
+
+Cette question examine la gestion des partenaires externes et leurs impacts sur la certification.
+
+2. Infrastructure et équipements
+Quelle est la taille de l'infrastructure informatique actuelle ?
+
+Cela permet de déterminer l'ampleur de l'audit à réaliser.
+Quels équipements sont actuellement utilisés pour les systèmes critiques ?
+
+Permet de comprendre l’équipement et sa robustesse pour la continuité des services.
+Avez-vous une cartographie complète des infrastructures de votre centre de données ?
+
+Cela permet de savoir si le client dispose d’une vue d’ensemble de son environnement.
+Comment gérez-vous la capacité et l’évolution de l’infrastructure ?
+
+Cette question permet d’analyser la gestion de la croissance du système.
+
+3. Sécurité et gestion des risques
+Comment les accès au centre de données sont-ils contrôlés ?
+
+Cette question s'intéresse à la sécurité des accès physiques et numériques.
+Comment les incidents sont-ils actuellement gérés ?
+
+Permet de juger de la réactivité et de l’efficacité des processus en place.
+Y a-t-il des processus de gestion des risques en place pour les systèmes critiques ?
+
+Permet d’évaluer la gestion proactive des risques.
+Les informations sensibles sont-elles protégées par des systèmes de chiffrement et de gestion des accès ?
+
+Cette question porte sur la gestion des informations sensibles et leur protection.
+
+4. Continuité et résilience
+Le centre de données dispose-t-il d’un plan de continuité des activités (PCA) et de reprise après sinistre (DRP) ?
+
+Vérifier la préparation en cas d’événements imprévus.
+Quels types de solutions de sauvegarde et de récupération des données sont en place ?
+
+Cette question évalue la résilience des processus de gestion des données.
+Les équipements sont-ils protégés contre les pannes, et existe-t-il une redondance pour les systèmes critiques ?
+
+Cela permet de vérifier si des mesures sont en place pour maintenir les services en cas de défaillance.
+Le centre de données dispose-t-il de procédures de reprise après sinistre et de continuité des services ?
+
+Cette question explore la planification et la gestion des interruptions potentielles des services.
+
+5. Surveillance et gestion des performances
+Comment le centre de données est-il surveillé (en termes de performance et de sécurité) ?
+
+Cette question évalue la surveillance des infrastructures pour garantir leur bon fonctionnement.
+Comment les incidents sont-ils suivis et rapportés ?
+
+Évaluer les mécanismes de suivi des incidents pour garantir la réactivité.
+Quel est le niveau de compétence et de formation des équipes en charge de l’infrastructure ?
+
+Cela permet de déterminer si les équipes disposent des compétences nécessaires pour assurer la conformité.
+Utilisez-vous des technologies de virtualisation ou de cloud dans votre infrastructure ?
+
+
+
+
+
+
+Onglet 2 : Questionnaire d'évaluation basé sur la norme TIA-942
+
+1. Catégorie : Infrastructure physique (Composants et équipements)
+Votre centre de données est-il conçu pour résister à des événements naturels (séismes, incendies, etc.) ?
+
+Référence TIA-942 : 4.1.2 - La norme préconise des mesures physiques pour assurer la résilience face aux catastrophes naturelles.
+L’alimentation électrique est-elle redondée ?
+
+Référence TIA-942 : 4.1.3 - Assurer la redondance de l’alimentation électrique est essentiel pour garantir la disponibilité des services.
+Les équipements sont-ils situés dans des zones adaptées aux risques physiques et climatiques ?
+
+Référence TIA-942 : 4.1.1 - La norme recommande l’évaluation des risques environnementaux pour garantir une sécurité maximale.
+Les installations disposent-elles de moyens de protection contre les incendies ?
+
+Référence TIA-942 : 4.1.5 - La norme impose des systèmes de détection et d’extinction des incendies dans le centre de données.
+2. Catégorie : Alimentation et refroidissement
+Votre centre de données utilise-t-il des systèmes de refroidissement redondants ?
+
+Référence TIA-942 : 4.2.2 - Redondance dans les systèmes de refroidissement pour éviter toute panne due à des problèmes de température.
+Avez-vous des générateurs de secours pour assurer la continuité de l’alimentation électrique ?
+
+Référence TIA-942 : 4.2.1 - Les générateurs assurent la continuité de l'alimentation lors des pannes électriques.
+L’alimentation en énergie est-elle mesurée et monitorée ?
+
+Référence TIA-942 : 4.2.3 - La gestion et le suivi des consommations d’énergie sont cruciaux pour une performance optimale.
+Avez-vous un système de gestion pour réguler la température et l’humidité du centre de données ?
+
+Référence TIA-942 : 4.2.4 - La norme recommande un contrôle de l’environnement pour garantir l’intégrité des équipements.
+3. Catégorie : Réseaux et communication
+Votre centre de données dispose-t-il de multiples connexions réseau ?
+
+Référence TIA-942 : 4.3.2 - La norme exige la redondance des connexions réseau pour éviter toute interruption des services.
+Les réseaux internes sont-ils protégés par des dispositifs de sécurité (pare-feu, systèmes de détection d’intrusion) ?
+
+Référence TIA-942 : 4.3.3 - La sécurité des communications internes est essentielle pour éviter les intrusions et les attaques.
+Le câblage réseau respecte-t-il les meilleures pratiques pour la gestion de la bande passante et des pannes ?
+
+Référence TIA-942 : 4.3.1 - La norme recommande une gestion optimale du câblage pour éviter des défaillances réseau.
+Les interconnexions entre les différents sites sont-elles sécurisées et redondantes ?
+
+Référence TIA-942 : 4.3.4 - Assurer la redondance et la sécurité des interconnexions est crucial pour une infrastructure résiliente.
+4. Catégorie : Sécurité physique et logique
+Les accès physiques au centre de données sont-ils contrôlés et limités aux personnes autorisées ?
+
+Référence TIA-942 : 4.4.1 - La norme impose des contrôles stricts pour limiter l’accès physique aux installations.
+Des systèmes de surveillance vidéo et d’alarme sont-ils installés pour la sécurité physique ?
+
+Référence TIA-942 : 4.4.2 - La sécurité physique est renforcée par des systèmes de surveillance et d’alarme.
+Les serveurs sont-ils situés dans des armoires sécurisées ?
+
+Référence TIA-942 : 4.4.3 - Garantir la sécurité des équipements physiques est essentiel pour protéger les informations sensibles.
+Les informations sensibles sont-elles protégées par des systèmes de chiffrement et de gestion des accès ?
+
+Référence TIA-942 : 4.4.4 - La norme recommande le chiffrement des données et une gestion stricte des accès pour garantir la sécurité des informations.
+5. Catégorie : Gestion des risques et résilience
+Avez-vous un plan documenté pour la gestion des risques dans le centre de données ?
+
+Référence TIA-942 : 4.5.1 - La gestion des risques est essentielle pour identifier et traiter les menaces potentielles.
+Le centre de données dispose-t-il de procédures de reprise après sinistre et de continuité des services ?
+
+Référence TIA-942 : 4.5.2 - Un plan de continuité des activités est indispensable pour maintenir les services en cas d’incident.
+Avez-vous un plan d’audit et de réévaluation des risques régulièrement ?
+
+Référence TIA-942 : 4.5.3 - La norme recommande de procéder à des audits réguliers pour maintenir la conformité et la résilience du centre de données.
+Les mises à jour et la maintenance des systèmes sont-elles programmées de manière à ne pas affecter la disponibilité des services ?
+
+Référence TIA-942 : 4.5.4 - La planification de la maintenance permet d'éviter les interruptions de service et de maintenir une disponibilité élevée.

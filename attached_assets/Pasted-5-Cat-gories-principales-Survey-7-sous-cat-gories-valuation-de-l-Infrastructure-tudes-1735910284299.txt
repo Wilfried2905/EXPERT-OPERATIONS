@@ -1,0 +1,65 @@
+5 Catégories principales :
+
+Survey (7 sous-catégories) :
+
+Évaluation de l'Infrastructure
+Études de faisabilité
+Études de localisation
+Évaluations spécialisées
+Études comparatives
+Études de modernisation
+Études de résilience
+Audits (7 sous-catégories) :
+
+Audit de conformité TIA 942
+Pré-audit de certification
+Tier Certification Audit
+Audits de sécurité
+Audits Opérationnels
+Audits Environnementaux
+Audits multisites
+Conseil (7 sous-catégories) :
+
+Optimisation Energétique
+Formation des équipes
+Planification stratégique
+Consulting technique spécialisé
+Consulting opérationnel
+Consulting stratégique
+Consulting réglementaire
+Support (8 sous-catégories) :
+
+Production Documentaire Technique
+Gestion de la documentation
+Formation des équipes
+Transfert de Compétences
+Support Technique Continu
+Accompagnement Projet
+Suivi des Recommandations
+Évaluations Périodiques
+NGRIDD (3 sous-catégories) :
+
+Micro Datacenter
+Modular Datacenter
+Container Datacenter
+
+Chaque sous-catégorie (des 32 au total) a ses propres :
+
+Analyse de l'existant spécifique
+Questionnaire d'évaluation spécifique
+Le point crucial que vous soulignez est :
+
+Il ne faut PAS dupliquer la même structure de questions pour toutes les sous-catégories
+Chaque sous-catégorie doit avoir ses propres questions spécifiques à son domaine
+Par exemple, les questions pour "Audit de sécurité" seront très différentes de celles pour "Optimisation Énergétique"
+Il faut donc mettre en place :
+
+Une séparation claire entre les sous-catégories
+Des questions spécifiques pour chaque sous-catégorie
+Une structure qui évite la duplication tout en maintenant la spécificité
+
+
+je veux que tu saches que le format actuelle présent dans le codes de "l'analyse de l'existant" et du "questionnaire d'Evaluation" sont validés (les couleurs, la disposition des textes etc) pour chaque sous-catégorie (je parle de la structure) mais chaque sous-catégories aura ses questions spécifiques,
+résumes moi pour m'assurer que tu as bien compris
+
+IMPORTANT : NE MODIFIES LES CODES EXISTANTS QU'AVEC MA VALIDATION

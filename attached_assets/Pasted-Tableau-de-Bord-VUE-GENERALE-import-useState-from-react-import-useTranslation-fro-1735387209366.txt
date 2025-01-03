@@ -1,0 +1,1353 @@
+Tableau de Bord 
+
+VUE GENERALE
+
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useUser } from '../hooks/use-user';
+import GeneralView from '../components/dashboard/GeneralView';
+import FinancierView from '../components/dashboard/FinancierView';
+import ClientView from '../components/dashboard/ClientView';
+import OperationsView from '../components/dashboard/OperationsView';
+import PredictifView from '../components/dashboard/PredictifView';
+import AIAssistant from '../components/AIAssistant';
+
+const DashboardPage = () => {
+  const { t } = useTranslation();
+  const { user } = useUser();
+  const [currentView, setCurrentView] = useState('general');
+
+  if (user?.role === 'guest') {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold text-[#003366]">
+          {t('dashboard')}
+        </h2>
+        <p className="mt-4">Access restricted to technicians and administrators.</p>
+      </Card>
+    );
+  }
+
+  const renderView = () => {
+    switch (currentView) {
+      case 'general':
+        return <GeneralView />;
+      case 'financier':
+        return user?.role === 'admin' ? <FinancierView /> : null;
+      case 'client':
+        return user?.role === 'admin' ? <ClientView /> : null;
+      case 'operations':
+        return <OperationsView />;
+      case 'predictif':
+        return user?.role === 'admin' ? <PredictifView /> : null;
+      default:
+        return <GeneralView />;
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-[#003366]">
+          {t('dashboard')}
+        </h2>
+        <div className="flex gap-2">
+          <Button
+            variant={currentView === 'general' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('general')}
+          >
+            Vue Générale
+          </Button>
+          {user?.role === 'admin' ? (
+            <>
+              <Button
+                variant={currentView === 'financier' ? 'default' : 'outline'}
+                onClick={() => setCurrentView('financier')}
+              >
+                Vue Financière
+              </Button>
+              <Button
+                variant={currentView === 'client' ? 'default' : 'outline'}
+                onClick={() => setCurrentView('client')}
+              >
+                Vue Client
+              </Button>
+            </>
+          ) : null}
+          <Button
+            variant={currentView === 'operations' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('operations')}
+          >
+            Vue Opérations
+          </Button>
+          {user?.role === 'admin' && (
+            <Button
+              variant={currentView === 'predictif' ? 'default' : 'outline'}
+              onClick={() => setCurrentView('predictif')}
+            >
+              Vue Analyses Prédictives
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-12">
+        {renderView()}
+        {user?.role === 'admin' && (
+          <AIAssistant
+            currentView={currentView}
+            onInsightGenerated={(insights) => {
+              console.log('Nouveaux insights:', insights);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DashboardPage;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+VUE FINANCE
+
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Legend } from 'recharts';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  white: "#FFFFFF",
+  gray: "#E5E5E5",
+  lightBlue: "#4A90E2",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545"
+};
+
+const metrics = [
+  { title: "Revenus", value: "125M", trend: "+12%" },
+  { title: "Coûts", value: "45M", trend: "-5%" },
+  { title: "Marge", value: "64%", trend: "+8%" },
+  { title: "Budget Utilisé", value: "85%", trend: "-2%" }
+];
+
+const charts = [
+  {
+    title: "Performance Financière",
+    type: "composed",
+    data: [
+      { name: 'Jan', revenus: 100, couts: 60, marge: 40, objectif: 45 },
+      { name: 'Fév', revenus: 120, couts: 65, marge: 55, objectif: 50 },
+      { name: 'Mar', revenus: 115, couts: 62, marge: 53, objectif: 52 },
+      { name: 'Avr', revenus: 130, couts: 70, marge: 60, objectif: 55 },
+      { name: 'Mai', revenus: 140, couts: 75, marge: 65, objectif: 58 },
+      { name: 'Jun', revenus: 135, couts: 72, marge: 63, objectif: 60 }
+    ]
+  },
+  {
+    title: "Répartition du Budget",
+    type: "pie",
+    data: [
+      { name: 'Personnel', value: 45, color: COLORS.primary },
+      { name: 'Équipement', value: 25, color: COLORS.secondary },
+      { name: 'Marketing', value: 15, color: COLORS.lightBlue },
+      { name: 'R&D', value: 15, color: COLORS.success }
+    ]
+  },
+  {
+    title: "Évolution des Coûts",
+    type: "area",
+    stacked: true,
+    data: [
+      { name: 'T1', fixe: 300, variable: 200, exceptionnel: 100 },
+      { name: 'T2', fixe: 320, variable: 220, exceptionnel: 90 },
+      { name: 'T3', fixe: 310, variable: 240, exceptionnel: 110 },
+      { name: 'T4', fixe: 330, variable: 260, exceptionnel: 95 }
+    ]
+  },
+  {
+    title: "Objectifs vs Réalisés",
+    type: "bar",
+    data: [
+      { name: 'T1 2024', objectif: 100, realise: 95, ecart: -5 },
+      { name: 'T2 2024', objectif: 110, realise: 115, ecart: 5 },
+      { name: 'T3 2024', objectif: 120, realise: 125, ecart: 5 },
+      { name: 'T4 2024', objectif: 130, realise: 128, ecart: -2 }
+    ]
+  }
+];
+
+const renderChart = (chart) => {
+  switch (chart.type) {
+    case 'composed':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: COLORS.white }}
+              formatter={(value, name) => [`${value}M FCFA`, name]}
+            />
+            <Legend />
+            <Bar dataKey="revenus" fill={COLORS.success} />
+            <Bar dataKey="couts" fill={COLORS.danger} />
+            <Line 
+              type="monotone" 
+              dataKey="marge" 
+              stroke={COLORS.primary}
+              strokeWidth={2}
+              dot={{ fill: COLORS.white }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="objectif" 
+              stroke={COLORS.secondary}
+              strokeDasharray="3 3"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      );
+
+    case 'pie':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={chart.data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              dataKey="value"
+              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+            >
+              {chart.data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value) => `${value}%`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+
+    case 'area':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: COLORS.white }}
+              formatter={(value) => `${value}M FCFA`}
+            />
+            <Legend />
+            {Object.keys(chart.data[0])
+              .filter(key => key !== 'name')
+              .map((key, index) => (
+                <Area
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stackId={chart.stacked ? "1" : index}
+                  stroke={[COLORS.primary, COLORS.secondary, COLORS.lightBlue][index]}
+                  fill={[COLORS.primary, COLORS.secondary, COLORS.lightBlue][index]}
+                  fillOpacity={0.3}
+                />
+              ))}
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+
+    case 'bar':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: COLORS.white }}
+              formatter={(value) => `${value}M FCFA`}
+            />
+            <Legend />
+            <Bar dataKey="objectif" fill={COLORS.primary} />
+            <Bar dataKey="realise" fill={COLORS.secondary} />
+            <Line 
+              type="monotone" 
+              dataKey="ecart" 
+              stroke={COLORS.lightBlue}
+              strokeWidth={2}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+
+    default:
+      return null;
+  }
+};
+
+const FinancierView = () => {
+  return (
+    <div className="space-y-6">
+      {/* Métriques */}
+      <div className="grid grid-cols-4 gap-4">
+        {metrics.map((metric, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="text-sm text-gray-500">{metric.title}</div>
+              <div className="text-2xl font-bold text-[#003366]">{metric.value}</div>
+              <div className={`text-sm ${metric.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                {metric.trend}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Graphiques */}
+      <div className="grid grid-cols-2 gap-6">
+        {charts.map((chart, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader>
+              <CardTitle className="text-[#003366]">{chart.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderChart(chart)}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default FinancierView;
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+VUE CLIENT 
+
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Legend } from 'recharts';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  white: "#FFFFFF",
+  gray: "#E5E5E5",
+  lightBlue: "#4A90E2",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545"
+};
+
+const metrics = [
+  { title: "Nouveaux Clients", value: "12", trend: "+4" },
+  { title: "Fidélisation", value: "95%", trend: "+2%" },
+  { title: "Score NPS", value: "72", trend: "+5" },
+  { title: "Satisfaction", value: "4.8/5", trend: "+0.3" }
+];
+
+const charts = [
+  {
+    title: "Évolution de la Satisfaction",
+    type: "composed",
+    data: [
+      { name: 'Jan', satisfaction: 4.5, nps: 65, fidelisation: 92 },
+      { name: 'Fév', satisfaction: 4.6, nps: 68, fidelisation: 93 },
+      { name: 'Mar', satisfaction: 4.7, nps: 70, fidelisation: 94 },
+      { name: 'Avr', satisfaction: 4.8, nps: 72, fidelisation: 95 },
+      { name: 'Mai', satisfaction: 4.7, nps: 71, fidelisation: 94 },
+      { name: 'Jun', satisfaction: 4.9, nps: 74, fidelisation: 96 }
+    ]
+  },
+  {
+    title: "Répartition par Segment",
+    type: "pie",
+    data: [
+      { name: 'Grandes Entreprises', value: 45, color: COLORS.primary },
+      { name: 'PME', value: 35, color: COLORS.secondary },
+      { name: 'Startups', value: 20, color: COLORS.lightBlue }
+    ]
+  },
+  {
+    title: "Sources d'Acquisition",
+    type: "area",
+    stacked: true,
+    data: [
+      { name: 'T1', recommandation: 30, publicite: 20, direct: 15, partenaires: 10 },
+      { name: 'T2', recommandation: 35, publicite: 25, direct: 18, partenaires: 12 },
+      { name: 'T3', recommandation: 40, publicite: 30, direct: 20, partenaires: 15 },
+      { name: 'T4', recommandation: 45, publicite: 35, direct: 25, partenaires: 18 }
+    ]
+  },
+  {
+    title: "Analyse des Interactions",
+    type: "bar",
+    data: [
+      { name: 'Support', positif: 85, neutre: 10, negatif: 5 },
+      { name: 'Commercial', positif: 90, neutre: 8, negatif: 2 },
+      { name: 'Technique', positif: 82, neutre: 12, negatif: 6 },
+      { name: 'SAV', positif: 88, neutre: 9, negatif: 3 }
+    ]
+  }
+];
+
+const renderChart = (chart) => {
+  switch (chart.type) {
+    case 'composed':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis yAxisId="left" stroke={COLORS.primary} />
+            <YAxis yAxisId="right" orientation="right" stroke={COLORS.secondary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="satisfaction"
+              stroke={COLORS.primary}
+              strokeWidth={2}
+              dot={{ fill: COLORS.white }}
+            />
+            <Bar yAxisId="right" dataKey="nps" fill={COLORS.secondary} />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="fidelisation"
+              stroke={COLORS.success}
+              strokeWidth={2}
+              dot={{ fill: COLORS.white }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      );
+
+    case 'pie':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={chart.data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              dataKey="value"
+              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+            >
+              {chart.data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+
+    case 'area':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            {Object.keys(chart.data[0])
+              .filter(key => key !== 'name')
+              .map((key, index) => (
+                <Area
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stackId="1"
+                  stroke={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.lightBlue][index]}
+                  fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.lightBlue][index]}
+                  fillOpacity={0.3}
+                />
+              ))}
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+
+    case 'bar':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            <Bar dataKey="positif" fill={COLORS.success} stackId="stack" />
+            <Bar dataKey="neutre" fill={COLORS.warning} stackId="stack" />
+            <Bar dataKey="negatif" fill={COLORS.danger} stackId="stack" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+
+    default:
+      return null;
+  }
+};
+
+const ClientView = () => {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        {metrics.map((metric, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="text-sm text-gray-500">{metric.title}</div>
+              <div className="text-2xl font-bold text-[#003366]">{metric.value}</div>
+              <div className={`text-sm ${metric.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                {metric.trend}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {charts.map((chart, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader>
+              <CardTitle className="text-[#003366]">{chart.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderChart(chart)}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ClientView;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+VUE OPERATION 
+
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Settings,
+  Wrench,
+  UserPlus,
+  User,
+  Plus,
+  Calendar,
+  Filter,
+  FileText,
+  BarChart2
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/hooks/use-user';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from 'recharts';
+import { format, parseISO, startOfWeek, startOfMonth, startOfQuarter } from 'date-fns';
+import { fr } from 'date-fns/locale/fr';
+
+interface Operation {
+  id: number;
+  clientName: string;
+  type: 'survey' | 'audit' | 'conseil' | 'support' | 'ngridd';
+  date: string;
+  progress: number;
+  status: 'pending' | 'in_progress' | 'completed';
+  userId: number;
+  assignedTo?: number;
+  site?: string;
+  satisfaction?: number;
+  duration?: number;
+  documentCount?: number;
+  recommendationsImplemented?: number;
+  complianceRate?: number;
+}
+
+interface OperationStats {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+interface Technician {
+  id: number;
+  email: string;
+}
+
+const COLORS = {
+  primary: "#003366",    // Bleu foncé corporate
+  secondary: "#FF9900",  // Orange pour les actions
+  white: "#FFFFFF",      // Fond principal
+  gray: "#E5E5E5",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545"
+};
+
+const TYPE_COLORS = {
+  'survey': COLORS.secondary,
+  'audit': COLORS.success,
+  'conseil': COLORS.primary,
+  'support': COLORS.warning,
+  'ngridd': '#FF8042'
+};
+
+const TYPE_LABELS = {
+  'survey': 'Survey',
+  'audit': 'Audits',
+  'conseil': 'Conseil',
+  'support': 'Support',
+  'ngridd': 'NGRIDD'
+};
+
+const formatDate = (dateString: string): string => {
+  try {
+    const date = parseISO(dateString);
+    return format(date, 'dd MMMM yyyy', { locale: fr });
+  } catch (error) {
+    console.error('Date parsing error:', error);
+    return 'Date invalide';
+  }
+};
+
+const OperationsView = () => {
+  const queryClient = useQueryClient();
+  const { data: operations = [], isLoading } = useQuery<Operation[]>({
+    queryKey: ['/api/operations'],
+  });
+  const { user } = useUser();
+  const { toast } = useToast();
+  const { data: technicians = [], isLoading: isLoadingTechnicians } = useQuery<Technician[]>({
+    queryKey: ['/api/technicians'],
+  });
+
+  // États pour les filtres
+  const [periodFilter, setPeriodFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fonction pour filtrer les opérations selon les critères
+  const filterOperations = (ops: Operation[]) => {
+    let filtered = [...ops];
+
+    // Filtre par période
+    if (periodFilter !== 'all') {
+      const now = new Date();
+      const startDate = {
+        'week': startOfWeek(now, { locale: fr }),
+        'month': startOfMonth(now),
+        'quarter': startOfQuarter(now)
+      }[periodFilter];
+
+      if (startDate) {
+        filtered = filtered.filter(op => parseISO(op.date) >= startDate);
+      }
+    }
+
+    // Filtre par type
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(op => op.type === typeFilter);
+    }
+
+    // Filtre par statut
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(op => op.status === statusFilter);
+    }
+
+    // Filtre par recherche
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(op => 
+        op.clientName.toLowerCase().includes(term) ||
+        (op.site?.toLowerCase() || '').includes(term)
+      );
+    }
+
+    // Filtre selon le rôle utilisateur
+    if (user?.role === 'technician') {
+      filtered = filtered.filter(op => op.assignedTo === user.id || op.userId === user.id);
+    }
+
+    return filtered;
+  };
+
+  const filteredOperations = useMemo(() => filterOperations(operations), [
+    operations,
+    periodFilter,
+    typeFilter,
+    statusFilter,
+    searchTerm,
+    user
+  ]);
+
+  // Calcul des indicateurs de performance
+  const performanceMetrics = useMemo(() => {
+    const relevantOps = user?.role === 'technician' 
+      ? operations.filter(op => op.assignedTo === user.id || op.userId === user.id)
+      : operations;
+
+    const completedOps = relevantOps.filter(op => op.status === 'completed');
+
+    return {
+      avgDuration: completedOps.reduce((acc, op) => acc + (op.duration || 0), 0) / completedOps.length || 0,
+      avgSatisfaction: completedOps.reduce((acc, op) => acc + (op.satisfaction || 0), 0) / completedOps.length || 0,
+      implementedRecommendations: completedOps.reduce((acc, op) => acc + (op.recommendationsImplemented || 0), 0),
+      avgCompliance: completedOps.reduce((acc, op) => acc + (op.complianceRate || 0), 0) / completedOps.length || 0
+    };
+  }, [operations, user]);
+
+  const handleFinishOperation = async (operation: Operation) => {
+    try {
+      const response = await fetch(`/api/operations/${operation.id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la finalisation de l\'opération');
+      }
+
+      toast({
+        title: "Opération terminée",
+        description: "Les informations ont été enregistrées avec succès",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['/api/operations'] });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de finaliser l'opération"
+      });
+    }
+  };
+
+  const handleAssignOperation = async (operationId: number, technicianId: number) => {
+    try {
+      const response = await fetch(`/api/operations/${operationId}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ technicianId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'attribution de l\'opération');
+      }
+
+      toast({
+        title: "Opération attribuée",
+        description: "L'opération a été attribuée avec succès",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['/api/operations'] });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'attribuer l'opération"
+      });
+    }
+  };
+
+  const handleViewOperation = (operationId: number) => {
+    if (user?.role === 'guest') {
+      window.location.href = `/operations/${operationId}/edit`;
+    } else {
+      window.location.href = `/operations/${operationId}/recommendations`;
+    }
+  };
+
+  const handleCreateOperation = async () => {
+    try {
+      const response = await fetch('/api/operations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientName: "Nouveau client",
+          type: "audit",
+          date: new Date().toISOString(),
+          site: "À définir"
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la création de l\'opération');
+      }
+
+      toast({
+        title: "Opération créée",
+        description: "La nouvelle opération a été créée avec succès",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['/api/operations'] });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer l'opération"
+      });
+    }
+  };
+
+  const typeStats = Object.keys(TYPE_LABELS).map(type => ({
+    type,
+    count: operations.filter(op => op.type === type).length,
+    percentage: (operations.filter(op => op.type === type).length / operations.length) * 100
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 font-sans">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-[#003366]">Tableau de bord des opérations</h1>
+        {user?.role === 'technician' && (
+          <Button
+            onClick={handleCreateOperation}
+            className="bg-[#FF9900] hover:bg-[#FF9900]/90 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle opération
+          </Button>
+        )}
+      </div>
+
+      {/* Filtres */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filtres
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Select value={periodFilter} onValueChange={setPeriodFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sélectionner une période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les périodes</SelectItem>
+                <SelectItem value="week">Cette semaine</SelectItem>
+                <SelectItem value="month">Ce mois</SelectItem>
+                <SelectItem value="quarter">Ce trimestre</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Type d'opération" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les types</SelectItem>
+                {Object.entries(TYPE_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="in_progress">En cours</SelectItem>
+                <SelectItem value="completed">Terminé</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Rechercher par client ou site..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-[300px]"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Liste des opérations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Liste des opérations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs uppercase bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">Client</th>
+                  <th className="px-6 py-3">Site</th>
+                  <th className="px-6 py-3">Type</th>
+                  <th className="px-6 py-3">Avancement</th>
+                  <th className="px-6 py-3">Documents</th>
+                  <th className="px-6 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOperations.map((operation) => (
+                  <tr key={operation.id} className="bg-white border-b hover:bg-gray-50">
+                    <td className="px-6 py-4">{formatDate(operation.date)}</td>
+                    <td className="px-6 py-4 font-medium">{operation.clientName}</td>
+                    <td className="px-6 py-4">{operation.site}</td>
+                    <td className="px-6 py-4">
+                      <span 
+                        className="px-2 py-1 text-xs rounded-full"
+                        style={{
+                          backgroundColor: `${TYPE_COLORS[operation.type]}20`,
+                          color: TYPE_COLORS[operation.type]
+                        }}
+                      >
+                        {TYPE_LABELS[operation.type]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <Progress value={operation.progress} className="w-24" />
+                        <span>{operation.progress}%</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {operation.documentCount || 0} document(s)
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {user?.role === 'admin' && operation.status === 'pending' && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <UserPlus className="w-4 h-4 mr-2" />
+                                Attribuer
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Attribuer l'opération</DialogTitle>
+                                <DialogDescription>
+                                  Sélectionnez un technicien pour cette opération
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4 mt-4">
+                                {technicians?.map((technician) => (
+                                  <Button
+                                    key={technician.id}
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                    onClick={() => handleAssignOperation(operation.id, technician.id)}
+                                  >
+                                    <User className="w-4 h-4 mr-2" />
+                                    {technician.email}
+                                  </Button>
+                                ))}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleViewOperation(operation.id)}
+                        >
+                          Voir détails
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Indicateurs de performance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart2 className="w-5 h-5" />
+            Indicateurs de performance
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="p-4 rounded-lg bg-gray-50">
+              <div className="text-sm text-gray-500">Durée moyenne</div>
+              <div className="text-2xl font-bold mt-1">
+                {performanceMetrics.avgDuration.toFixed(1)} jours
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-gray-50">
+              <div className="text-sm text-gray-500">Satisfaction client</div>
+              <div className="text-2xl font-bold mt-1">
+                {performanceMetrics.avgSatisfaction.toFixed(1)}/5
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-gray-50">
+              <div className="text-sm text-gray-500">Recommandations implémentées</div>
+              <div className="text-2xl font-bold mt-1">
+                {performanceMetrics.implementedRecommendations}
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-gray-50">
+              <div className="text-sm text-gray-500">Taux de conformité</div>
+              <div className="text-2xl font-bold mt-1">
+                {performanceMetrics.avgCompliance.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Graphiques statistiques */}
+      <div className="grid grid-cols-2 gap-6">
+        <Card className="hover:shadow-lg transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle className="text-[#003366]">Répartition par Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={typeStats}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="count"
+                  label={({ type, percent }) =>
+                    `${TYPE_LABELS[type]} (${(percent * 100).toFixed(0)}%)`
+                  }
+                >
+                  {typeStats.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={TYPE_COLORS[entry.type]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle className="text-[#003366]">Progression des Opérations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={filteredOperations}>
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+                <XAxis dataKey="clientName" stroke={COLORS.primary} />
+                <YAxis stroke={COLORS.primary} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="progress"
+                  name="Progression"
+                  fill={COLORS.primary}
+                >
+                  {filteredOperations.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={TYPE_COLORS[entry.type]}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default OperationsView;
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+VUE PREDICTIVES 
+
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Legend } from 'recharts';
+
+const COLORS = {
+  primary: "#003366",
+  secondary: "#FF9900",
+  white: "#FFFFFF",
+  gray: "#E5E5E5",
+  lightBlue: "#4A90E2",
+  success: "#28A745",
+  warning: "#FFC107",
+  danger: "#DC3545"
+};
+
+const metrics = [
+  { title: "Prévisions", value: "+25%", trend: "+5%" },
+  { title: "Précision", value: "92%", trend: "+2%" },
+  { title: "Alertes", value: "3", trend: "-2" },
+  { title: "Tendances", value: "↗", trend: "+4%" }
+];
+
+const charts = [
+  {
+    title: "Prévisions vs Réalité",
+    type: "composed",
+    data: [
+      { name: 'Jan', prevision: 100, realise: 98, precision: 98, tendance: 97 },
+      { name: 'Fév', prevision: 110, realise: 105, precision: 95, tendance: 108 },
+      { name: 'Mar', prevision: 115, realise: 112, precision: 97, tendance: 114 },
+      { name: 'Avr', prevision: 120, realise: 118, precision: 98, tendance: 119 },
+      { name: 'Mai', prevision: 125, realise: 122, precision: 97, tendance: 124 },
+      { name: 'Jun', prevision: 130, realise: 128, precision: 98, tendance: 129 }
+    ]
+  },
+  {
+    title: "Distribution des Risques",
+    type: "pie",
+    data: [
+      { name: 'Faible', value: 60, color: COLORS.success },
+      { name: 'Moyen', value: 30, color: COLORS.warning },
+      { name: 'Élevé', value: 10, color: COLORS.danger }
+    ]
+  },
+  {
+    title: "Évolution des Indicateurs",
+    type: "area",
+    stacked: false,
+    data: [
+      { name: 'T1', performance: 85, qualite: 90, satisfaction: 88, fiabilite: 87 },
+      { name: 'T2', performance: 88, qualite: 92, satisfaction: 90, fiabilite: 89 },
+      { name: 'T3', performance: 92, qualite: 94, satisfaction: 93, fiabilite: 91 },
+      { name: 'T4', performance: 95, qualite: 95, satisfaction: 94, fiabilite: 93 }
+    ]
+  },
+  {
+    title: "Impact des Facteurs Prédictifs",
+    type: "bar",
+    data: [
+      { name: 'Marché', impact: 85, confiance: 90, risque: 15 },
+      { name: 'Technologie', impact: 75, confiance: 85, risque: 25 },
+      { name: 'Client', impact: 90, confiance: 88, risque: 12 },
+      { name: 'Opérationnel', impact: 70, confiance: 82, risque: 30 }
+    ]
+  }
+];
+
+const renderChart = (chart: any) => {
+  switch (chart.type) {
+    case 'composed':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            <Area
+              type="monotone"
+              dataKey="tendance"
+              fill={COLORS.lightBlue}
+              stroke={COLORS.lightBlue}
+              fillOpacity={0.1}
+            />
+            <Line
+              type="monotone"
+              dataKey="prevision"
+              stroke={COLORS.primary}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+            />
+            <Line
+              type="monotone"
+              dataKey="realise"
+              stroke={COLORS.secondary}
+              strokeWidth={2}
+              dot={{ fill: COLORS.white }}
+            />
+            <Line
+              type="monotone"
+              dataKey="precision"
+              stroke={COLORS.success}
+              strokeWidth={1}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      );
+
+    case 'pie':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={chart.data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              dataKey="value"
+              label={({ name, percent }) => 
+                `${name} (${(percent * 100).toFixed(0)}%)`
+              }
+            >
+              {chart.data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+
+    case 'area':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            {Object.keys(chart.data[0])
+              .filter(key => key !== 'name')
+              .map((key, index) => (
+                <Area
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stackId={chart.stacked ? "1" : key}
+                  stroke={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.lightBlue][index]}
+                  fill={[COLORS.primary, COLORS.secondary, COLORS.success, COLORS.lightBlue][index]}
+                  fillOpacity={0.2}
+                />
+              ))}
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+
+    case 'bar':
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chart.data}>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} />
+            <XAxis dataKey="name" stroke={COLORS.primary} />
+            <YAxis stroke={COLORS.primary} />
+            <Tooltip contentStyle={{ backgroundColor: COLORS.white }} />
+            <Legend />
+            <Bar dataKey="impact" fill={COLORS.primary} />
+            <Bar dataKey="confiance" fill={COLORS.secondary} />
+            <Line
+              type="monotone"
+              dataKey="risque"
+              stroke={COLORS.danger}
+              strokeWidth={2}
+              dot={{ fill: COLORS.white }}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+
+    default:
+      return null;
+  }
+};
+
+const PredictifView = () => {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        {metrics.map((metric, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="text-sm text-gray-500">{metric.title}</div>
+              <div className="text-2xl font-bold text-[#003366]">{metric.value}</div>
+              <div className={`text-sm ${metric.trend.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                {metric.trend}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {charts.map((chart, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader>
+              <CardTitle className="text-[#003366]">{chart.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderChart(chart)}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default PredictifView;

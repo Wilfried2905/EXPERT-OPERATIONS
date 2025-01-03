@@ -1,0 +1,154 @@
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent } from '@/components/ui/card';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Users, Shield, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+type UserRole = 'guest' | 'technician' | 'admin';
+
+interface RoleCard {
+  role: UserRole;
+  title: string;
+  icon: React.ReactNode;
+  email: string;
+  bgColor: string;
+}
+
+export default function HomePage() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+  const [showLoginForm, setShowLoginForm] = useState(false);
+
+  const roles: RoleCard[] = [
+    {
+      role: 'guest',
+      title: 'Invité',
+      icon: <Users className="w-8 h-8 text-[#003366]" />,
+      email: 'invite@3rtechnologie.com',
+      bgColor: 'bg-blue-100'
+    },
+    {
+      role: 'technician',
+      title: 'Technicien',
+      icon: <User className="w-8 h-8 text-[#FF9900]" />,
+      email: 'technicien@3rtechnologie.com',
+      bgColor: 'bg-orange-100'
+    },
+    {
+      role: 'admin',
+      title: 'Administrateur',
+      icon: <Shield className="w-8 h-8 text-[#003366]" />,
+      email: 'admin@3rtechnologie.com',
+      bgColor: 'bg-blue-100'
+    }
+  ];
+
+  useEffect(() => {
+    if (selectedRole && selectedEmail) {
+      setShowLoginForm(true);
+    }
+  }, [selectedRole, selectedEmail]);
+
+  const handleProfileSelection = async (role: UserRole) => {
+    const selectedRoleData = roles.find(r => r.role === role);
+    if (!selectedRoleData) {
+      console.error('Données du rôle non trouvées');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/profile-selected', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileType: role,
+          email: selectedRoleData.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la sélection du profil');
+      }
+
+      setSelectedEmail(selectedRoleData.email);
+      setSelectedRole(role);
+      setShowLoginForm(true);
+
+    } catch (error) {
+      console.error('Erreur lors de la sélection du profil:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sélection du profil",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBack = () => {
+    setSelectedRole(null);
+    setSelectedEmail(null);
+    setShowLoginForm(false);
+  };
+
+  // Si le formulaire de connexion doit être affiché
+  if (showLoginForm && selectedEmail) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md space-y-4">
+          <h1 className="text-2xl font-bold text-center text-[#003366] mb-8">
+            3R EXPERT OPERATIONS
+          </h1>
+          <LoginForm selectedEmail={selectedEmail} />
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="w-full text-[#003366]"
+          >
+            Retour à la sélection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage de la sélection des rôles
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-[#003366]">
+            3R EXPERT OPERATIONS
+          </h1>
+          <p className="text-lg text-[#003366]/70 mt-2">
+            Bienvenue sur 3R Expert Operations
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {roles.map((role) => (
+            <Card
+              key={role.role}
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-2 border-[#003366]/10 hover:border-[#003366]/30"
+              onClick={() => handleProfileSelection(role.role)}
+            >
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className={`mb-4 rounded-full p-4 ${role.bgColor}`}>
+                  {role.icon}
+                </div>
+                <h2 className="text-xl font-bold text-[#003366]">
+                  {role.title}
+                </h2>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
