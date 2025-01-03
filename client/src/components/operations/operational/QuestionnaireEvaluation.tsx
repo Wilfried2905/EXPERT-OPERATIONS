@@ -245,24 +245,14 @@ const QuestionnaireEvaluation = () => {
           </div>
         </Card>
 
-        <div className="mt-6 flex justify-between">
+        <div className="mt-6 flex justify-end">
           <button 
-            onClick={() => window.history.back()}
+            onClick={() => setLocation('/recommendations')}
             className={`px-6 py-3 rounded font-medium ${
-              isDarkMode 
-                ? 'bg-[#002B47] text-white' 
-                : 'bg-[#003366] text-white'
-            }`}
-          >
-            Précédent
-          </button>
-          <button 
-            onClick={() => setLocation('/operations/operational/client-info')}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+              isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
             } text-white`}
           >
-            Informations Client
+            Voir les Recommandations
           </button>
         </div>
       </div>
