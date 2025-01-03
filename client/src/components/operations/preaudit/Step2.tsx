@@ -12,48 +12,48 @@ export default function PreAuditStep2() {
   // Questions pour le questionnaire d'évaluation du Pré-Audit de Certification
   const questions = [
     {
-      category: "Infrastructure physique (Composants et équipements)",
+      category: "Infrastructure physique et environnement",
       items: [
-        "Votre centre de données est-il conçu pour résister à des événements naturels (séismes, incendies, etc.) ?",
-        "L'alimentation électrique est-elle redondée ?",
-        "Les équipements sont-ils situés dans des zones adaptées aux risques physiques et climatiques ?",
-        "Les installations disposent-elles de moyens de protection contre les incendies ?"
+        "L'infrastructure physique est-elle conçue selon les normes de certification visées ?",
+        "Les systèmes de protection contre les risques environnementaux sont-ils conformes aux exigences ?",
+        "La séparation des zones critiques est-elle conforme aux standards ?",
+        "Les systèmes de contrôle environnemental répondent-ils aux critères de certification ?"
       ]
     },
     {
-      category: "Alimentation et refroidissement",
+      category: "Systèmes électriques et mécaniques",
       items: [
-        "Votre centre de données utilise-t-il des systèmes de refroidissement redondants ?",
-        "Avez-vous des générateurs de secours pour assurer la continuité de l'alimentation électrique ?",
-        "L'alimentation en énergie est-elle mesurée et monitorée ?",
-        "Avez-vous un système de gestion pour réguler la température et l'humidité du centre de données ?"
+        "Les systèmes électriques respectent-ils les exigences de redondance ?",
+        "La distribution électrique est-elle conforme aux standards de certification ?",
+        "Les systèmes mécaniques sont-ils dimensionnés selon les normes ?",
+        "La maintenance des équipements critiques suit-elle les recommandations ?"
       ]
     },
     {
-      category: "Réseaux et communication",
+      category: "Sécurité et contrôle d'accès",
       items: [
-        "Votre centre de données dispose-t-il de multiples connexions réseau ?",
-        "Les réseaux internes sont-ils protégés par des dispositifs de sécurité (pare-feu, systèmes de détection d'intrusion) ?",
-        "Le câblage réseau respecte-t-il les meilleures pratiques pour la gestion de la bande passante et des pannes ?",
-        "Les interconnexions entre les différents sites sont-elles sécurisées et redondantes ?"
+        "Le système de contrôle d'accès répond-il aux exigences de certification ?",
+        "Les procédures de sécurité sont-elles documentées selon les standards ?",
+        "La surveillance des zones sensibles est-elle conforme aux normes ?",
+        "La gestion des incidents de sécurité suit-elle les bonnes pratiques ?"
       ]
     },
     {
-      category: "Sécurité physique et logique",
+      category: "Documentation et procédures",
       items: [
-        "Les accès physiques au centre de données sont-ils contrôlés et limités aux personnes autorisées ?",
-        "Des systèmes de surveillance vidéo et d'alarme sont-ils installés pour la sécurité physique ?",
-        "Les serveurs sont-ils situés dans des armoires sécurisées ?",
-        "Les informations sensibles sont-elles protégées par des systèmes de chiffrement et de gestion des accès ?"
+        "La documentation technique est-elle conforme aux exigences de certification ?",
+        "Les procédures opérationnelles sont-elles standardisées et documentées ?",
+        "Les plans de maintenance sont-ils alignés avec les recommandations ?",
+        "Le système de gestion documentaire répond-il aux critères ?"
       ]
     },
     {
-      category: "Gestion des risques et résilience",
+      category: "Organisation et processus",
       items: [
-        "Avez-vous un plan documenté pour la gestion des risques dans le centre de données ?",
-        "Le centre de données dispose-t-il de procédures de reprise après sinistre et de continuité des services ?",
-        "Avez-vous un plan d'audit et de réévaluation des risques régulièrement ?",
-        "Les mises à jour et la maintenance des systèmes sont-elles programmées de manière à ne pas affecter la disponibilité des services ?"
+        "L'organisation des équipes est-elle conforme aux exigences ?",
+        "Les processus de gestion des changements suivent-ils les standards ?",
+        "Les procédures d'urgence sont-elles conformes aux normes ?",
+        "La formation du personnel répond-elle aux critères de certification ?"
       ]
     }
   ];

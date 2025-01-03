@@ -12,48 +12,48 @@ export default function PreAuditStep1() {
   // Questions pour l'analyse de l'existant du Pré-Audit de Certification
   const questions = [
     {
-      category: "1. Objectifs et stratégie",
+      category: "1. État actuel et objectifs",
       items: [
-        "Quels sont les principaux objectifs du client pour la certification ?",
-        "Quelles sont les principales applications et services en production dans votre centre de données ?",
-        "Avez-vous effectué des audits de sécurité ou de conformité précédemment ?",
-        "Avez-vous des fournisseurs externes qui gèrent des parties de votre infrastructure ?"
+        "Quel est le niveau de certification visé par le client ?",
+        "Quels sont les principaux enjeux et motivations pour cette certification ?",
+        "Y a-t-il eu des audits ou certifications précédents ?",
+        "Quelles sont les contraintes temporelles pour l'obtention de la certification ?"
       ]
     },
     {
-      category: "2. Infrastructure et équipements",
+      category: "2. Infrastructure existante",
       items: [
-        "Quelle est la taille de l'infrastructure informatique actuelle ?",
-        "Quels équipements sont actuellement utilisés pour les systèmes critiques ?",
-        "Avez-vous une cartographie complète des infrastructures de votre centre de données ?",
-        "Comment gérez-vous la capacité et l'évolution de l'infrastructure ?"
+        "Quelle est la configuration actuelle des salles IT (superficie, disposition, contraintes) ?",
+        "Quels sont les systèmes critiques actuellement en production ?",
+        "Comment est organisée la documentation technique de l'infrastructure ?",
+        "Quelles sont les principales évolutions prévues de l'infrastructure ?"
       ]
     },
     {
-      category: "3. Sécurité et gestion des risques",
+      category: "3. Gestion opérationnelle",
       items: [
-        "Comment les accès au centre de données sont-ils contrôlés ?",
-        "Comment les incidents sont-ils actuellement gérés ?",
-        "Y a-t-il des processus de gestion des risques en place pour les systèmes critiques ?",
-        "Les informations sensibles sont-elles protégées par des systèmes de chiffrement et de gestion des accès ?"
+        "Comment sont organisées les équipes d'exploitation ?",
+        "Quels sont les processus de gestion des incidents en place ?",
+        "Comment est gérée la maintenance préventive et corrective ?",
+        "Existe-t-il des procédures documentées pour les opérations critiques ?"
       ]
     },
     {
-      category: "4. Continuité et résilience",
+      category: "4. Conformité et sécurité",
       items: [
-        "Le centre de données dispose-t-il d'un plan de continuité des activités (PCA) et de reprise après sinistre (DRP) ?",
-        "Quels types de solutions de sauvegarde et de récupération des données sont en place ?",
-        "Les équipements sont-ils protégés contre les pannes, et existe-t-il une redondance pour les systèmes critiques ?",
-        "Le centre de données dispose-t-il de procédures de reprise après sinistre et de continuité des services ?"
+        "Quelles sont les normes et réglementations actuellement suivies ?",
+        "Comment est gérée la sécurité physique et logique ?",
+        "Existe-t-il un système de management de la qualité ?",
+        "Comment sont gérés les accès et les habilitations ?"
       ]
     },
     {
-      category: "5. Surveillance et gestion des performances",
+      category: "5. Continuité d'activité",
       items: [
-        "Comment le centre de données est-il surveillé (en termes de performance et de sécurité) ?",
-        "Comment les incidents sont-ils suivis et rapportés ?",
-        "Quel est le niveau de compétence et de formation des équipes en charge de l'infrastructure ?",
-        "Utilisez-vous des technologies de virtualisation ou de cloud dans votre infrastructure ?"
+        "Existe-t-il un plan de continuité d'activité formalisé ?",
+        "Comment sont réalisés les tests de continuité ?",
+        "Quelles sont les procédures de sauvegarde et de restauration ?",
+        "Comment est assurée la redondance des systèmes critiques ?"
       ]
     }
   ];
