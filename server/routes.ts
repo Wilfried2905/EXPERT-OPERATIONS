@@ -45,22 +45,71 @@ Génère des recommandations structurées selon ce format:
    - PUE cible
    - Disponibilité attendue
    - Niveau TIER visé
-   - Points de conformité adressés
+   - Points de conformité adressés`;
 
-Format ta réponse en JSON pour faciliter le parsing.`;
+    // En attendant l'intégration complète avec Anthropic, utilisons des données mock
+    const mockRecommendations = {
+      recommendations: [
+        {
+          id: "1",
+          title: "Optimisation du système de refroidissement",
+          description: "Mise à niveau du système de refroidissement pour améliorer l'efficacité énergétique",
+          priority: "high",
+          timeFrame: "short_term",
+          impact: {
+            cost: 0.7,
+            performance: 0.8,
+            compliance: 0.9
+          },
+          alternatives: [
+            {
+              description: "Installation d'un système free cooling",
+              pros: ["Économie d'énergie", "ROI rapide"],
+              cons: ["Installation complexe", "Maintenance régulière"],
+              estimatedCost: 50000
+            }
+          ],
+          metrics: {
+            pue: 1.5,
+            availability: 99.99,
+            tierLevel: 3,
+            complianceGaps: ["ISO 50001", "EN 50600"]
+          },
+          progress: 0,
+          implemented: false
+        },
+        {
+          id: "2",
+          title: "Sécurisation des accès physiques",
+          description: "Renforcement du contrôle d'accès et de la surveillance",
+          priority: "critical",
+          timeFrame: "immediate",
+          impact: {
+            cost: 0.5,
+            performance: 0.6,
+            compliance: 0.95
+          },
+          alternatives: [
+            {
+              description: "Système biométrique avancé",
+              pros: ["Haute sécurité", "Traçabilité complète"],
+              cons: ["Coût élevé", "Formation nécessaire"],
+              estimatedCost: 75000
+            }
+          ],
+          metrics: {
+            pue: null,
+            availability: 99.999,
+            tierLevel: 4,
+            complianceGaps: ["ISO 27001"]
+          },
+          progress: 0,
+          implemented: false
+        }
+      ]
+    };
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 4000,
-      messages: [{ role: "user", content: prompt }]
-    });
-
-    if (!response.content?.[0]?.text) {
-      throw new Error('Invalid response format from Anthropic API');
-    }
-
-    const recommendations = JSON.parse(response.content[0].text);
-    res.json(recommendations);
+    res.json(mockRecommendations);
   } catch (error) {
     console.error("Error generating recommendations:", error);
     res.status(500).json({ error: error.message });

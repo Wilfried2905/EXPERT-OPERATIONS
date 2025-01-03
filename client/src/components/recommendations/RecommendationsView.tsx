@@ -44,15 +44,16 @@ export default function RecommendationsView() {
         };
 
         console.log("RecommendationsView: Fetching recommendations");
-        const newRecommendations = await generateRecommendations(auditData);
-        setRecommendations(newRecommendations);
+        const response = await generateRecommendations(auditData);
+        console.log("API Response:", response);
+        setRecommendations(response.recommendations || []);
 
         console.log("RecommendationsView: Fetching compliance matrix");
         const matrix = await generateMatrixCompliance(auditData);
         setComplianceMatrix(matrix);
 
         console.log("RecommendationsView: Fetching Gantt data");
-        const gantt = await generateGanttData(newRecommendations);
+        const gantt = await generateGanttData(response.recommendations || []);
         setGanttData(gantt);
 
       } catch (err) {
@@ -110,6 +111,8 @@ export default function RecommendationsView() {
     );
   }
 
+  console.log("Current recommendations:", recommendations);
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -142,7 +145,7 @@ export default function RecommendationsView() {
 
         <TabsContent value="recommendations">
           <div className="grid gap-6">
-            {recommendations?.map((rec) => (
+            {Array.isArray(recommendations) && recommendations.map((rec) => (
               <Card key={rec.id}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -202,6 +205,7 @@ export default function RecommendationsView() {
                               </ul>
                             </div>
                           </div>
+                          <p className="mt-2 text-sm">Coût estimé: {alt.estimatedCost}€</p>
                         </div>
                       ))}
                     </div>
@@ -221,7 +225,7 @@ export default function RecommendationsView() {
           <Card>
             <CardContent className="pt-6">
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={recommendations.map(rec => ({
+                <BarChart data={recommendations?.map(rec => ({
                   name: rec.title.substring(0, 20) + '...',
                   cost: rec.impact.cost * 100,
                   performance: rec.impact.performance * 100,
