@@ -22,6 +22,7 @@ export default function RecommendationsView() {
     setLoading,
     setError
   } = useRecommendationsStore();
+  const { toast } = useToast();
 
   const [complianceMatrix, setComplianceMatrix] = useState(null);
   const [ganttData, setGanttData] = useState(null);
@@ -67,7 +68,7 @@ export default function RecommendationsView() {
 
   const handleExportWord = async () => {
     try {
-      const clientName = "Client"; // À remplacer par le vrai nom du client
+      const clientName = "Client"; 
       const currentDate = format(new Date(), 'yyyy-MM-dd');
       const fileName = `3R_Recommandations_${clientName}_${currentDate}.docx`;
 
@@ -153,6 +154,15 @@ export default function RecommendationsView() {
       const blob = await exportToWord(exportData);
       console.log('Word export blob created:', blob);
 
+      if (!blob) {
+        toast({
+          title: "Erreur",
+          description: 'Export Word a retourné un blob null',
+          variant: "destructive"
+        });
+        return;
+      }
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -161,9 +171,14 @@ export default function RecommendationsView() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export réussi",
+        description: "Le document Word a été généré avec succès",
+      });
     } catch (error) {
       console.error('Error exporting to Word:', error);
-      useToast({
+      toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'export Word',
         variant: "destructive"
