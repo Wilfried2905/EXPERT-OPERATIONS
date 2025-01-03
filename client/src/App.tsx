@@ -11,6 +11,7 @@ import MainLayout from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
+// Importer le bon composant RecommendationsView
 import RecommendationsView from "./components/recommendations/RecommendationsView";
 
 function App() {
