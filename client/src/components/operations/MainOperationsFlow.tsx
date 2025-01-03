@@ -9,11 +9,13 @@ import {
 } from 'lucide-react';
 import DocumentNavigation from './DocumentNavigation';
 import DataCollectionWorkflow from './DataCollectionWorkflow';
+import RecommendationsView from '@/components/recommendations/RecommendationsView';
 
 const MainOperationsFlow = () => {
   const [currentStep, setCurrentStep] = useState<number | null>(null);
   const [showCollectionWorkflow, setShowCollectionWorkflow] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const [documentSection, setDocumentSection] = useState<'collecte' | 'recommandations' | 'documents'>('collecte');
 
   const mainSteps = [
@@ -38,27 +40,58 @@ const MainOperationsFlow = () => {
   ];
 
   const handleStepClick = (stepId: number) => {
+    console.log("Clicking step:", stepId);
     if (stepId === 0) {
       setShowCollectionWorkflow(true);
+      setShowDocuments(false);
+      setShowRecommendations(false);
     } else if (stepId === 1) {
-      setShowDocuments(true);
-      setDocumentSection('recommandations');
+      setShowRecommendations(true);
+      setShowDocuments(false);
+      setShowCollectionWorkflow(false);
     } else if (stepId === 2) {
       setShowDocuments(true);
+      setShowRecommendations(false);
+      setShowCollectionWorkflow(false);
       setDocumentSection('documents');
     }
     setCurrentStep(stepId);
   };
 
   if (showCollectionWorkflow) {
-    return <DataCollectionWorkflow onBack={() => setShowCollectionWorkflow(false)} />;
+    return <DataCollectionWorkflow onBack={() => {
+      setShowCollectionWorkflow(false);
+      setCurrentStep(null);
+    }} />;
+  }
+
+  if (showRecommendations) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto p-6">
+          <Button 
+            onClick={() => {
+              setShowRecommendations(false);
+              setCurrentStep(null);
+            }}
+            className="mb-4"
+          >
+            Retour
+          </Button>
+          <RecommendationsView />
+        </div>
+      </div>
+    );
   }
 
   if (showDocuments) {
     return (
       <DocumentNavigation 
         section={documentSection} 
-        onBack={() => setShowDocuments(false)} 
+        onBack={() => {
+          setShowDocuments(false);
+          setCurrentStep(null);
+        }}
       />
     );
   }
@@ -92,10 +125,7 @@ const MainOperationsFlow = () => {
                       <p className="text-sm text-gray-600">{step.description}</p>
                       <Button 
                         className="mt-4 bg-[#FF9900] hover:bg-[#e68a00] text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStepClick(step.id);
-                        }}
+                        onClick={() => handleStepClick(step.id)}
                       >
                         Commencer
                         <ArrowRight className="ml-2 h-4 w-4" />
