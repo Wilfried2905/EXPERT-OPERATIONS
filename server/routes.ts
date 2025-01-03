@@ -174,15 +174,53 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
                 {
                   name: "Étude et conception",
                   duration: "4 semaines",
-                  tasks: ["Audit système existant", "Conception détaillée"],
-                  deliverables: ["Rapport d'audit", "Plans techniques"]
+                  tasks: [
+                    "Audit système existant",
+                    "Analyse des besoins",
+                    "Conception détaillée",
+                    "Validation technique"
+                  ],
+                  deliverables: [
+                    "Rapport d'audit",
+                    "Cahier des charges",
+                    "Plans techniques",
+                    "Documentation technique"
+                  ]
+                },
+                {
+                  name: "Installation",
+                  duration: "6 semaines",
+                  tasks: [
+                    "Préparation du site",
+                    "Installation des équipements",
+                    "Tests unitaires",
+                    "Tests d'intégration"
+                  ],
+                  deliverables: [
+                    "Rapport d'installation",
+                    "Résultats des tests",
+                    "Documentation technique mise à jour"
+                  ]
                 }
               ],
               milestones: [
                 {
                   name: "Validation conception",
                   date: "2024-02-15",
-                  requirements: ["Conformité EN 50600", "Validation technique"]
+                  requirements: [
+                    "Conformité EN 50600",
+                    "Validation technique",
+                    "Validation budgétaire"
+                  ]
+                },
+                {
+                  name: "Réception des travaux",
+                  date: "2024-04-01",
+                  requirements: [
+                    "Tests de performance",
+                    "Documentation complète",
+                    "Formation des équipes"
+                  ]
                 }
               ]
             }
@@ -222,27 +260,70 @@ export async function generateGanttData(req: any, res: any) {
     tasks: [
       {
         name: "Mise à niveau infrastructure",
-        duration: "4 semaines",
-        startDate: "2024-01-15",
-        endDate: "2024-02-15",
-        dependencies: [],
         details: {
           description: "Conformément à la norme EN 50600-2-2",
           phases: [
             {
               name: "Audit initial",
               duration: "1 semaine",
-              deliverables: ["Rapport d'évaluation", "Liste des non-conformités"]
+              tasks: [
+                "Analyse de l'existant",
+                "Identification des écarts",
+                "Définition des objectifs"
+              ],
+              deliverables: [
+                "Rapport d'évaluation",
+                "Liste des non-conformités",
+                "Plan d'action préliminaire"
+              ]
             },
             {
               name: "Mise en œuvre",
               duration: "2 semaines",
-              deliverables: ["Rapport d'installation", "Tests de conformité"]
+              tasks: [
+                "Installation des équipements",
+                "Configuration des systèmes",
+                "Tests fonctionnels"
+              ],
+              deliverables: [
+                "Rapport d'installation",
+                "Tests de conformité",
+                "Documentation technique"
+              ]
             },
             {
               name: "Validation",
               duration: "1 semaine",
-              deliverables: ["Certification finale", "Documentation technique"]
+              tasks: [
+                "Tests de performance",
+                "Vérification des normes",
+                "Formation des équipes"
+              ],
+              deliverables: [
+                "Certification finale",
+                "Documentation technique",
+                "Manuel d'exploitation"
+              ]
+            }
+          ],
+          milestones: [
+            {
+              name: "Validation initiale",
+              date: "2024-02-01",
+              requirements: [
+                "Rapport d'audit validé",
+                "Budget approuvé",
+                "Planning accepté"
+              ]
+            },
+            {
+              name: "Mise en production",
+              date: "2024-03-01",
+              requirements: [
+                "Tests validés",
+                "Documentation complète",
+                "Équipes formées"
+              ]
             }
           ]
         }

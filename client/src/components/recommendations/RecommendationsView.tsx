@@ -338,13 +338,13 @@ export default function RecommendationsView() {
             <CardContent className="pt-6">
               {ganttData && (
                 <div className="space-y-6">
-                  {ganttData.tasks.map((task: any, index: number) => (
+                  {ganttData.tasks?.map((task: any, index: number) => (
                     <div key={index} className="border rounded p-4">
                       <h3 className="font-medium mb-2">{task.name}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{task.details.description}</p>
+                      <p className="text-sm text-gray-600 mb-4">{task.details?.description}</p>
 
                       <div className="space-y-4">
-                        {task.details.phases.map((phase: any, phaseIndex: number) => (
+                        {task.details?.phases?.map((phase: any, phaseIndex: number) => (
                           <div key={phaseIndex} className="bg-gray-50 p-3 rounded">
                             <div className="flex justify-between items-center mb-2">
                               <h4 className="font-medium">{phase.name}</h4>
@@ -355,7 +355,7 @@ export default function RecommendationsView() {
                               <div>
                                 <h5 className="text-sm font-medium mb-1">Tâches:</h5>
                                 <ul className="list-disc list-inside text-sm">
-                                  {phase.tasks.map((t: string, i: number) => (
+                                  {phase.tasks?.map((t: string, i: number) => (
                                     <li key={i}>{t}</li>
                                   ))}
                                 </ul>
@@ -363,7 +363,7 @@ export default function RecommendationsView() {
                               <div>
                                 <h5 className="text-sm font-medium mb-1">Livrables:</h5>
                                 <ul className="list-disc list-inside text-sm">
-                                  {phase.deliverables.map((d: string, i: number) => (
+                                  {phase.deliverables?.map((d: string, i: number) => (
                                     <li key={i}>{d}</li>
                                   ))}
                                 </ul>
@@ -375,11 +375,11 @@ export default function RecommendationsView() {
 
                       <div className="mt-4">
                         <h4 className="font-medium mb-2">Jalons importants:</h4>
-                        {task.details.milestones && task.details.milestones.map((milestone: any, milestoneIndex: number) => (
+                        {task.details?.milestones?.map((milestone: any, milestoneIndex: number) => (
                           <div key={milestoneIndex} className="mb-2">
                             <p className="font-medium text-sm">{milestone.name} - {milestone.date}</p>
                             <ul className="list-disc list-inside text-sm">
-                              {milestone.requirements.map((req: string, i: number) => (
+                              {milestone.requirements?.map((req: string, i: number) => (
                                 <li key={i}>{req}</li>
                               ))}
                             </ul>
