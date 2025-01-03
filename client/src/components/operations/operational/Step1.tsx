@@ -164,7 +164,7 @@ const AnalyseExistant = () => {
               Progression
             </h3>
             <div className="progress-bar">
-              <div 
+              <div
                 className="progress-bar-indicator green"
                 style={{ width: `${calculateProgress()}%` }}
               />
@@ -178,11 +178,11 @@ const AnalyseExistant = () => {
               Conformité
             </h3>
             <div className="progress-bar">
-              <div 
+              <div
                 className={`progress-bar-indicator ${
-                  calculateConformity() >= 75 ? 'green' : 
-                  calculateConformity() >= 50 ? 'yellow' : 
-                  'red'
+                  calculateConformity() >= 75 ? 'green' :
+                    calculateConformity() >= 50 ? 'yellow' :
+                      'red'
                 }`}
                 style={{ width: `${calculateConformity()}%` }}
               />
@@ -200,9 +200,9 @@ const AnalyseExistant = () => {
                 key={index}
                 onClick={() => setActiveTab(index)}
                 className={`flex-1 px-4 py-3 text-center font-medium transition-colors
-                  ${activeTab === index 
-                    ? isDarkMode 
-                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]' 
+                  ${activeTab === index
+                    ? isDarkMode
+                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]'
                       : 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
                     : isDarkMode
                       ? 'text-[#E0E0E0] hover:bg-[#001F33]'
@@ -230,38 +230,6 @@ const AnalyseExistant = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setResults(prev => ({
-                        ...prev,
-                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
-                      }))}
-                      className={`px-4 py-2 rounded transition-colors ${
-                        results[q.id]?.status === 'conforme'
-                          ? 'bg-green-500 text-white'
-                          : isDarkMode
-                            ? 'bg-[#002B47] text-[#E0E0E0]'
-                            : 'bg-gray-100 text-[#003366]'
-                      }`}
-                    >
-                      Conforme
-                    </button>
-                    <button
-                      onClick={() => setResults(prev => ({
-                        ...prev,
-                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
-                      }))}
-                      className={`px-4 py-2 rounded transition-colors ${
-                        results[q.id]?.status === 'non-conforme'
-                          ? 'bg-red-500 text-white'
-                          : isDarkMode
-                            ? 'bg-[#002B47] text-[#E0E0E0]'
-                            : 'bg-gray-100 text-[#003366]'
-                      }`}
-                    >
-                      Non Conforme
-                    </button>
-                  </div>
 
                   <textarea
                     value={results[q.id]?.comments || ''}
@@ -271,8 +239,8 @@ const AnalyseExistant = () => {
                     }))}
                     placeholder="Commentaires et observations..."
                     className={`w-full p-3 rounded border ${
-                      isDarkMode 
-                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]' 
+                      isDarkMode
+                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]'
                         : 'bg-white border-gray-200 text-[#003366]'
                     }`}
                     rows={3}
@@ -293,16 +261,6 @@ const AnalyseExistant = () => {
           </div>
         </Card>
 
-        <div className="mt-6 flex justify-end">
-          <button 
-            onClick={() => setLocation('/recommendations')}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
-            } text-white`}
-          >
-            Voir les Recommandations
-          </button>
-        </div>
       </div>
     </div>
   );
