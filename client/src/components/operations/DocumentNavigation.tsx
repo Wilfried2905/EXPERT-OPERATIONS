@@ -299,7 +299,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
           size: "Grande entreprise"
         },
         auditData: {
-          recommendations: [],
+          recommendations: [], // À remplir avec les données réelles
           metrics: {
             pue: [1.8, 1.9, 1.7],
             availability: [99.9, 99.8, 99.95],
@@ -321,6 +321,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
       const document = await generateDocument(input);
       console.log('[Download] Document generated successfully');
 
+      // Création du blob et téléchargement
       const blob = new Blob([document], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
