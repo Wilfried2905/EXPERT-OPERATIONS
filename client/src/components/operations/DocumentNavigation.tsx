@@ -285,6 +285,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
     try {
       setIsGenerating(true);
       const fileName = generateFileName(docTitle);
+      console.log(`[Download] Starting document generation for ${fileName}`);
 
       const input = {
         type: docKey === 'offreTechnique'
@@ -312,39 +313,48 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
           compliance: {
             matrix: {},
             score: 85
-          },
-          additionalData: {
-            images: [],
-            documents: [],
-            comments: []
           }
         }
       };
 
+      console.log(`[Download] Calling generateDocument with type: ${input.type}`);
       const document = await generateDocument(input);
+      console.log('[Download] Document generated successfully');
 
       const blob = new Blob([document], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
 
-      const url = window.URL.createObjectURL(blob);
-      const a = window.document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      window.document.body.appendChild(a);
-      a.click();
-      window.document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      console.log(`[Download] Document size: ${blob.size} bytes`);
+      if (blob.size === 0) {
+        throw new Error('Le document généré est vide');
+      }
+
+      console.log('[Download] Creating download URL');
+      const url = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = fileName;
+
+      console.log('[Download] Triggering download');
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+
+      console.log('[Download] Download process completed');
 
       toast({
         title: "Document généré",
         description: "Le document a été généré et téléchargé avec succès"
       });
     } catch (error) {
-      console.error('Erreur lors de la génération du document:', error);
+      console.error('[Download] Error during document generation/download:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la génération du document",
+        description: error instanceof Error 
+          ? `Erreur : ${error.message}`
+          : "Une erreur est survenue lors de la génération du document",
         variant: "destructive"
       });
     } finally {
