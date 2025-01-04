@@ -4,13 +4,6 @@ import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Table, TableRow, TableCell, WidthType } from 'docx';
 
-// Types de documents supportés
-export enum DocumentType {
-  TECHNICAL_OFFER = 'Offre Technique',
-  SPECIFICATIONS = 'Cahier des Charges',
-  AUDIT_REPORT = 'Rapport d\'Audit'
-}
-
 // the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -182,50 +175,61 @@ function generatePrompt(input: any): string {
   }
 
   const baseContext = `
-Agissez en tant qu'expert en datacenters et infrastructure IT, génération d'un document professionnel de type "${input.type}" en suivant strictement cette structure :
+En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel détaillé de type "${input.type}" en suivant strictement cette structure.
 
-FORMAT DU DOCUMENT:
-Créez un document professionnel avec :
-1. Une page de garde contenant :
-   - Logo et nom "3R TECHNOLOGIE"
+INSTRUCTIONS DÉTAILLÉES:
+
+1. Format du Document:
+   - Page de garde professionnelle avec logo et nom "3R TECHNOLOGIE"
    - Titre : "${input.type}"
    - Client : ${input.clientInfo.name}
    - Date : ${new Date().toLocaleDateString('fr-FR')}
+   - Table des matières détaillée
+   - Sections numérotées (1., 1.1, 1.1.1, etc.)
 
-2. Une table des matières détaillée suivant ce plan :
+2. Style de Rédaction:
+   - Français professionnel et technique
+   - Citations et références aux normes TIA-942
+   - Explications détaillées pour chaque point
+   - Exemples concrets et chiffrés
+   - Minimum 2-3 paragraphes par section
+   - Utilisation de listes à puces pour les énumérations
 
-SOMMAIRE
+3. Contenu Technique:
+   - Références précises aux standards TIA-942
+   - Métriques et KPIs spécifiques
+   - Recommandations basées sur les meilleures pratiques
+   - Solutions techniques détaillées
+   - Analyse des impacts et risques
 
-${documentStructure}
+4. Structure du Contenu:
+   ${documentStructure}
 
-CONTEXTE CLIENT:
-Client: ${input.clientInfo.name}
-Secteur: ${input.clientInfo.industry}
-Taille: ${input.clientInfo.size}
+5. Contexte Client:
+   - Nom: ${input.clientInfo.name}
+   - Secteur: ${input.clientInfo.industry}
+   - Taille: ${input.clientInfo.size}
 
-Métriques clés:
-- PUE moyen: ${input.auditData.metrics.pue.join(', ')}
-- Disponibilité: ${input.auditData.metrics.availability.join(', ')}%
-- Niveau TIER: ${input.auditData.metrics.tierLevel}
-- Principaux écarts de conformité: ${input.auditData.metrics.complianceGaps.join(', ')}
+   Métriques:
+   - PUE moyen: ${input.auditData.metrics.pue.join(', ')}
+   - Disponibilité: ${input.auditData.metrics.availability.join(', ')}%
+   - Niveau TIER: ${input.auditData.metrics.tierLevel}
+   - Écarts de conformité: ${input.auditData.metrics.complianceGaps.join(', ')}
+   - Score de conformité: ${input.auditData.compliance.score}%
 
-Score de conformité global: ${input.auditData.compliance.score}%
+FORMAT DU TEXTE:
+- Utilisez "# " pour les titres principaux (1.)
+- Utilisez "## " pour les sous-titres (1.1)
+- Utilisez "### " pour les sous-sections (1.1.1)
+- Utilisez "- " pour les listes à puces
+- Séparez les sections par des sauts de ligne
 
-INSTRUCTIONS IMPORTANTES:
-1. Rédigez le document en français professionnel
-2. Utilisez un style technique mais accessible
-3. Incluez des exemples concrets et des références à la norme TIA-942
-4. Utilisez les données du contexte client pour personnaliser le contenu
-5. Ajoutez une page de garde professionnelle
-6. Incluez une table des matières structurée
-7. Respectez la hiérarchie des titres fournie
-
-FORMAT DU CONTENU:
-- Utilisez "# " pour les titres de niveau 1
-- Utilisez "## " pour les sous-titres
-- Utilisez "### " pour les sections détaillées
-- Utilisez des listes à puces avec "-" pour les énumérations
-- Séparez chaque section principale par une nouvelle page`;
+IMPORTANT: Pour chaque section:
+1. Commencez par une introduction
+2. Développez en détail chaque point
+3. Ajoutez des exemples concrets
+4. Citez les normes pertinentes
+5. Concluez avec des recommandations`;
 
   return baseContext;
 }
@@ -246,16 +250,30 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
       return acc;
     }, [] as Array<{ level: number; text: string }>);
 
-    // Création de la table des matières statique
+    // Création de la table des matières statique avec numérotation
     const tocRows = headings.map((heading, index) => {
       const indent = '  '.repeat(heading.level - 1);
+      const number = `${index + 1}.${heading.level > 1 ? '1' : ''}${heading.level > 2 ? '.1' : ''}`;
+
       return new TableRow({
         children: [
           new TableCell({
-            width: {
-              size: 90,
-              type: WidthType.PERCENTAGE,
-            },
+            width: { size: 15, type: WidthType.PERCENTAGE },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: number,
+                    bold: true,
+                    size: 24,
+                  }),
+                ],
+                alignment: AlignmentType.LEFT,
+              }),
+            ],
+          }),
+          new TableCell({
+            width: { size: 75, type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 children: [
@@ -270,10 +288,7 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
             ],
           }),
           new TableCell({
-            width: {
-              size: 10,
-              type: WidthType.PERCENTAGE,
-            },
+            width: { size: 10, type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 children: [
@@ -291,10 +306,7 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
     });
 
     const tocTable = new Table({
-      width: {
-        size: 100,
-        type: WidthType.PERCENTAGE,
-      },
+      width: { size: 100, type: WidthType.PERCENTAGE },
       borders: {
         top: { style: BorderStyle.NONE },
         bottom: { style: BorderStyle.NONE },
@@ -425,23 +437,33 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
             pageBreakBefore: true,
           }),
           // Contenu du document
-          ...content.split('\n').map(line => {
+          ...content.split('\n').map((line, index) => {
+            let headingNumber = "";
             if (line.trim().startsWith('# ')) {
+              const headingIndex = headings.findIndex(h => h.text === line.replace('# ', '').trim());
+              headingNumber = `${headingIndex + 1}. `;
               return new Paragraph({
-                text: line.replace('# ', '').trim(),
+                text: `${headingNumber}${line.replace('# ', '').trim()}`,
                 heading: HeadingLevel.HEADING_1,
                 spacing: { before: 400, after: 200 },
                 pageBreakBefore: true,
               });
             } else if (line.trim().startsWith('## ')) {
+              const parentHeading = Math.floor(index / 10) + 1;
+              const subHeading = (index % 10) + 1;
+              headingNumber = `${parentHeading}.${subHeading} `;
               return new Paragraph({
-                text: line.replace('## ', '').trim(),
+                text: `${headingNumber}${line.replace('## ', '').trim()}`,
                 heading: HeadingLevel.HEADING_2,
                 spacing: { before: 300, after: 200 },
               });
             } else if (line.trim().startsWith('### ')) {
+              const parentHeading = Math.floor(index / 100) + 1;
+              const subHeading = Math.floor((index % 100) / 10) + 1;
+              const subSubHeading = (index % 10) + 1;
+              headingNumber = `${parentHeading}.${subHeading}.${subSubHeading} `;
               return new Paragraph({
-                text: line.replace('### ', '').trim(),
+                text: `${headingNumber}${line.replace('### ', '').trim()}`,
                 heading: HeadingLevel.HEADING_3,
                 spacing: { before: 200, after: 100 },
               });
@@ -471,61 +493,6 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
   } catch (error) {
     console.error('[Word] Error generating document:', error);
     throw new Error('Erreur lors de la génération du document Word');
-  }
-}
-
-async function generateDocumentHandler(req: any, res: any) {
-  try {
-    console.log('[Generate] Starting document generation');
-    const input = req.body;
-
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error('Clé API Anthropic manquante');
-    }
-
-    const prompt = generatePrompt(input);
-    console.log('[Anthropic] Sending request to API');
-
-    const result = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }],
-    });
-
-    if (!result.content || result.content.length === 0) {
-      throw new Error('Réponse vide de l\'API Anthropic');
-    }
-
-    const content = result.content[0];
-    if (!content || content.type !== 'text') {
-      throw new Error('Format de réponse incorrect de l\'API Anthropic');
-    }
-
-    console.log('[Anthropic] Received response, length:', content.text.length);
-
-    const documentTitle = `3R_${input.type}_${input.clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`;
-    console.log('[Word] Starting Word document generation');
-    const wordBuffer = await generateWordDocument(content.text, documentTitle);
-    console.log('[Word] Document generated successfully');
-
-    // Définir les en-têtes pour forcer le téléchargement
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
-    res.setHeader('Content-Length', wordBuffer.length);
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-
-    // Envoyer le buffer
-    res.send(wordBuffer);
-  } catch (error) {
-    console.error('[Error] Document generation failed:', error);
-    res.status(500).json({
-      error: error instanceof Error ? error.message : 'Une erreur inattendue est survenue'
-    });
   }
 }
 
@@ -611,4 +578,66 @@ export function registerRoutes(app: Express): Server {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Types de documents supportés
+export enum DocumentType {
+  TECHNICAL_OFFER = 'Offre Technique',
+  SPECIFICATIONS = 'Cahier des Charges',
+  AUDIT_REPORT = 'Rapport d\'Audit'
+}
+
+async function generateDocumentHandler(req: any, res: any) {
+  try {
+    console.log('[Generate] Starting document generation');
+    const input = req.body;
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error('Clé API Anthropic manquante');
+    }
+
+    const prompt = generatePrompt(input);
+    console.log('[Anthropic] Sending request to API');
+
+    const result = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 4000,
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+    });
+
+    if (!result.content || result.content.length === 0) {
+      throw new Error('Réponse vide de l\'API Anthropic');
+    }
+
+    const content = result.content[0];
+    if (!content || content.type !== 'text') {
+      throw new Error('Format de réponse incorrect de l\'API Anthropic');
+    }
+
+    console.log('[Anthropic] Received response, length:', content.text.length);
+
+    const documentTitle = `3R_${input.type}_${input.clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`;
+    console.log('[Word] Starting Word document generation');
+    const wordBuffer = await generateWordDocument(content.text, documentTitle);
+    console.log('[Word] Document generated successfully');
+
+    // Définir les en-têtes pour forcer le téléchargement
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
+    res.setHeader('Content-Length', wordBuffer.length);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    // Envoyer le buffer
+    res.send(wordBuffer);
+  } catch (error) {
+    console.error('[Error] Document generation failed:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Une erreur inattendue est survenue'
+    });
+  }
 }
