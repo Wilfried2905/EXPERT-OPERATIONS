@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { DocumentType, generateDocument } from '@/services/documentGeneration';
 import { useRecommendationsStore } from '@/store/useRecommendationsStore';
 
@@ -24,6 +24,7 @@ export default function DocumentGenerator() {
     }
 
     setIsGenerating(true);
+    const toastId = 'document-generation';
 
     try {
       console.log(`[Generation] Starting document generation of type: ${documentType}`);
@@ -59,6 +60,7 @@ export default function DocumentGenerator() {
       await generateDocument(input, {
         onStart: () => {
           toast({
+            id: toastId,
             title: "Génération en cours",
             description: "Veuillez patienter pendant la génération du document...",
             duration: null,
@@ -66,6 +68,7 @@ export default function DocumentGenerator() {
         },
         onSuccess: () => {
           toast({
+            id: toastId,
             title: "Document généré",
             description: "Le document a été généré et téléchargé avec succès",
             duration: 3000,
@@ -73,6 +76,7 @@ export default function DocumentGenerator() {
         },
         onError: (error) => {
           toast({
+            id: toastId,
             title: "Erreur",
             description: error.message,
             variant: "destructive",
@@ -117,9 +121,10 @@ export default function DocumentGenerator() {
             className="w-full"
           >
             {isGenerating ? (
-              <>
-                <span className="animate-pulse">Génération en cours...</span>
-              </>
+              <div className="flex items-center space-x-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Génération en cours...</span>
+              </div>
             ) : (
               <>
                 <FileText className="w-4 h-4 mr-2" />

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } from 'docx';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -79,16 +79,35 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
 
     console.log('[Word] Created', sections.length, 'document sections');
 
+    // Création du document avec des styles améliorés
     const doc = new Document({
       sections: [{
-        properties: {},
+        properties: {
+          page: {
+            margin: {
+              top: 2800,
+              right: 2000,
+              bottom: 2000,
+              left: 2000,
+            },
+          },
+        },
         children: [
           new Paragraph({
             text: title,
             heading: HeadingLevel.TITLE,
             spacing: {
-              after: 400
-            }
+              before: 200,
+              after: 400,
+            },
+            border: {
+              bottom: {
+                color: "auto",
+                space: 1,
+                style: BorderStyle.SINGLE,
+                size: 6,
+              },
+            },
           }),
           ...sections.map(section => {
             switch (section.type) {
@@ -96,7 +115,15 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
                 return new Paragraph({
                   text: section.text,
                   heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 400, after: 200 }
+                  spacing: { before: 400, after: 200 },
+                  border: {
+                    bottom: {
+                      color: "auto",
+                      space: 1,
+                      style: BorderStyle.SINGLE,
+                      size: 3,
+                    },
+                  },
                 });
               case 'heading2':
                 return new Paragraph({
@@ -108,7 +135,8 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
                 return new Paragraph({
                   children: [new TextRun({ text: section.text })],
                   bullet: { level: 0 },
-                  spacing: { before: 100, after: 100 }
+                  spacing: { before: 100, after: 100 },
+                  indent: { left: 720 }, // ~0.5 inch
                 });
               default:
                 return new Paragraph({
@@ -168,8 +196,13 @@ async function generateDocumentHandler(req: any, res: any) {
     const wordBuffer = await generateWordDocument(content.text, documentTitle);
     console.log('[Word] Document generated successfully');
 
+    // Définir les en-têtes pour forcer le téléchargement
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
+    res.setHeader('Content-Length', wordBuffer.length);
+    res.setHeader('Cache-Control', 'no-cache');
+
+    // Envoyer le buffer
     res.send(wordBuffer);
   } catch (error) {
     console.error('[Error] Document generation failed:', error);
