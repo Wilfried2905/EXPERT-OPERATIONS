@@ -76,6 +76,10 @@ function generatePrompt(input: DocumentGenerationInput): string {
 En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel et accessible aux non-experts basé sur les informations suivantes.
 Utilisez un langage clair et précis, en expliquant les termes techniques lorsque nécessaire.
 
+POINT PRIORITAIRE :
+Il est IMPÉRATIF d'utiliser et de faire référence à la norme TIA-942 et ses normes affiliées tout au long de la rédaction.
+Toutes les recommandations, analyses et spécifications techniques doivent être alignées avec les exigences de la norme TIA-942.
+
 Client: ${input.clientInfo.name}
 Secteur: ${input.clientInfo.industry}
 Taille: ${input.clientInfo.size}
@@ -93,6 +97,9 @@ Instructions spécifiques:
 2. Expliquez brièvement les termes techniques à leur première apparition
 3. Utilisez des exemples concrets pour illustrer les concepts complexes
 4. Intégrez les recommandations et données collectées de manière cohérente
+5. Pour chaque section technique, citez les exigences spécifiques de la norme TIA-942 applicables
+6. Détaillez comment les solutions proposées répondent aux critères de la norme TIA-942
+7. Incluez les références aux normes affiliées pertinentes (électrique, climatisation, sécurité, etc.)
 `;
 
   switch (input.type) {

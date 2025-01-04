@@ -3,6 +3,8 @@ import { FileText, ChevronDown, Eye, Download, ArrowLeft } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { generateDocument, DocumentType } from '@/services/documentGeneration';
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentNavigationProps {
   section: 'collecte' | 'recommandations' | 'documents';
@@ -277,10 +279,68 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
     console.log(`Prévisualisation du document: ${docKey}`);
   };
 
-  const handleDownload = (e: React.MouseEvent, docKey: string, docTitle: string) => {
+  const handleDownload = async (e: React.MouseEvent, docKey: string, docTitle: string) => {
     e.stopPropagation();
     const fileName = generateFileName(docTitle);
-    console.log(`Téléchargement du document: ${fileName}`);
+    const { toast } = useToast();
+
+    try {
+      // Exemple de données - À adapter selon votre structure réelle
+      const input = {
+        type: docKey === 'offreTechnique'
+          ? DocumentType.TECHNICAL_OFFER
+          : docKey === 'cahierCharges'
+            ? DocumentType.SPECIFICATIONS
+            : DocumentType.AUDIT_REPORT,
+        clientInfo: {
+          name: clientName,
+          industry: "Technologie", // TODO: Récupérer depuis le store global
+          size: "Grande entreprise" // TODO: Récupérer depuis le store global
+        },
+        auditData: {
+          recommendations: [], // TODO: Récupérer depuis le store de recommandations
+          metrics: {
+            pue: [1.8, 1.9, 1.7],
+            availability: [99.9, 99.8, 99.95],
+            tierLevel: 3,
+            complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
+          },
+          infrastructure: {
+            rooms: [],
+            equipment: []
+          },
+          compliance: {
+            matrix: {},
+            score: 85
+          }
+        }
+      };
+
+      const document = await generateDocument(input);
+
+      // Créer un blob et déclencher le téléchargement
+      const blob = new Blob([document], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Document généré",
+        description: "Le document a été généré et téléchargé avec succès"
+      });
+    } catch (error) {
+      console.error('Erreur lors de la génération du document:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération du document",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -307,8 +367,8 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
                     className={`
                       p-6 rounded-lg border-2 cursor-pointer
                       transition-all duration-200 h-full
-                      ${isSelected 
-                        ? 'border-[#003366] text-[#003366] md:col-span-3' 
+                      ${isSelected
+                        ? 'border-[#003366] text-[#003366] md:col-span-3'
                         : 'border-gray-200 text-gray-400'}
                       hover:border-[#FF9900] hover:shadow-lg
                     `}
@@ -319,7 +379,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
                       <p className="text-sm text-gray-600">{doc.description}</p>
 
                       {!isSelected && (
-                        <Button 
+                        <Button
                           className="mt-4 bg-[#FF9900] hover:bg-[#e68a00] text-white"
                         >
                           Voir le détail
@@ -346,7 +406,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
                           </div>
 
                           <div className="flex justify-end space-x-4 mt-4">
-                            <Button 
+                            <Button
                               variant="outline"
                               className="flex items-center gap-2"
                               onClick={(e) => handlePreview(e, key)}
@@ -354,7 +414,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
                               <Eye className="h-4 w-4" />
                               Prévisualiser
                             </Button>
-                            <Button 
+                            <Button
                               className="flex items-center gap-2 bg-[#FF9900] hover:bg-[#e68a00] text-white relative"
                               onClick={(e) => handleDownload(e, key, doc.title)}
                             >
