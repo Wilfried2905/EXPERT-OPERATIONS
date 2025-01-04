@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Table, TableRow, TableCell, WidthType, TableOfContents } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Table, TableRow, TableCell, WidthType } from 'docx';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -234,42 +234,77 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
   try {
     console.log('[Word] Starting document generation with content length:', content.length);
 
-    // Création des sections du document
-    const sections = content.split('\n').reduce((acc, line) => {
+    // Extraction des titres pour la table des matières
+    const headings = content.split('\n').reduce((acc, line) => {
       if (line.trim().startsWith('# ')) {
-        // Nouvelle section principale (avec saut de page)
-        acc.push({
-          type: 'pageBreak'
-        });
-        acc.push({
-          type: 'heading1',
-          text: line.replace('# ', '').trim()
-        });
+        acc.push({ level: 1, text: line.replace('# ', '').trim() });
       } else if (line.trim().startsWith('## ')) {
-        acc.push({
-          type: 'heading2',
-          text: line.replace('## ', '').trim()
-        });
+        acc.push({ level: 2, text: line.replace('## ', '').trim() });
       } else if (line.trim().startsWith('### ')) {
-        acc.push({
-          type: 'heading3',
-          text: line.replace('### ', '').trim()
-        });
-      } else if (line.trim().startsWith('- ')) {
-        acc.push({
-          type: 'bullet',
-          text: line.replace('- ', '').trim()
-        });
-      } else if (line.trim()) {
-        acc.push({
-          type: 'paragraph',
-          text: line.trim()
-        });
+        acc.push({ level: 3, text: line.replace('### ', '').trim() });
       }
       return acc;
-    }, [] as Array<{type: string, text?: string}>);
+    }, [] as Array<{ level: number; text: string }>);
 
-    console.log('[Word] Created', sections.length, 'document sections');
+    // Création de la table des matières statique
+    const tocRows = headings.map((heading, index) => {
+      const indent = '  '.repeat(heading.level - 1);
+      return new TableRow({
+        children: [
+          new TableCell({
+            width: {
+              size: 90,
+              type: WidthType.PERCENTAGE,
+            },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${indent}${heading.text}`,
+                    bold: heading.level === 1,
+                    size: 24,
+                  }),
+                ],
+                indent: { left: (heading.level - 1) * 360 },
+              }),
+            ],
+          }),
+          new TableCell({
+            width: {
+              size: 10,
+              type: WidthType.PERCENTAGE,
+            },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${index + 1}`,
+                    size: 24,
+                  }),
+                ],
+                alignment: AlignmentType.RIGHT,
+              }),
+            ],
+          }),
+        ],
+      });
+    });
+
+    const tocTable = new Table({
+      width: {
+        size: 100,
+        type: WidthType.PERCENTAGE,
+      },
+      borders: {
+        top: { style: BorderStyle.NONE },
+        bottom: { style: BorderStyle.NONE },
+        left: { style: BorderStyle.NONE },
+        right: { style: BorderStyle.NONE },
+        insideHorizontal: { style: BorderStyle.NONE },
+        insideVertical: { style: BorderStyle.NONE },
+      },
+      rows: tocRows,
+    });
 
     // Création du document avec des styles améliorés
     const doc = new Document({
@@ -376,73 +411,55 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
             text: "",
             pageBreakBefore: true,
           }),
-          // Table des matières
+          // Table des matières statique
           new Paragraph({
             text: "Table des matières",
             heading: HeadingLevel.HEADING_1,
             spacing: { before: 400, after: 400 },
             alignment: AlignmentType.CENTER,
           }),
-          new TableOfContents("Table des matières", {
-            hyperlink: true,
-            headingStyleRange: "1-3",
-          }),
+          tocTable,
           // Saut de page après la table des matières
           new Paragraph({
             text: "",
             pageBreakBefore: true,
           }),
           // Contenu du document
-          ...sections.map(section => {
-            switch (section.type) {
-              case 'pageBreak':
-                return new Paragraph({
-                  text: "",
-                  pageBreakBefore: true,
-                });
-              case 'heading1':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 400, after: 200 },
-                  alignment: AlignmentType.LEFT,
-                  border: {
-                    bottom: {
-                      color: "auto",
-                      space: 1,
-                      style: BorderStyle.SINGLE,
-                      size: 6,
-                    },
-                  },
-                });
-              case 'heading2':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { before: 300, after: 200 },
-                  alignment: AlignmentType.LEFT,
-                });
-              case 'heading3':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_3,
-                  spacing: { before: 200, after: 100 },
-                  alignment: AlignmentType.LEFT,
-                });
-              case 'bullet':
-                return new Paragraph({
-                  text: section.text,
-                  bullet: { level: 0 },
-                  spacing: { before: 100, after: 100 },
-                  indent: { left: 720 },
-                });
-              default:
-                return new Paragraph({
-                  text: section.text,
-                  spacing: { before: 100, after: 100 },
-                });
+          ...content.split('\n').map(line => {
+            if (line.trim().startsWith('# ')) {
+              return new Paragraph({
+                text: line.replace('# ', '').trim(),
+                heading: HeadingLevel.HEADING_1,
+                spacing: { before: 400, after: 200 },
+                pageBreakBefore: true,
+              });
+            } else if (line.trim().startsWith('## ')) {
+              return new Paragraph({
+                text: line.replace('## ', '').trim(),
+                heading: HeadingLevel.HEADING_2,
+                spacing: { before: 300, after: 200 },
+              });
+            } else if (line.trim().startsWith('### ')) {
+              return new Paragraph({
+                text: line.replace('### ', '').trim(),
+                heading: HeadingLevel.HEADING_3,
+                spacing: { before: 200, after: 100 },
+              });
+            } else if (line.trim().startsWith('- ')) {
+              return new Paragraph({
+                text: line.replace('- ', '').trim(),
+                bullet: { level: 0 },
+                spacing: { before: 100, after: 100 },
+                indent: { left: 720 },
+              });
+            } else if (line.trim()) {
+              return new Paragraph({
+                text: line.trim(),
+                spacing: { before: 100, after: 100 },
+              });
             }
-          })
+            return null;
+          }).filter(Boolean),
         ],
       }],
     });
