@@ -200,7 +200,9 @@ async function generateDocumentHandler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
     res.setHeader('Content-Length', wordBuffer.length);
-    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
 
     // Envoyer le buffer
     res.send(wordBuffer);

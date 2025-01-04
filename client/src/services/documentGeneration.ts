@@ -34,56 +34,27 @@ interface DocumentGenerationInput {
   };
 }
 
-interface GenerationCallbacks {
-  onStart?: () => void;
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}
+export async function generateDocument(input: DocumentGenerationInput): Promise<Blob> {
+  console.log('[Generation] Starting document generation process');
 
-export async function generateDocument(
-  input: DocumentGenerationInput, 
-  callbacks?: GenerationCallbacks
-): Promise<void> {
-  try {
-    console.log('[Generation] Starting document generation process');
-    callbacks?.onStart?.();
+  const response = await fetch('/api/anthropic/document', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input)
+  });
 
-    const response = await fetch('/api/anthropic/document', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(input)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erreur lors de la génération du document');
-    }
-
-    // Créer un blob à partir de la réponse
-    const blob = await response.blob();
-
-    // Créer un lien de téléchargement
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const filename = response.headers.get('content-disposition')?.split('filename=')[1].replace(/"/g, '') || 
-                    `3R_${input.type}_${input.clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}.docx`;
-
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-
-    // Nettoyer
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-
-    console.log('[Generation] Document generated and download started');
-    callbacks?.onSuccess?.();
-  } catch (error) {
-    console.error('[Error] Document generation failed:', error);
-    callbacks?.onError?.(error instanceof Error ? error : new Error('Une erreur inattendue est survenue'));
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Erreur lors de la génération du document');
   }
+
+  // Récupérer le blob directement de la réponse
+  const blob = await response.blob();
+  if (!blob) {
+    throw new Error('Le document généré est invalide');
+  }
+
+  return blob;
 }
