@@ -39,7 +39,24 @@ interface DocumentGenerationInput {
   };
 }
 
+// Interface pour le tracking des logs
+interface GenerationLog {
+  timestamp: string;
+  documentType: DocumentType;
+  clientName: string;
+  status: 'started' | 'completed' | 'failed';
+  error?: string;
+  duration?: number;
+}
+
+const generationLogs: GenerationLog[] = [];
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+function logGeneration(log: GenerationLog) {
+  generationLogs.push(log);
+  console.log(`[Document Generation] ${log.timestamp} - ${log.status} - ${log.documentType} for ${log.clientName}${log.error ? ` - Error: ${log.error}` : ''}`);
+}
 
 async function retryWithExponentialBackoff<T>(
   operation: () => Promise<T>,
@@ -54,11 +71,12 @@ async function retryWithExponentialBackoff<T>(
       if (retries > 0) {
         const delayTime = initialDelay * Math.pow(2, retries - 1);
         await delay(delayTime);
-        console.log(`Retrying request... Attempt ${retries + 1}/${maxRetries}`);
+        console.log(`[Retry] Attempt ${retries + 1}/${maxRetries} after ${delayTime}ms delay`);
       }
       return await operation();
     } catch (error) {
       lastError = error as Error;
+      console.error(`[Retry] Error on attempt ${retries + 1}:`, error);
       if (error instanceof Error && (error.message.includes('overloaded') || error.message.includes('529'))) {
         retries++;
         continue;
@@ -270,20 +288,32 @@ Générez un rapport d'audit détaillé selon le plan suivant :
 }
 
 export async function generateDocument(input: DocumentGenerationInput): Promise<string> {
-  if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
-    throw new Error('VITE_ANTHROPIC_API_KEY is not set. Please check your environment variables.');
-  }
+  const startTime = Date.now();
 
-  const anthropic = new Anthropic({
-    apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  // Log generation start
+  logGeneration({
+    timestamp: new Date().toISOString(),
+    documentType: input.type,
+    clientName: input.clientInfo.name,
+    status: 'started'
   });
 
-  const prompt = generatePrompt(input);
-
   try {
+    if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
+      throw new Error('VITE_ANTHROPIC_API_KEY is not set. Please check your environment variables.');
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+    });
+
+    const prompt = generatePrompt(input);
+    console.log(`[Generation] Starting generation for ${input.type} - Client: ${input.clientInfo.name}`);
+
     const response = await retryWithExponentialBackoff(async () => {
+      console.log('[API] Sending request to Anthropic API...');
       const result = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-sonnet-20240229',
         max_tokens: 4000,
         messages: [
           {
@@ -305,9 +335,51 @@ export async function generateDocument(input: DocumentGenerationInput): Promise<
       return content.text;
     });
 
+    // Log successful completion
+    logGeneration({
+      timestamp: new Date().toISOString(),
+      documentType: input.type,
+      clientName: input.clientInfo.name,
+      status: 'completed',
+      duration: Date.now() - startTime
+    });
+
     return response;
   } catch (error) {
+    // Log failure
+    logGeneration({
+      timestamp: new Date().toISOString(),
+      documentType: input.type,
+      clientName: input.clientInfo.name,
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration: Date.now() - startTime
+    });
+
     console.error('Erreur lors de la génération du document:', error);
     throw new Error('Une erreur est survenue lors de la génération du document. Veuillez réessayer.');
   }
+}
+
+// Nouvelle fonction pour récupérer les logs de génération
+export function getGenerationLogs(): GenerationLog[] {
+  return generationLogs;
+}
+
+// Fonction pour analyser les logs
+export function analyzeGenerationLogs() {
+  const totalAttempts = generationLogs.length;
+  const failures = generationLogs.filter(log => log.status === 'failed').length;
+  const successes = generationLogs.filter(log => log.status === 'completed').length;
+  const averageDuration = generationLogs
+    .filter(log => log.duration)
+    .reduce((acc, log) => acc + (log.duration || 0), 0) / successes;
+
+  return {
+    totalAttempts,
+    failures,
+    successes,
+    successRate: (successes / totalAttempts) * 100,
+    averageDuration
+  };
 }

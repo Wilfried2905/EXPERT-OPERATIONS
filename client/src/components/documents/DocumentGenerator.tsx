@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText } from 'lucide-react';
-import { DocumentType, generateDocument } from '@/services/documentGeneration';
+import { FileText, AlertCircle } from 'lucide-react';
+import { DocumentType, generateDocument, getGenerationLogs, analyzeGenerationLogs } from '@/services/documentGeneration';
 import { useRecommendationsStore } from '@/store/useRecommendationsStore';
 
 export default function DocumentGenerator() {
   const [documentType, setDocumentType] = useState<DocumentType | ''>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStats, setGenerationStats] = useState<{
+    totalAttempts: number;
+    failures: number;
+    successes: number;
+    successRate: number;
+    averageDuration: number;
+  } | null>(null);
   const { toast } = useToast();
   const { recommendations } = useRecommendationsStore();
+
+  useEffect(() => {
+    const stats = analyzeGenerationLogs();
+    setGenerationStats(stats);
+  }, [isGenerating]);
 
   const handleGenerate = async () => {
     if (!documentType) {
@@ -25,8 +37,8 @@ export default function DocumentGenerator() {
 
     try {
       setIsGenerating(true);
+      console.log(`[Generation] Starting document generation of type: ${documentType}`);
 
-      // Exemple de données - À adapter selon votre structure réelle
       const input = {
         type: documentType,
         clientInfo: {
@@ -53,28 +65,36 @@ export default function DocumentGenerator() {
         }
       };
 
+      console.log('[Generation] Calling generateDocument with input:', JSON.stringify(input, null, 2));
       const document = await generateDocument(input);
+      console.log('[Generation] Document generated successfully');
 
       // Créer un blob et déclencher le téléchargement
-      const blob = new Blob([document], { type: 'text/plain' });
+      console.log('[Download] Preparing document for download');
+      const blob = new Blob([document], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
       a.download = `3R_${documentType.toLowerCase()}_${new Date().toISOString().split('T')[0]}.docx`;
+
+      console.log('[Download] Triggering download');
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      console.log('[Download] Download completed');
 
       toast({
         title: "Document généré",
-        description: "Le document a été généré avec succès",
+        description: "Le document a été généré et téléchargé avec succès"
       });
     } catch (error) {
-      console.error('Erreur lors de la génération:', error);
+      console.error('[Error] Document generation failed:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la génération du document",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération du document",
         variant: "destructive"
       });
     } finally {
@@ -105,6 +125,28 @@ export default function DocumentGenerator() {
               </SelectContent>
             </Select>
           </div>
+
+          {generationStats && (
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+              <h3 className="font-medium">Statistiques de génération</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p>Tentatives totales: {generationStats.totalAttempts}</p>
+                  <p>Taux de succès: {generationStats.successRate.toFixed(1)}%</p>
+                </div>
+                <div>
+                  <p>Succès: {generationStats.successes}</p>
+                  <p>Échecs: {generationStats.failures}</p>
+                </div>
+              </div>
+              {generationStats.failures > 0 && (
+                <div className="flex items-center gap-2 text-amber-600">
+                  <AlertCircle className="w-4 h-4" />
+                  <p>Des erreurs ont été détectées dans les générations précédentes</p>
+                </div>
+              )}
+            </div>
+          )}
 
           <Button
             onClick={handleGenerate}
