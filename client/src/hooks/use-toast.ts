@@ -72,6 +72,7 @@ function reducer(state: State, action: Action): State {
 
     case "DISMISS_TOAST": {
       const { toastId } = action;
+
       return {
         ...state,
         toasts: state.toasts.map((t) =>
@@ -170,7 +171,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 export function useToast() {
   const context = React.useContext(ToastContext);
 
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useToast must be used within a ToastProvider");
   }
 
