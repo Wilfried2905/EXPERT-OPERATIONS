@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType } from 'docx';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -18,8 +18,70 @@ const anthropic = new Anthropic({
 
 function generatePrompt(input: any): string {
   const baseContext = `
-Agissez en tant qu'expert en datacenters et infrastructure IT, génération d'un document professionnel basé sur ces informations :
+Agissez en tant qu'expert en datacenters et infrastructure IT, génération d'un document professionnel de type "Offre Technique" en suivant strictement cette structure :
 
+FORMAT DU DOCUMENT:
+Créez un document professionnel avec :
+1. Une page de garde contenant :
+   - Logo et nom "3R TECHNOLOGIE"
+   - Titre : "Offre Technique"
+   - Client : ${input.clientInfo.name}
+   - Date : ${new Date().toLocaleDateString('fr-FR')}
+
+2. Une table des matières détaillée suivant ce plan :
+
+SOMMAIRE
+
+1. Introduction
+   - Présentation de 3R TECHNOLOGIE
+   - Expertise en datacenters
+   - Certifications TIA-942
+   - Équipe projet et qualifications
+   - Références projets similaires
+   - Méthodologie de gestion de projet
+   - Partenariats stratégiques
+
+2. Analyse des Besoins
+   - Contexte et enjeux client
+   - Objectifs de conformité TIA-942
+   - Contraintes techniques et opérationnelles
+   - Exigences de performance
+   - Parties prenantes et organisation
+   - Critères de succès du projet
+
+3. Architecture Technique TIA-942
+   - Classification Tier visée
+   - Architecture générale
+   - Redondance N+1/2N selon Tier
+   - Points de défaillance unique (SPOF)
+   - Évolutivité et scalabilité
+   - Indicateurs de performance (PUE, DCIE)
+   - Stratégie de maintenance
+
+4. Infrastructures Critiques
+   - Alimentation électrique
+   - Système de refroidissement
+   - Sécurité physique
+   - Connectivité
+   - Plan de continuité d'activité
+   - Procédures d'exploitation
+
+5. Conformité et Certification
+   - Analyse des écarts TIA-942
+   - Plan de mise en conformité
+   - Processus de certification
+   - Documentation requise
+   - Tests et validations
+
+6. Planification et Budget
+   - Planning détaillé
+   - Budget prévisionnel
+   - Analyse des risques
+   - Plan de transition
+   - Plan de formation
+   - Conditions de garantie
+
+CONTEXTE CLIENT:
 Client: ${input.clientInfo.name}
 Secteur: ${input.clientInfo.industry}
 Taille: ${input.clientInfo.size}
@@ -33,17 +95,20 @@ Métriques clés:
 Score de conformité global: ${input.auditData.compliance.score}%
 
 INSTRUCTIONS IMPORTANTES:
-1. Rédigez le document en français
-2. Utilisez un style professionnel mais accessible
-3. Expliquez les termes techniques
-4. Référencez systématiquement la norme TIA-942
-5. Structurez le document avec des sections claires
-6. Incluez des recommandations basées sur les données d'audit
+1. Rédigez le document en français professionnel
+2. Utilisez un style technique mais accessible
+3. Incluez des exemples concrets et des références à la norme TIA-942
+4. Utilisez les données du contexte client pour personnaliser le contenu
+5. Ajoutez une page de garde professionnelle
+6. Incluez une table des matières structurée
+7. Respectez la hiérarchie des titres fournie
 
-FORMAT DU DOCUMENT:
-- Démarrez chaque section principale par "# Titre"
-- Utilisez "## Sous-titre" pour les sous-sections
-- Utilisez des listes à puces avec "-" pour les énumérations`;
+FORMAT DU CONTENU:
+- Utilisez "# " pour les titres de niveau 1
+- Utilisez "## " pour les sous-titres
+- Utilisez "### " pour les sections détaillées
+- Utilisez des listes à puces avec "-" pour les énumérations
+- Séparez chaque section principale par une nouvelle page`;
 
   return baseContext;
 }
@@ -52,8 +117,13 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
   try {
     console.log('[Word] Starting document generation with content length:', content.length);
 
+    // Création des sections du document
     const sections = content.split('\n').reduce((acc, line) => {
       if (line.trim().startsWith('# ')) {
+        // Nouvelle section principale (avec saut de page)
+        acc.push({
+          type: 'pageBreak'
+        });
         acc.push({
           type: 'heading1',
           text: line.replace('# ', '').trim()
@@ -62,6 +132,11 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
         acc.push({
           type: 'heading2',
           text: line.replace('## ', '').trim()
+        });
+      } else if (line.trim().startsWith('### ')) {
+        acc.push({
+          type: 'heading3',
+          text: line.replace('### ', '').trim()
         });
       } else if (line.trim().startsWith('- ')) {
         acc.push({
@@ -75,7 +150,7 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
         });
       }
       return acc;
-    }, [] as Array<{type: string, text: string}>);
+    }, [] as Array<{type: string, text?: string}>);
 
     console.log('[Word] Created', sections.length, 'document sections');
 
@@ -93,35 +168,61 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
           },
         },
         children: [
+          // Page de garde
+          new Paragraph({
+            text: "3R TECHNOLOGIE",
+            heading: HeadingLevel.TITLE,
+            spacing: { before: 700, after: 400 },
+            alignment: AlignmentType.CENTER,
+          }),
           new Paragraph({
             text: title,
-            heading: HeadingLevel.TITLE,
-            spacing: {
-              before: 200,
-              after: 400,
-            },
-            border: {
-              bottom: {
-                color: "auto",
-                space: 1,
-                style: BorderStyle.SINGLE,
-                size: 6,
-              },
-            },
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 400 },
+            alignment: AlignmentType.CENTER,
           }),
+          new Paragraph({
+            text: new Date().toLocaleDateString('fr-FR'),
+            spacing: { before: 200, after: 400 },
+            alignment: AlignmentType.CENTER,
+          }),
+          // Saut de page après la page de garde
+          new Paragraph({
+            text: "",
+            pageBreakBefore: true,
+          }),
+          // Table des matières
+          new Paragraph({
+            text: "Table des matières",
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 400 },
+            alignment: AlignmentType.CENTER,
+          }),
+          // Saut de page après la table des matières
+          new Paragraph({
+            text: "",
+            pageBreakBefore: true,
+          }),
+          // Contenu du document
           ...sections.map(section => {
             switch (section.type) {
+              case 'pageBreak':
+                return new Paragraph({
+                  text: "",
+                  pageBreakBefore: true,
+                });
               case 'heading1':
                 return new Paragraph({
                   text: section.text,
                   heading: HeadingLevel.HEADING_1,
                   spacing: { before: 400, after: 200 },
+                  alignment: AlignmentType.LEFT,
                   border: {
                     bottom: {
                       color: "auto",
                       space: 1,
                       style: BorderStyle.SINGLE,
-                      size: 3,
+                      size: 6,
                     },
                   },
                 });
@@ -129,19 +230,27 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
                 return new Paragraph({
                   text: section.text,
                   heading: HeadingLevel.HEADING_2,
-                  spacing: { before: 300, after: 200 }
+                  spacing: { before: 300, after: 200 },
+                  alignment: AlignmentType.LEFT,
+                });
+              case 'heading3':
+                return new Paragraph({
+                  text: section.text,
+                  heading: HeadingLevel.HEADING_3,
+                  spacing: { before: 200, after: 100 },
+                  alignment: AlignmentType.LEFT,
                 });
               case 'bullet':
                 return new Paragraph({
-                  children: [new TextRun({ text: section.text })],
+                  text: section.text,
                   bullet: { level: 0 },
                   spacing: { before: 100, after: 100 },
-                  indent: { left: 720 }, // ~0.5 inch
+                  indent: { left: 720 },
                 });
               default:
                 return new Paragraph({
-                  children: [new TextRun({ text: section.text })],
-                  spacing: { before: 100, after: 100 }
+                  text: section.text,
+                  spacing: { before: 100, after: 100 },
                 });
             }
           })
