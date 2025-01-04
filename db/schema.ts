@@ -118,6 +118,20 @@ export const equipmentManufacturers = pgTable("equipment_manufacturers", {
   }).notNull(),
 });
 
+// New table for document generation logs
+export const documentGenerationLogs = pgTable("document_generation_logs", {
+  id: serial("id").primaryKey(),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  documentType: text("document_type").notNull(),
+  clientName: text("client_name").notNull(),
+  status: text("status", { enum: ['started', 'completed', 'failed'] }).notNull(),
+  operationId: integer("operation_id").references(() => operations.id),
+  userId: integer("user_id").references(() => users.id),
+  error: text("error"),
+  duration: integer("duration"),
+  metadata: jsonb("metadata").default({}).notNull(),
+});
+
 // Define relationships
 export const userRelations = relations(users, ({ many }) => ({
   operations: many(operations),
@@ -167,6 +181,18 @@ export const equipmentManufacturerRelations = relations(equipmentManufacturers, 
   }),
 }));
 
+// Add relations
+export const documentGenerationLogRelations = relations(documentGenerationLogs, ({ one }) => ({
+  operation: one(operations, {
+    fields: [documentGenerationLogs.operationId],
+    references: [operations.id],
+  }),
+  user: one(users, {
+    fields: [documentGenerationLogs.userId],
+    references: [users.id],
+  }),
+}));
+
 
 // Create Zod schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -190,6 +216,10 @@ export const selectManufacturerSchema = createSelectSchema(manufacturers);
 export const insertEquipmentSchema = createInsertSchema(equipments);
 export const selectEquipmentSchema = createSelectSchema(equipments);
 
+// Add schema validation
+export const insertDocumentGenerationLogSchema = createInsertSchema(documentGenerationLogs);
+export const selectDocumentGenerationLogSchema = createSelectSchema(documentGenerationLogs);
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -209,3 +239,7 @@ export type Manufacturer = typeof manufacturers.$inferSelect;
 export type InsertManufacturer = typeof manufacturers.$inferInsert;
 export type Equipment = typeof equipments.$inferSelect;
 export type InsertEquipment = typeof equipments.$inferInsert;
+
+// Add type
+export type DocumentGenerationLog = typeof documentGenerationLogs.$inferSelect;
+export type InsertDocumentGenerationLog = typeof documentGenerationLogs.$inferInsert;
