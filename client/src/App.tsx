@@ -13,6 +13,7 @@ import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
 import DocumentNavigation from "@/components/operations/DocumentNavigation";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   const { user, isLoading } = useUser();
@@ -106,6 +107,7 @@ function App() {
           </div>
         </Route>
       </Switch>
+      <Toaster />
     </MainLayout>
   );
 }

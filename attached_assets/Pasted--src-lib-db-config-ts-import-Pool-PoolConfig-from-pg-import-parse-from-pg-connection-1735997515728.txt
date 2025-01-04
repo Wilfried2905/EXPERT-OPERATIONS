@@ -1,0 +1,108 @@
+// src/lib/db/config.ts
+import { Pool, PoolConfig } from 'pg'
+import { parse } from 'pg-connection-string'
+
+// Fonction pour valider l'URL de connexion
+function validateDatabaseUrl(url: string | undefined): string {
+  if (!url) {
+    throw new Error('DATABASE_URL is not defined in environment variables')
+  }
+  try {
+    parse(url) // Vérifie si l'URL est valide
+    return url
+  } catch (error) {
+    throw new Error(`Invalid DATABASE_URL: ${error.message}`)
+  }
+}
+
+// Configuration du pool de connexions
+function createPoolConfig(): PoolConfig {
+  const databaseUrl = validateDatabaseUrl(process.env.DATABASE_URL)
+  const config = parse(databaseUrl)
+
+  return {
+    user: config.user,
+    password: config.password,
+    host: config.host,
+    port: Number(config.port),
+    database: config.database,
+    ssl: process.env.NODE_ENV === 'production' 
+      ? { rejectUnauthorized: false }
+      : false,
+    max: 20, // nombre maximum de clients dans le pool
+    idleTimeoutMillis: 30000, // temps maximum d'inactivité d'un client
+    connectionTimeoutMillis: 2000, // temps maximum pour établir une connexion
+  }
+}
+
+// Création du pool de connexions
+const pool = new Pool(createPoolConfig())
+
+// Gestion des événements du pool
+pool.on('connect', () => {
+  console.log('Database pool client connected')
+})
+
+pool.on('error', (err) => {
+  console.error('Unexpected database pool error:', err)
+})
+
+// Classe pour gérer les connexions à la base de données
+class Database {
+  private static instance: Database
+  private pool: Pool
+
+  private constructor() {
+    this.pool = pool
+  }
+
+  public static getInstance(): Database {
+    if (!Database.instance) {
+      Database.instance = new Database()
+    }
+    return Database.instance
+  }
+
+  // Méthode pour exécuter une requête
+  public async query<T>(text: string, params?: any[]): Promise<T[]> {
+    const start = Date.now()
+    try {
+      const result = await this.pool.query(text, params)
+      const duration = Date.now() - start
+      console.log('Executed query', { text, duration, rows: result.rowCount })
+      return result.rows
+    } catch (error) {
+      console.error('Database query error:', error)
+      throw new Error(`Database query failed: ${error.message}`)
+    }
+  }
+
+  // Méthode pour obtenir un client dédié
+  public async getClient() {
+    const client = await this.pool.connect()
+    const query = client.query.bind(client)
+    const release = client.release.bind(client)
+
+    // Surcharge de la méthode release pour le logging
+    client.release = () => {
+      client.release = release
+      return release()
+    }
+
+    return client
+  }
+
+  // Méthode pour tester la connexion
+  public async testConnection(): Promise<boolean> {
+    try {
+      await this.query('SELECT NOW()')
+      return true
+    } catch (error) {
+      console.error('Database connection test failed:', error)
+      return false
+    }
+  }
+}
+
+export const db = Database.getInstance()
+export default db
