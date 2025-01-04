@@ -4,6 +4,13 @@ import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 
+// Types de documents supportés
+export enum DocumentType {
+  TECHNICAL_OFFER = 'Offre Technique',
+  SPECIFICATIONS = 'Cahier des Charges',
+  AUDIT_REPORT = 'Rapport d\'Audit'
+}
+
 // the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -156,7 +163,7 @@ async function generateDocumentHandler(req: any, res: any) {
 
     console.log('[Anthropic] Received response, length:', content.text.length);
 
-    const documentTitle = `3R_${input.type}_${input.clientInfo.name}_${new Date().toISOString().split('T')[0]}`;
+    const documentTitle = `3R_${input.type}_${input.clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`;
     console.log('[Word] Starting Word document generation');
     const wordBuffer = await generateWordDocument(content.text, documentTitle);
     console.log('[Word] Document generated successfully');
