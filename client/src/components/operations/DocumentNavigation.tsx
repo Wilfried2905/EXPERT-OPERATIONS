@@ -324,25 +324,15 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
       const blob = new Blob([document], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
+      const url = window.URL.createObjectURL(blob);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = fileName;
 
-      console.log(`[Download] Document size: ${blob.size} bytes`);
-      if (blob.size === 0) {
-        throw new Error('Le document généré est vide');
-      }
-
-      console.log('[Download] Creating download URL');
-      const url = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = fileName;
-
-      console.log('[Download] Triggering download');
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
-
-      console.log('[Download] Download process completed');
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       toast({
         title: "Document généré",
