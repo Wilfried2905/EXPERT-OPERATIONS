@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Table, TableRow, TableCell, WidthType, TableOfContents } from 'docx';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -273,6 +273,74 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
 
     // Création du document avec des styles améliorés
     const doc = new Document({
+      styles: {
+        paragraphStyles: [
+          {
+            id: "Title",
+            name: "Title",
+            basedOn: "Normal",
+            next: "Normal",
+            quickFormat: true,
+            run: {
+              size: 44,
+              bold: true,
+              color: "000000",
+            },
+            paragraph: {
+              spacing: { before: 340, after: 340 },
+              alignment: AlignmentType.CENTER,
+            },
+          },
+          {
+            id: "Heading1",
+            name: "Heading 1",
+            basedOn: "Normal",
+            next: "Normal",
+            quickFormat: true,
+            run: {
+              size: 36,
+              bold: true,
+              color: "000000",
+            },
+            paragraph: {
+              spacing: { before: 240, after: 120 },
+              outlineLevel: 0,
+            },
+          },
+          {
+            id: "Heading2",
+            name: "Heading 2",
+            basedOn: "Normal",
+            next: "Normal",
+            quickFormat: true,
+            run: {
+              size: 32,
+              bold: true,
+              color: "000000",
+            },
+            paragraph: {
+              spacing: { before: 240, after: 120 },
+              outlineLevel: 1,
+            },
+          },
+          {
+            id: "Heading3",
+            name: "Heading 3",
+            basedOn: "Normal",
+            next: "Normal",
+            quickFormat: true,
+            run: {
+              size: 28,
+              bold: true,
+              color: "000000",
+            },
+            paragraph: {
+              spacing: { before: 240, after: 120 },
+              outlineLevel: 2,
+            },
+          },
+        ],
+      },
       sections: [{
         properties: {
           page: {
@@ -314,6 +382,10 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
             heading: HeadingLevel.HEADING_1,
             spacing: { before: 400, after: 400 },
             alignment: AlignmentType.CENTER,
+          }),
+          new TableOfContents("Table des matières", {
+            hyperlink: true,
+            headingStyleRange: "1-3",
           }),
           // Saut de page après la table des matières
           new Paragraph({
