@@ -17,21 +17,12 @@ const anthropic = new Anthropic({
 });
 
 function generatePrompt(input: any): string {
-  const baseContext = `
-Agissez en tant qu'expert en datacenters et infrastructure IT, génération d'un document professionnel de type "Offre Technique" en suivant strictement cette structure :
+  // Sélectionner le plan selon le type de document
+  let documentStructure = '';
 
-FORMAT DU DOCUMENT:
-Créez un document professionnel avec :
-1. Une page de garde contenant :
-   - Logo et nom "3R TECHNOLOGIE"
-   - Titre : "Offre Technique"
-   - Client : ${input.clientInfo.name}
-   - Date : ${new Date().toLocaleDateString('fr-FR')}
-
-2. Une table des matières détaillée suivant ce plan :
-
-SOMMAIRE
-
+  switch (input.type) {
+    case DocumentType.TECHNICAL_OFFER:
+      documentStructure = `
 1. Introduction
    - Présentation de 3R TECHNOLOGIE
    - Expertise en datacenters
@@ -79,7 +70,133 @@ SOMMAIRE
    - Analyse des risques
    - Plan de transition
    - Plan de formation
+   - Conditions de garantie`;
+      break;
+
+    case DocumentType.SPECIFICATIONS:
+      documentStructure = `
+1. Présentation du Projet
+   - Contexte général
+   - Objectifs du projet
+   - Périmètre d'intervention
+   - Classification Tier visée
+   - Parties prenantes
+   - Budget prévisionnel
+   - Critères de succès
+
+2. Exigences TIA-942
+   - Conformité architecturale
+   - Conformité électrique
+   - Conformité climatisation
+   - Conformité sécurité
+   - Niveaux de redondance requis
+   - Métriques de performance attendues
+   - Exigences de monitoring
+
+3. Spécifications Techniques
+   - Architecture physique
+   - Infrastructure électrique
+   - Système de refroidissement
+   - Sécurité et monitoring
+   - Infrastructure réseau
+   - Plan de continuité d'activité
+   - Évolutivité technique
+
+4. Exigences Opérationnelles
+   - Disponibilité et SLA
+   - Maintenance préventive
+   - Documentation technique
+   - Formation du personnel
+   - Gestion des incidents
+   - Procédures d'exploitation
+   - Exigences de reporting
+
+5. Contraintes et Prérequis
+   - Contraintes site et bâtiment
+   - Contraintes réglementaires
+   - Contraintes techniques spécifiques
+   - Prérequis d'installation
+   - Normes applicables
+
+6. Modalités de Réception
+   - Critères d'acceptation
+   - Processus de validation
+   - Tests de réception
+   - Livrables attendus
    - Conditions de garantie
+   - Conditions contractuelles`;
+      break;
+
+    case DocumentType.AUDIT_REPORT:
+      documentStructure = `
+1. Résumé Exécutif
+   - Objectifs de l'audit
+   - Méthodologie d'évaluation
+   - Synthèse des conclusions majeures
+   - Recommandations prioritaires
+   - Impact financier des non-conformités
+   - Analyse des risques
+   - ROI des améliorations proposées
+
+2. Présentation du Site Audité
+   - Informations client
+   - Description des installations
+   - Configuration des salles techniques
+   - Inventaire des équipements critiques
+   - Organisation opérationnelle
+   - Processus actuels
+   - Historique des incidents
+
+3. Analyse de Conformité TIA-942
+   - Architecture et Structure
+   - Système Électrique
+   - Système de Refroidissement
+   - Sécurité et Contrôle d'Accès
+   - Conformité des Infrastructures
+   - Points d'Amélioration
+   - Comparaison avec les standards du marché
+   - Évaluation de la maturité opérationnelle
+   - Analyse des procédures
+
+4. Recommandations
+   - Améliorations Prioritaires
+   - Plan d'Action Détaillé
+   - Estimations Budgétaires
+   - Calendrier de Mise en Œuvre
+   - Analyse coût-bénéfice
+   - Scénarios alternatifs
+   - Impact opérationnel
+   - Plan de formation
+   - Indicateurs de suivi
+
+5. Annexes
+   - Rapports de Tests
+   - Documentation Technique
+   - Photos et Schémas
+   - Références Normatives
+   - Matrices de conformité
+   - Historique des mesures
+   - Fiches d'incidents
+   - Plans d'actions correctives`;
+      break;
+  }
+
+  const baseContext = `
+Agissez en tant qu'expert en datacenters et infrastructure IT, génération d'un document professionnel de type "${input.type}" en suivant strictement cette structure :
+
+FORMAT DU DOCUMENT:
+Créez un document professionnel avec :
+1. Une page de garde contenant :
+   - Logo et nom "3R TECHNOLOGIE"
+   - Titre : "${input.type}"
+   - Client : ${input.clientInfo.name}
+   - Date : ${new Date().toLocaleDateString('fr-FR')}
+
+2. Une table des matières détaillée suivant ce plan :
+
+SOMMAIRE
+
+${documentStructure}
 
 CONTEXTE CLIENT:
 Client: ${input.clientInfo.name}
