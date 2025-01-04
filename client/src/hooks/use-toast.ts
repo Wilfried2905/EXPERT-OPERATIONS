@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-
+// Hooks
+import * as React from "react";
 import type {
   ToastActionElement,
   ToastProps,
@@ -71,7 +71,7 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout);
 };
 
-export const reducer = (state: State, action: Action): State => {
+const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
       return {
@@ -124,66 +124,70 @@ export const reducer = (state: State, action: Action): State => {
   }
 };
 
-const listeners: Array<(state: State) => void> = [];
+// Créer un contexte React pour le state des toasts
+const ToastContext = React.createContext<{
+  state: State;
+  dispatch: React.Dispatch<Action>;
+}>({
+  state: { toasts: [] },
+  dispatch: () => null,
+});
 
-let memoryState: State = { toasts: [] };
-
-function dispatch(action: Action) {
-  memoryState = reducer(memoryState, action);
-  listeners.forEach((listener) => {
-    listener(memoryState);
+// Provider component
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = React.useReducer(reducer, {
+    toasts: [],
   });
+
+  return (
+    <ToastContext.Provider value={{ state, dispatch }}>
+      {children}
+    </ToastContext.Provider>
+  );
 }
 
-type Toast = Omit<ToasterToast, "id">;
+// Hook personnalisé pour utiliser le contexte
+export function useToast() {
+  const context = React.useContext(ToastContext);
 
-function toast({ ...props }: Toast) {
-  const id = genId();
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
 
-  const update = (props: ToasterToast) =>
+  const { dispatch } = context;
+
+  function toast(props: Omit<ToasterToast, "id">) {
+    const id = genId();
+
+    const update = (props: ToasterToast) =>
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { ...props, id },
+      });
+    const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
+
     dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    });
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss();
+      type: "ADD_TOAST",
+      toast: {
+        ...props,
+        id,
+        open: true,
+        onOpenChange: (open) => {
+          if (!open) dismiss();
+        },
       },
-    },
-  });
+    });
 
-  return {
-    id: id,
-    dismiss,
-    update,
-  };
-}
-
-function useToast() {
-  const [state, setState] = useState<State>(memoryState);
-
-  useEffect(() => {
-    listeners.push(setState);
-    return () => {
-      const index = listeners.indexOf(setState);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
+    return {
+      id,
+      dismiss,
+      update,
     };
-  }, [state]);
+  }
 
   return {
-    ...state,
+    ...context.state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   };
 }
-
-export { useToast, toast };

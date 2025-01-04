@@ -47,7 +47,7 @@ async function retryWithExponentialBackoff<T>(
   initialDelay: number = 1000
 ): Promise<T> {
   let retries = 0;
-  let lastError: any;
+  let lastError: Error | null = null;
 
   while (retries < maxRetries) {
     try {
@@ -57,9 +57,9 @@ async function retryWithExponentialBackoff<T>(
         console.log(`Retrying request... Attempt ${retries + 1}/${maxRetries}`);
       }
       return await operation();
-    } catch (error: any) {
-      lastError = error;
-      if (error?.status === 529 || error?.error?.type === 'overloaded_error') {
+    } catch (error) {
+      lastError = error as Error;
+      if (error instanceof Error && (error.message.includes('overloaded') || error.message.includes('529'))) {
         retries++;
         continue;
       }
@@ -70,7 +70,6 @@ async function retryWithExponentialBackoff<T>(
   throw lastError;
 }
 
-// Fonction pour générer le prompt en fonction du type de document
 function generatePrompt(input: DocumentGenerationInput): string {
   const baseContext = `
 En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel et accessible aux non-experts basé sur les informations suivantes.
@@ -106,12 +105,10 @@ Instructions spécifiques:
 4. Intégrez les recommandations et données collectées de manière cohérente
 5. Pour chaque section technique, citez les exigences spécifiques de la norme TIA-942 applicables
 6. Détaillez comment les solutions proposées répondent aux critères de la norme TIA-942
-7. Incluez les références aux normes affiliées pertinentes (électrique, climatisation, sécurité, etc.)
-`;
+7. Incluez les références aux normes affiliées pertinentes (électrique, climatisation, sécurité, etc.)`;
 
-  switch (input.type) {
-    case DocumentType.TECHNICAL_OFFER:
-      return `${baseContext}
+  const documentTypePrompts = {
+    [DocumentType.TECHNICAL_OFFER]: `${baseContext}
 Générez une offre technique complète selon le plan suivant :
 
 1. Introduction
@@ -161,10 +158,8 @@ Générez une offre technique complète selon le plan suivant :
    - Analyse des risques
    - Plan de transition
    - Plan de formation
-   - Conditions de garantie`;
-
-    case DocumentType.SPECIFICATIONS:
-      return `${baseContext}
+   - Conditions de garantie`,
+    [DocumentType.SPECIFICATIONS]: `${baseContext}
 Générez un cahier des charges détaillé selon le plan suivant :
 
 1. Présentation du Projet
@@ -216,10 +211,8 @@ Générez un cahier des charges détaillé selon le plan suivant :
    - Tests de réception
    - Livrables attendus
    - Conditions de garantie
-   - Conditions contractuelles`;
-
-    case DocumentType.AUDIT_REPORT:
-      return `${baseContext}
+   - Conditions contractuelles`,
+    [DocumentType.AUDIT_REPORT]: `${baseContext}
 Générez un rapport d'audit détaillé selon le plan suivant :
 
 1. Résumé Exécutif
@@ -270,14 +263,17 @@ Générez un rapport d'audit détaillé selon le plan suivant :
    - Matrices de conformité
    - Historique des mesures
    - Fiches d'incidents
-   - Plans d'actions correctives`;
+   - Plans d'actions correctives`
+  };
 
-    default:
-      throw new Error('Type de document non supporté');
-  }
+  return documentTypePrompts[input.type];
 }
 
 export async function generateDocument(input: DocumentGenerationInput): Promise<string> {
+  if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
+    throw new Error('VITE_ANTHROPIC_API_KEY is not set. Please check your environment variables.');
+  }
+
   const anthropic = new Anthropic({
     apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   });
@@ -286,7 +282,7 @@ export async function generateDocument(input: DocumentGenerationInput): Promise<
 
   try {
     const response = await retryWithExponentialBackoff(async () => {
-      return await anthropic.messages.create({
+      const result = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4000,
         messages: [
@@ -296,14 +292,22 @@ export async function generateDocument(input: DocumentGenerationInput): Promise<
           }
         ],
       });
+
+      if (!result.content || result.content.length === 0) {
+        throw new Error('Empty response from Anthropic API');
+      }
+
+      const content = result.content[0];
+      if (!('text' in content)) {
+        throw new Error('Unexpected response format from Anthropic API');
+      }
+
+      return content.text;
     });
 
-    return response.content[0].text;
+    return response;
   } catch (error) {
     console.error('Erreur lors de la génération du document:', error);
-    if (error?.status === 529 || error?.error?.type === 'overloaded_error') {
-      throw new Error('Le service est temporairement surchargé. Veuillez réessayer dans quelques instants.');
-    }
     throw new Error('Une erreur est survenue lors de la génération du document. Veuillez réessayer.');
   }
 }

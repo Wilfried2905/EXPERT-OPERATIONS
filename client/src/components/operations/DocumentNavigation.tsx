@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FileText, ChevronDown, Eye, Download, ArrowLeft } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -256,33 +256,36 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
   const clientName = "Nom_Client";
 
-  const handleDocumentClick = (docKey: string) => {
-    if (selectedDoc === docKey) {
-      setSelectedDoc(null);
-    } else {
-      setSelectedDoc(docKey);
-    }
-  };
+  const handleDocumentClick = useCallback((docKey: string) => {
+    setSelectedDoc(prevDoc => prevDoc === docKey ? null : docKey);
+  }, []);
 
-  const generateFileName = (docTitle: string) => {
+  const generateFileName = useCallback((docTitle: string) => {
     const date = format(new Date(), 'yyyyMMdd');
     return `3R_${docTitle.replace(/\s+/g, '_')}_${clientName}_${date}.docx`;
-  };
+  }, [clientName]);
 
-  const handlePreview = (e: React.MouseEvent, docKey: string) => {
+  const handlePreview = useCallback((e: React.MouseEvent, docKey: string) => {
     e.stopPropagation();
     setPreviewContent(docKey);
     setShowPreview(true);
-  };
+  }, []);
 
-  const handleDownload = async (e: React.MouseEvent, docKey: string, docTitle: string) => {
+  const handleDownload = useCallback(async (e: React.MouseEvent, docKey: string, docTitle: string) => {
     e.stopPropagation();
-    const fileName = generateFileName(docTitle);
+
+    if (isGenerating) {
+      return;
+    }
 
     try {
+      setIsGenerating(true);
+      const fileName = generateFileName(docTitle);
+
       const input = {
         type: docKey === 'offreTechnique'
           ? DocumentType.TECHNICAL_OFFER
@@ -320,7 +323,10 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
 
       const document = await generateDocument(input);
 
-      const blob = new Blob([document], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const blob = new Blob([document], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
@@ -341,8 +347,10 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
         description: "Une erreur est survenue lors de la génération du document",
         variant: "destructive"
       });
+    } finally {
+      setIsGenerating(false);
     }
-  };
+  }, [clientName, generateFileName, isGenerating, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
