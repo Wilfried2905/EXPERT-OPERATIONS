@@ -75,8 +75,8 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
     const tocRows = sections
       .filter(section => section.type.startsWith('heading'))
       .map(section => {
-        const indent = section.type === 'heading1' ? 0 : 
-                      section.type === 'heading2' ? 1 : 2;
+        const indent = section.type === 'heading1' ? 0 :
+          section.type === 'heading2' ? 1 : 2;
 
         return new TableRow({
           children: [
@@ -94,7 +94,7 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
               children: [
                 new Paragraph({
                   children: [
-                    new TextRun({ 
+                    new TextRun({
                       text: section.text.replace(/^\d+(\.\d+)*\s*/, ''),
                       bold: section.type === 'heading1',
                       size: 24,
@@ -493,7 +493,8 @@ async function generateDocumentHandler(req: any, res: any) {
 
     const result = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 12000, // Augmenté pour obtenir plus de contenu
+      max_tokens: 8000, // Réduit à 8000 pour respecter la limite de 8192
+      temperature: 0.7, // Ajouté pour plus de créativité dans la génération
       messages: [{
         role: 'user',
         content: prompt
@@ -581,8 +582,8 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4000,
-      messages: [{ 
-        role: "user", 
+      messages: [{
+        role: "user",
         content: prompt,
       }],
     });
@@ -596,14 +597,14 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
       res.json(recommendations);
     } catch (parseError) {
       console.error("Error parsing Anthropic response:", parseError);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Erreur lors du parsing de la réponse"
       });
     }
   } catch (error) {
     console.error("Error generating recommendations:", error);
-    res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'Une erreur est survenue' 
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Une erreur est survenue'
     });
   }
 }
