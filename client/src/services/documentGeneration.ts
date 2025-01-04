@@ -1,5 +1,4 @@
 import type { Document } from 'docx';
-import { useToast } from '@/hooks/use-toast';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -35,20 +34,19 @@ interface DocumentGenerationInput {
   };
 }
 
-export async function generateDocument(input: DocumentGenerationInput): Promise<void> {
-  const { toast } = useToast();
-  const toastId = 'document-generation';
+interface GenerationCallbacks {
+  onStart?: () => void;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
 
+export async function generateDocument(
+  input: DocumentGenerationInput, 
+  callbacks?: GenerationCallbacks
+): Promise<void> {
   try {
     console.log('[Generation] Starting document generation process');
-
-    // Afficher le toast de chargement
-    toast({
-      id: toastId,
-      title: 'Génération du document en cours',
-      description: 'Veuillez patienter pendant la génération du document...',
-      duration: null, // Le toast restera affiché jusqu'à ce qu'on le ferme
-    });
+    callbacks?.onStart?.();
 
     const response = await fetch('/api/anthropic/document', {
       method: 'POST',
@@ -81,27 +79,11 @@ export async function generateDocument(input: DocumentGenerationInput): Promise<
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
 
-    // Mettre à jour le toast pour indiquer le succès
-    toast({
-      id: toastId,
-      title: 'Document généré avec succès',
-      description: 'Le téléchargement devrait commencer automatiquement.',
-      duration: 3000,
-    });
-
     console.log('[Generation] Document generated and download started');
+    callbacks?.onSuccess?.();
   } catch (error) {
     console.error('[Error] Document generation failed:', error);
-
-    // Mettre à jour le toast pour indiquer l'erreur
-    toast({
-      id: toastId,
-      title: 'Erreur de génération',
-      description: error instanceof Error ? error.message : 'Une erreur inattendue est survenue',
-      variant: 'destructive',
-      duration: 5000,
-    });
-
+    callbacks?.onError?.(error instanceof Error ? error : new Error('Une erreur inattendue est survenue'));
     throw error;
   }
 }
