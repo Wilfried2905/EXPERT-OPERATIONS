@@ -73,7 +73,8 @@ async function retryWithExponentialBackoff<T>(
 // Fonction pour générer le prompt en fonction du type de document
 function generatePrompt(input: DocumentGenerationInput): string {
   const baseContext = `
-En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel détaillé basé sur les informations suivantes :
+En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel et accessible aux non-experts basé sur les informations suivantes.
+Utilisez un langage clair et précis, en expliquant les termes techniques lorsque nécessaire.
 
 Client: ${input.clientInfo.name}
 Secteur: ${input.clientInfo.industry}
@@ -86,67 +87,80 @@ Métriques clés:
 - Principaux écarts de conformité: ${input.auditData.metrics.complianceGaps.join(', ')}
 
 Score de conformité global: ${input.auditData.compliance.score}%
+
+Instructions spécifiques:
+1. Rédigez de manière professionnelle tout en restant accessible aux lecteurs non-experts
+2. Expliquez brièvement les termes techniques à leur première apparition
+3. Utilisez des exemples concrets pour illustrer les concepts complexes
+4. Intégrez les recommandations et données collectées de manière cohérente
 `;
 
   switch (input.type) {
     case DocumentType.TECHNICAL_OFFER:
       return `${baseContext}
 Générez une offre technique complète selon le plan suivant :
+
 1. Introduction
    - Présentation de 3R TECHNOLOGIE
    - Expertise en datacenters
    - Certifications TIA-942
    - Équipe projet et qualifications
+   - Références projets similaires
+   - Méthodologie de gestion de projet
+   - Partenariats stratégiques
 
 2. Analyse des Besoins
    - Contexte et enjeux client
    - Objectifs de conformité TIA-942
    - Contraintes techniques et opérationnelles
    - Exigences de performance
+   - Parties prenantes et organisation
+   - Critères de succès du projet
 
 3. Architecture Technique TIA-942
    - Classification Tier visée
    - Architecture générale
    - Redondance N+1/2N selon Tier
    - Points de défaillance unique (SPOF)
+   - Évolutivité et scalabilité
+   - Indicateurs de performance (PUE, DCIE)
+   - Stratégie de maintenance
 
 4. Infrastructures Critiques
    - Alimentation électrique
    - Système de refroidissement
    - Sécurité physique
-   - Connectivité`;
+   - Connectivité
+   - Plan de continuité d'activité
+   - Procédures d'exploitation
 
-    case DocumentType.AUDIT_REPORT:
-      return `${baseContext}
-Générez un rapport d'audit détaillé selon le plan suivant :
-1. Résumé Exécutif
-   - Objectifs de l'audit
-   - Méthodologie d'évaluation
-   - Synthèse des conclusions majeures
-   - Recommandations prioritaires
+5. Conformité et Certification
+   - Analyse des écarts TIA-942
+   - Plan de mise en conformité
+   - Processus de certification
+   - Documentation requise
+   - Tests et validations
 
-2. Analyse de Conformité TIA-942
-   - Architecture et Structure
-   - Système Électrique
-   - Système de Refroidissement
-   - Sécurité et Contrôle d'Accès
-   - Conformité des Infrastructures
-   - Points d'Amélioration
-
-3. Recommandations
-   - Améliorations Prioritaires
-   - Plan d'Action Détaillé
-   - Estimations Budgétaires
-   - Calendrier de Mise en Œuvre`;
+6. Planification et Budget
+   - Planning détaillé
+   - Budget prévisionnel
+   - Analyse des risques
+   - Plan de transition
+   - Plan de formation
+   - Conditions de garantie`;
 
     case DocumentType.SPECIFICATIONS:
       return `${baseContext}
 Générez un cahier des charges détaillé selon le plan suivant :
+
 1. Présentation du Projet
    - Contexte général
    - Objectifs du projet
    - Périmètre d'intervention
    - Classification Tier visée
+   - Parties prenantes
+   - Budget prévisionnel
+   - Critères de succès
 
 2. Exigences TIA-942
    - Conformité architecturale
@@ -154,13 +168,95 @@ Générez un cahier des charges détaillé selon le plan suivant :
    - Conformité climatisation
    - Conformité sécurité
    - Niveaux de redondance requis
+   - Métriques de performance attendues
+   - Exigences de monitoring
 
 3. Spécifications Techniques
    - Architecture physique
    - Infrastructure électrique
    - Système de refroidissement
    - Sécurité et monitoring
-   - Infrastructure réseau`;
+   - Infrastructure réseau
+   - Plan de continuité d'activité
+   - Évolutivité technique
+
+4. Exigences Opérationnelles
+   - Disponibilité et SLA
+   - Maintenance préventive
+   - Documentation technique
+   - Formation du personnel
+   - Gestion des incidents
+   - Procédures d'exploitation
+   - Exigences de reporting
+
+5. Contraintes et Prérequis
+   - Contraintes site et bâtiment
+   - Contraintes réglementaires
+   - Contraintes techniques spécifiques
+   - Prérequis d'installation
+   - Normes applicables
+
+6. Modalités de Réception
+   - Critères d'acceptation
+   - Processus de validation
+   - Tests de réception
+   - Livrables attendus
+   - Conditions de garantie
+   - Conditions contractuelles`;
+
+    case DocumentType.AUDIT_REPORT:
+      return `${baseContext}
+Générez un rapport d'audit détaillé selon le plan suivant :
+
+1. Résumé Exécutif
+   - Objectifs de l'audit
+   - Méthodologie d'évaluation
+   - Synthèse des conclusions majeures
+   - Recommandations prioritaires
+   - Impact financier des non-conformités
+   - Analyse des risques
+   - ROI des améliorations proposées
+
+2. Présentation du Site Audité
+   - Informations client
+   - Description des installations
+   - Configuration des salles techniques
+   - Inventaire des équipements critiques
+   - Organisation opérationnelle
+   - Processus actuels
+   - Historique des incidents
+
+3. Analyse de Conformité TIA-942
+   - Architecture et Structure
+   - Système Électrique
+   - Système de Refroidissement
+   - Sécurité et Contrôle d'Accès
+   - Conformité des Infrastructures
+   - Points d'Amélioration
+   - Comparaison avec les standards du marché
+   - Évaluation de la maturité opérationnelle
+   - Analyse des procédures
+
+4. Recommandations
+   - Améliorations Prioritaires
+   - Plan d'Action Détaillé
+   - Estimations Budgétaires
+   - Calendrier de Mise en Œuvre
+   - Analyse coût-bénéfice
+   - Scénarios alternatifs
+   - Impact opérationnel
+   - Plan de formation
+   - Indicateurs de suivi
+
+5. Annexes
+   - Rapports de Tests
+   - Documentation Technique
+   - Photos et Schémas
+   - Références Normatives
+   - Matrices de conformité
+   - Historique des mesures
+   - Fiches d'incidents
+   - Plans d'actions correctives`;
 
     default:
       throw new Error('Type de document non supporté');
