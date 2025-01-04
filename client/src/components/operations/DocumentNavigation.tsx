@@ -256,7 +256,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
-  // TODO: Ajouter le nom du client via un store global ou les props
+  const { toast } = useToast(); 
   const clientName = "Nom_Client";
 
   const handleDocumentClick = (docKey: string) => {
@@ -276,16 +276,13 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
     e.stopPropagation();
     setPreviewContent(docKey);
     setShowPreview(true);
-    console.log(`Prévisualisation du document: ${docKey}`);
   };
 
   const handleDownload = async (e: React.MouseEvent, docKey: string, docTitle: string) => {
     e.stopPropagation();
     const fileName = generateFileName(docTitle);
-    const { toast } = useToast();
 
     try {
-      // Exemple de données - À adapter selon votre structure réelle
       const input = {
         type: docKey === 'offreTechnique'
           ? DocumentType.TECHNICAL_OFFER
@@ -294,11 +291,11 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
             : DocumentType.AUDIT_REPORT,
         clientInfo: {
           name: clientName,
-          industry: "Technologie", // TODO: Récupérer depuis le store global
-          size: "Grande entreprise" // TODO: Récupérer depuis le store global
+          industry: "Technologie", 
+          size: "Grande entreprise" 
         },
         auditData: {
-          recommendations: [], // TODO: Récupérer depuis le store de recommandations
+          recommendations: [], 
           metrics: {
             pue: [1.8, 1.9, 1.7],
             availability: [99.9, 99.8, 99.95],
@@ -318,15 +315,14 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
 
       const document = await generateDocument(input);
 
-      // Créer un blob et déclencher le téléchargement
       const blob = new Blob([document], { type: 'text/plain' });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = url;
       a.download = fileName;
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      window.document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
       toast({
@@ -435,7 +431,6 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
           </CardContent>
         </Card>
 
-        {/* Modal de prévisualisation amélioré */}
         {showPreview && previewContent && documents[previewContent] && (
           <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
             <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-white">
