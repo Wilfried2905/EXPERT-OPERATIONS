@@ -88,10 +88,14 @@ function genId() {
   return count.toString()
 }
 
-const ToastContext = React.createContext({
-  toasts: [] as ToasterToast[],
-  toast: (_: Omit<ToasterToast, "id">) => {},
-  dismiss: (_?: string) => {},
+const ToastContext = React.createContext<{
+  toasts: ToasterToast[]
+  toast: (props: Omit<ToasterToast, "id">) => void
+  dismiss: (toastId?: string) => void
+}>({
+  toasts: [],
+  toast: () => {},
+  dismiss: () => {},
 })
 
 export function ToastProvider({
@@ -130,6 +134,7 @@ export function ToastProvider({
 
   const toast = React.useCallback((props: Omit<ToasterToast, "id">) => {
     const id = genId()
+
     dispatch({
       type: "ADD_TOAST",
       toast: {
