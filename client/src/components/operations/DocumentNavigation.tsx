@@ -37,7 +37,10 @@ const documents: Documents = {
           "Présentation de 3R TECHNOLOGIE",
           "Expertise en datacenters",
           "Certifications TIA-942",
-          "Équipe projet et qualifications"
+          "Équipe projet et qualifications",
+          "Références projets similaires",
+          "Méthodologie de gestion de projet",
+          "Partenariats stratégiques"
         ]
       },
       {
@@ -46,7 +49,9 @@ const documents: Documents = {
           "Contexte et enjeux client",
           "Objectifs de conformité TIA-942",
           "Contraintes techniques et opérationnelles",
-          "Exigences de performance"
+          "Exigences de performance",
+          "Parties prenantes et organisation",
+          "Critères de succès du projet"
         ]
       },
       {
@@ -55,7 +60,10 @@ const documents: Documents = {
           "Classification Tier visée",
           "Architecture générale",
           "Redondance N+1/2N selon Tier",
-          "Points de défaillance unique (SPOF)"
+          "Points de défaillance unique (SPOF)",
+          "Évolutivité et scalabilité",
+          "Indicateurs de performance (PUE, DCIE)",
+          "Stratégie de maintenance"
         ]
       },
       {
@@ -64,7 +72,30 @@ const documents: Documents = {
           "Alimentation électrique",
           "Système de refroidissement",
           "Sécurité physique",
-          "Connectivité"
+          "Connectivité",
+          "Plan de continuité d'activité",
+          "Procédures d'exploitation"
+        ]
+      },
+      {
+        title: "5. Conformité et Certification",
+        items: [
+          "Analyse des écarts TIA-942",
+          "Plan de mise en conformité",
+          "Processus de certification",
+          "Documentation requise",
+          "Tests et validations"
+        ]
+      },
+      {
+        title: "6. Planification et Budget",
+        items: [
+          "Planning détaillé",
+          "Budget prévisionnel",
+          "Analyse des risques",
+          "Plan de transition",
+          "Plan de formation",
+          "Conditions de garantie"
         ]
       }
     ]
@@ -80,7 +111,10 @@ const documents: Documents = {
           "Contexte général",
           "Objectifs du projet",
           "Périmètre d'intervention",
-          "Classification Tier visée"
+          "Classification Tier visée",
+          "Parties prenantes",
+          "Budget prévisionnel",
+          "Critères de succès"
         ]
       },
       {
@@ -90,7 +124,9 @@ const documents: Documents = {
           "Conformité électrique",
           "Conformité climatisation",
           "Conformité sécurité",
-          "Niveaux de redondance requis"
+          "Niveaux de redondance requis",
+          "Métriques de performance attendues",
+          "Exigences de monitoring"
         ]
       },
       {
@@ -100,7 +136,42 @@ const documents: Documents = {
           "Infrastructure électrique",
           "Système de refroidissement",
           "Sécurité et monitoring",
-          "Infrastructure réseau"
+          "Infrastructure réseau",
+          "Plan de continuité d'activité",
+          "Évolutivité technique"
+        ]
+      },
+      {
+        title: "4. Exigences Opérationnelles",
+        items: [
+          "Disponibilité et SLA",
+          "Maintenance préventive",
+          "Documentation technique",
+          "Formation du personnel",
+          "Gestion des incidents",
+          "Procédures d'exploitation",
+          "Exigences de reporting"
+        ]
+      },
+      {
+        title: "5. Contraintes et Prérequis",
+        items: [
+          "Contraintes site et bâtiment",
+          "Contraintes réglementaires",
+          "Contraintes techniques spécifiques",
+          "Prérequis d'installation",
+          "Normes applicables"
+        ]
+      },
+      {
+        title: "6. Modalités de Réception",
+        items: [
+          "Critères d'acceptation",
+          "Processus de validation",
+          "Tests de réception",
+          "Livrables attendus",
+          "Conditions de garantie",
+          "Conditions contractuelles"
         ]
       }
     ]
@@ -116,27 +187,63 @@ const documents: Documents = {
           "Objectifs de l'audit",
           "Méthodologie d'évaluation",
           "Synthèse des conclusions majeures",
-          "Recommandations prioritaires"
+          "Recommandations prioritaires",
+          "Impact financier des non-conformités",
+          "Analyse des risques",
+          "ROI des améliorations proposées"
         ]
       },
       {
-        title: "2. Analyse de Conformité TIA-942",
+        title: "2. Présentation du Site Audité",
+        items: [
+          "Informations client",
+          "Description des installations",
+          "Configuration des salles techniques",
+          "Inventaire des équipements critiques",
+          "Organisation opérationnelle",
+          "Processus actuels",
+          "Historique des incidents"
+        ]
+      },
+      {
+        title: "3. Analyse de Conformité TIA-942",
         items: [
           "Architecture et Structure",
           "Système Électrique",
           "Système de Refroidissement",
           "Sécurité et Contrôle d'Accès",
           "Conformité des Infrastructures",
-          "Points d'Amélioration"
+          "Points d'Amélioration",
+          "Comparaison avec les standards du marché",
+          "Évaluation de la maturité opérationnelle",
+          "Analyse des procédures"
         ]
       },
       {
-        title: "3. Recommandations",
+        title: "4. Recommandations",
         items: [
           "Améliorations Prioritaires",
           "Plan d'Action Détaillé",
           "Estimations Budgétaires",
-          "Calendrier de Mise en Œuvre"
+          "Calendrier de Mise en Œuvre",
+          "Analyse coût-bénéfice",
+          "Scénarios alternatifs",
+          "Impact opérationnel",
+          "Plan de formation",
+          "Indicateurs de suivi"
+        ]
+      },
+      {
+        title: "5. Annexes",
+        items: [
+          "Rapports de Tests",
+          "Documentation Technique",
+          "Photos et Schémas",
+          "Références Normatives",
+          "Matrices de conformité",
+          "Historique des mesures",
+          "Fiches d'incidents",
+          "Plans d'actions correctives"
         ]
       }
     ]
