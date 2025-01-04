@@ -39,6 +39,37 @@ interface DocumentGenerationInput {
   };
 }
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function retryWithExponentialBackoff<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<T> {
+  let retries = 0;
+  let lastError: any;
+
+  while (retries < maxRetries) {
+    try {
+      if (retries > 0) {
+        const delayTime = initialDelay * Math.pow(2, retries - 1);
+        await delay(delayTime);
+        console.log(`Retrying request... Attempt ${retries + 1}/${maxRetries}`);
+      }
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      if (error?.status === 529 || error?.error?.type === 'overloaded_error') {
+        retries++;
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+
 // Fonction pour générer le prompt en fonction du type de document
 function generatePrompt(input: DocumentGenerationInput): string {
   const baseContext = `
@@ -137,27 +168,32 @@ Générez un cahier des charges détaillé selon le plan suivant :
 }
 
 export async function generateDocument(input: DocumentGenerationInput): Promise<string> {
+  const anthropic = new Anthropic({
+    apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  });
+
+  const prompt = generatePrompt(input);
+
   try {
-    const anthropic = new Anthropic({
-      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-    });
-
-    const prompt = generatePrompt(input);
-
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
+    const response = await retryWithExponentialBackoff(async () => {
+      return await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4000,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+      });
     });
 
     return response.content[0].text;
   } catch (error) {
     console.error('Erreur lors de la génération du document:', error);
-    throw error;
+    if (error?.status === 529 || error?.error?.type === 'overloaded_error') {
+      throw new Error('Le service est temporairement surchargé. Veuillez réessayer dans quelques instants.');
+    }
+    throw new Error('Une erreur est survenue lors de la génération du document. Veuillez réessayer.');
   }
 }
