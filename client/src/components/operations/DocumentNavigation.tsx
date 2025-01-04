@@ -256,7 +256,7 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
-  const { toast } = useToast(); 
+  const { toast } = useToast();
   const clientName = "Nom_Client";
 
   const handleDocumentClick = (docKey: string) => {
@@ -291,11 +291,11 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
             : DocumentType.AUDIT_REPORT,
         clientInfo: {
           name: clientName,
-          industry: "Technologie", 
-          size: "Grande entreprise" 
+          industry: "Technologie",
+          size: "Grande entreprise"
         },
         auditData: {
-          recommendations: [], 
+          recommendations: [],
           metrics: {
             pue: [1.8, 1.9, 1.7],
             availability: [99.9, 99.8, 99.95],

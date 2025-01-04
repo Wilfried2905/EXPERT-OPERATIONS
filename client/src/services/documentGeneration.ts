@@ -31,11 +31,11 @@ interface DocumentGenerationInput {
       matrix: any;
       score: number;
     };
-  };
-  additionalData?: {
-    images?: string[];
-    documents?: string[];
-    comments?: string[];
+    additionalData?: {
+      images?: string[];
+      documents?: string[];
+      comments?: string[];
+    };
   };
 }
 
@@ -91,6 +91,13 @@ Métriques clés:
 - Principaux écarts de conformité: ${input.auditData.metrics.complianceGaps.join(', ')}
 
 Score de conformité global: ${input.auditData.compliance.score}%
+
+Instructions pour les éléments visuels :
+1. Insérez des graphiques pour illustrer les métriques clés (PUE, disponibilité)
+2. Ajoutez des diagrammes d'architecture pour les sections techniques
+3. Incluez des schémas explicatifs pour les concepts complexes
+4. Utilisez des tableaux de comparaison pour les analyses
+5. Ajoutez des photos ou schémas pertinents des installations
 
 Instructions spécifiques:
 1. Rédigez de manière professionnelle tout en restant accessible aux lecteurs non-experts
