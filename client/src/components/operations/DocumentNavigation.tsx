@@ -309,13 +309,18 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
           compliance: {
             matrix: {},
             score: 85
+          },
+          additionalData: {
+            images: [],
+            documents: [],
+            comments: []
           }
         }
       };
 
       const document = await generateDocument(input);
 
-      const blob = new Blob([document], { type: 'text/plain' });
+      const blob = new Blob([document], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
