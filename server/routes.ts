@@ -20,7 +20,7 @@ async function generateRecommendations(req: any, res: any) {
     console.log('[Recommendations] Headers:', req.headers);
     console.log('[Recommendations] Body:', JSON.stringify(req.body, null, 2));
 
-    const auditData = req.body;
+    const { auditData } = req.body;
 
     if (!auditData) {
       console.log('[Recommendations] Missing audit data');

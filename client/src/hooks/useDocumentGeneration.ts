@@ -14,15 +14,20 @@ export function useDocumentGeneration() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          metrics: {
-            pue: [1.8, 1.9, 1.7],
-            availability: [99.9, 99.8, 99.95],
-            tierLevel: 3
-          },
-          infrastructure: {
-            totalArea: 1000,
-            rooms: [],
-            equipment: []
+          auditData: {
+            metrics: {
+              pue: [1.8, 1.9, 1.7],
+              availability: [99.9, 99.8, 99.95],
+              tierLevel: 3
+            },
+            infrastructure: {
+              rooms: [],
+              equipment: []
+            },
+            compliance: {
+              matrix: {},
+              score: 85
+            }
           }
         })
       });
@@ -70,7 +75,6 @@ export function useDocumentGeneration() {
       setIsGenerating(true);
       console.log('[Download] Preparing request data');
 
-      // Map docKey to correct document type
       const documentType = docKey === 'offreTechnique' 
         ? DocumentType.TECHNICAL_OFFER
         : docKey === 'cahierCharges'
@@ -84,7 +88,7 @@ export function useDocumentGeneration() {
           industry: 'Technologie',
           size: 'Grande entreprise'
         },
-        content: `Contenu du document ${documentType}\n\nCeci est un exemple de contenu généré pour le document.`
+        content: `# ${documentType}\n\nContenu généré automatiquement pour le document ${documentType}.\n\nDate: ${new Date().toLocaleDateString('fr-FR')}\n\nCe document est un exemple de contenu généré.`
       };
 
       console.log('[Download] Request data:', requestData);
@@ -160,5 +164,5 @@ export function useDocumentGeneration() {
     }
   }, [isGenerating]);
 
-  return { handleDownload, handleRecommendations };
+  return { handleDownload, handleRecommendations, isGenerating };
 }
