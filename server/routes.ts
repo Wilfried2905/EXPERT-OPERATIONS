@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 
+// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
@@ -27,29 +27,46 @@ async function generateRecommendations(req: any, res: any) {
       });
     }
 
-    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées.
+    // Structurer le prompt pour une réponse JSON
+    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées en te basant sur les standards TIA-942.
 
+    DONNÉES D'ENTRÉE:
     ${JSON.stringify(req.body.auditData, null, 2)}
 
-    IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide ayant cette structure exacte:
+    IMPORTANT: Tu dois répondre UNIQUEMENT avec un objet JSON valide ayant cette structure exacte:
     {
       "recommendations": [
         {
-          "id": string,
-          "title": string,
-          "description": string,
+          "id": string (unique identifier),
+          "title": string (titre court et descriptif),
+          "description": string (description détaillée),
           "priority": "critical" | "high" | "medium" | "low",
           "impact": {
-            "description": string,
-            "metrics": object
+            "description": string (description de l'impact),
+            "metrics": {
+              "efficiency": number (0-100),
+              "reliability": number (0-100),
+              "security": number (0-100)
+            }
           },
           "implementation": {
-            "steps": string[],
-            "timeframe": string,
-            "resources": string[]
+            "steps": string[] (étapes d'implémentation),
+            "timeframe": string (durée estimée),
+            "resources": string[] (ressources nécessaires)
           }
         }
-      ]
+      ],
+      "summary": {
+        "criticalCount": number,
+        "highCount": number,
+        "mediumCount": number,
+        "lowCount": number,
+        "totalImpact": {
+          "efficiency": number (0-100),
+          "reliability": number (0-100),
+          "security": number (0-100)
+        }
+      }
     }`;
 
     console.log('[Anthropic] Sending request with prompt length:', prompt.length);
@@ -72,11 +89,23 @@ async function generateRecommendations(req: any, res: any) {
     }
 
     try {
+      // Parse et valider la réponse JSON
       const result = JSON.parse(response.content[0].text);
-      console.log('[Recommendations] Parsed response:', result);
 
+      // Validation de base de la structure
+      if (!result.recommendations || !Array.isArray(result.recommendations)) {
+        throw new Error('Structure de réponse invalide');
+      }
+
+      console.log('[Recommendations] Parsed response:', JSON.stringify(result, null, 2));
+
+      // Définir les headers de réponse
       res.setHeader('Content-Type', 'application/json');
-      return res.json(result);
+      return res.json({
+        success: true,
+        data: result
+      });
+
     } catch (parseError: any) {
       console.error('[Parse] Error:', parseError);
       console.error('[Parse] Raw response:', response.content[0].text);
@@ -92,6 +121,18 @@ async function generateRecommendations(req: any, res: any) {
       details: error instanceof Error ? error.message : 'Erreur inconnue'
     });
   }
+}
+
+export function registerRoutes(app: Express): Server {
+  setupAuth(app);
+
+  // Route de génération des recommandations
+  app.post("/api/recommendations", generateRecommendations);
+
+  // Autres routes...
+
+  const httpServer = createServer(app);
+  return httpServer;
 }
 
 async function generateWordDocument(content: string, title: string): Promise<Buffer> {
@@ -129,7 +170,7 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
             spacing: { before: 400, after: 400 },
             alignment: AlignmentType.CENTER
           }),
-          ...content.split('\n').map(line => 
+          ...content.split('\n').map(line =>
             new Paragraph({
               text: line,
               spacing: { before: 200, after: 200 }
@@ -148,48 +189,4 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
     console.error('[Word] Generation error:', error);
     throw error;
   }
-}
-
-export function registerRoutes(app: Express): Server {
-  setupAuth(app);
-
-  app.post("/api/recommendations", generateRecommendations);
-
-  app.post("/api/documents/generate", async (req, res) => {
-    try {
-      console.log('[Documents] Request received');
-      console.log('[Documents] Headers:', req.headers);
-      console.log('[Documents] Body:', JSON.stringify(req.body, null, 2));
-
-      const { type, title, clientInfo, content, auditData } = req.body;
-
-      if (!type || !clientInfo || !content || !auditData) {
-        console.log('[Documents] Missing required data:', { type, clientInfo, content, auditData });
-        return res.status(400).json({
-          error: 'Données requises manquantes'
-        });
-      }
-
-      const documentTitle = `3R_${type}_${clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '')}`;
-      console.log('[Documents] Generating document:', documentTitle);
-
-      const wordBuffer = await generateWordDocument(content, documentTitle);
-      console.log('[Documents] Document generated, sending response');
-
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
-      res.setHeader('Content-Length', wordBuffer.length);
-      res.send(wordBuffer);
-
-    } catch (error: any) {
-      console.error('[Documents] Error:', error);
-      res.status(500).json({
-        error: 'Erreur de génération',
-        details: error.message
-      });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
 }
