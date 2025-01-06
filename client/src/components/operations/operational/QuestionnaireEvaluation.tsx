@@ -85,42 +85,6 @@ const QuestionnaireEvaluation = () => {
           Questionnaire d'évaluation - Audit Opérationnel
         </h1>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
-              Progression
-            </h3>
-            <div className="progress-bar">
-              <div 
-                className="progress-bar-indicator green"
-                style={{ width: `${calculateProgress()}%` }}
-              />
-            </div>
-            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {calculateProgress().toFixed(1)}% complété
-            </p>
-          </Card>
-
-          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
-              Conformité
-            </h3>
-            <div className="progress-bar">
-              <div 
-                className={`progress-bar-indicator ${
-                  calculateConformity() >= 75 ? 'green' : 
-                  calculateConformity() >= 50 ? 'yellow' : 
-                  'red'
-                }`}
-                style={{ width: `${calculateConformity()}%` }}
-              />
-            </div>
-            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {calculateConformity().toFixed(1)}% conforme
-            </p>
-          </Card>
-        </div>
-
         <Card className={`p-4 mb-6 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
           <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
             {evaluationSections[activeTab].title}
@@ -146,26 +110,6 @@ const QuestionnaireEvaluation = () => {
         </Card>
 
         <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
-          <div className="flex border-b border-gray-200">
-            {evaluationSections.map((section, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveTab(index)}
-                className={`flex-1 px-4 py-3 text-center font-medium transition-colors
-                  ${activeTab === index 
-                    ? isDarkMode 
-                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]' 
-                      : 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
-                    : isDarkMode
-                      ? 'text-[#E0E0E0] hover:bg-[#001F33]'
-                      : 'text-[#003366] hover:bg-gray-50'
-                  }`}
-              >
-                {section.title}
-              </button>
-            ))}
-          </div>
-
           <div className="p-6">
             {evaluationSections[activeTab].questions.map((q) => (
               <div key={q.id} className="mb-8 last:mb-0">
@@ -243,18 +187,18 @@ const QuestionnaireEvaluation = () => {
               </div>
             ))}
           </div>
-        </Card>
 
-        <div className="mt-6 flex justify-end">
-          <button 
-            onClick={() => setLocation('/recommendations')}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
-            } text-white`}
-          >
-            Voir les Recommandations
-          </button>
-        </div>
+          <div className="flex justify-end mt-6">
+            <button 
+              onClick={() => setLocation('/recommendations')}
+              className={`px-6 py-3 rounded font-medium ${
+                isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
+              } text-white`}
+            >
+              Voir les Recommandations
+            </button>
+          </div>
+        </Card>
       </div>
     </div>
   );
