@@ -322,6 +322,11 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
 
     try {
       setIsGenerating(true);
+      const toastId = toast({
+        title: "Génération en cours",
+        description: "Veuillez patienter pendant la génération du document...",
+        duration: null,
+      });
 
       const input = {
         type: docKey === 'offreTechnique'
@@ -353,26 +358,10 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
         }
       };
 
-      // Validate input data
-      validateInput(input);
-
-      // Show progress toast
-      const toastId = toast({
-        title: "Génération en cours",
-        description: "Veuillez patienter pendant la génération du document...",
-        duration: null,
-      });
-
-      // Enrich input data
-      const enrichedInput = await enrichInputData(input);
-      console.log(`[Download] Starting document generation for ${docTitle} with enriched data`);
-
-      // Generate and download document
-      const blob = await generateDocument(enrichedInput);
+      const blob = await generateDocument(input);
       const fileName = generateFileName(docTitle);
       await handleFileDownload(blob, fileName);
 
-      // Update UI after successful download
       toast.dismiss(toastId);
       toast({
         title: "Document généré",
@@ -381,12 +370,10 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
       });
 
     } catch (error) {
-      console.error('[Download] Error during document generation/download:', error);
+      console.error('[Download] Error:', error);
       toast({
         title: "Erreur",
-        description: error instanceof Error
-          ? `Erreur : ${error.message}`
-          : "Une erreur est survenue lors de la génération du document",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
         variant: "destructive",
         duration: 5000,
       });

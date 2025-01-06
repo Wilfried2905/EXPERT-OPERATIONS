@@ -1,54 +1,17 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-interface Recommendation {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  impact: {
-    description: string;
-    metrics: {
-      efficiency: number;
-      reliability: number;
-      security: number;
-    };
-  };
-  implementation: {
-    steps: string[];
-    timeframe: string;
-    resources: string[];
-  };
-}
-
-interface RecommendationsResponse {
-  recommendations: Recommendation[];
-  summary: {
-    criticalCount: number;
-    highCount: number;
-    mediumCount: number;
-    lowCount: number;
-    totalImpact: {
-      efficiency: number;
-      reliability: number;
-      security: number;
-    };
-  };
-}
-
-interface ApiResponse {
-  success: boolean;
-  data?: RecommendationsResponse;
+interface AnthropicResponse {
+  text: string;
   error?: string;
-  details?: string;
 }
 
 export function useAnthropic() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const generateRecommendations = async (auditData: any): Promise<RecommendationsResponse> => {
-    console.log('[useAnthropic] Starting generateRecommendations with data:', auditData);
+  const generateRecommendations = async (context: any): Promise<AnthropicResponse> => {
+    console.log('useAnthropic: Démarrage de generateRecommendations avec context:', context);
     setIsLoading(true);
 
     try {
@@ -57,35 +20,23 @@ export function useAnthropic() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ auditData })
+        body: JSON.stringify(context)
       });
 
-      console.log('[useAnthropic] Response status:', response.status);
+      const result = await response.json();
 
-      const result: ApiResponse = await response.json();
-      console.log('[useAnthropic] Response data:', result);
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.details || result.error || `Erreur ${response.status}`);
+      if (!response.ok) {
+        throw new Error(result.error || `Erreur ${response.status}`);
       }
 
-      if (!result.data || !result.data.recommendations) {
-        throw new Error('Réponse invalide - données manquantes');
+      if (!result.text && !result.error) {
+        throw new Error('Réponse invalide du serveur');
       }
 
-      return result.data;
+      return result;
 
     } catch (error) {
-      console.error('[useAnthropic] Error details:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-
-      toast({
-        title: "Erreur",
-        description: `Erreur lors de la génération des recommandations: ${errorMessage}`,
-        variant: "destructive",
-        duration: 5000,
-      });
-
+      console.error('useAnthropic: Erreur:', error);
       throw error;
     } finally {
       setIsLoading(false);
