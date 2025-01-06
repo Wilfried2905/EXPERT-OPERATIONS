@@ -1,0 +1,152 @@
+interface CollectedData {
+  documents: Document[];
+  images?: ImageData[];
+  metrics: AuditMetrics;
+  infrastructure: InfrastructureData;
+  comments: Comment[];
+}
+
+interface Document {
+  type: string;
+  content: string;
+  metadata: {
+    date: string;
+    version: string;
+    author: string;
+  };
+}
+
+interface AnalyzedData {
+  keyFindings: Finding[];
+  metrics: ProcessedMetrics;
+  recommendations: Recommendation[];
+  risks: Risk[];
+  timeline: TimelineEvent[];
+}
+
+class DocumentAnalyzer {
+  private rawData: CollectedData;
+  private analyzedData: AnalyzedData;
+
+  constructor(data: CollectedData) {
+    this.rawData = data;
+    this.analyzedData = this.initializeAnalyzedData();
+  }
+
+  async analyzeAllData(): Promise<AnalyzedData> {
+    // Analyse des documents
+    for (const doc of this.rawData.documents) {
+      const docContent = await this.parseDocument(doc);
+      this.extractKeyInformation(docContent);
+      this.identifyMetrics(docContent);
+      this.analyzeComments(docContent);
+    }
+
+    // Analyse des métriques
+    this.processMetrics(this.rawData.metrics);
+
+    // Analyse de l'infrastructure
+    this.analyzeInfrastructure(this.rawData.infrastructure);
+
+    // Analyse des images si présentes
+    if (this.rawData.images) {
+      this.analyzeImages(this.rawData.images);
+    }
+
+    // Analyse des commentaires
+    this.processComments(this.rawData.comments);
+
+    // Génération des recommandations
+    this.generateRecommendations();
+
+    return this.analyzedData;
+  }
+
+  private async parseDocument(doc: Document): Promise<ParsedDocument> {
+    // Extraction structurée du contenu du document
+    const sections = this.extractSections(doc.content);
+    const tables = this.extractTables(doc.content);
+    const lists = this.extractLists(doc.content);
+
+    return {
+      sections,
+      tables,
+      lists,
+      metadata: doc.metadata
+    };
+  }
+
+  private extractKeyInformation(parsedDoc: ParsedDocument): void {
+    // Extraction des informations clés
+    const findings = this.identifyKeyFindings(parsedDoc);
+    const risks = this.identifyRisks(parsedDoc);
+    const timeline = this.extractTimeline(parsedDoc);
+
+    this.analyzedData.keyFindings.push(...findings);
+    this.analyzedData.risks.push(...risks);
+    this.analyzedData.timeline.push(...timeline);
+  }
+
+  private processMetrics(metrics: AuditMetrics): void {
+    // Traitement et normalisation des métriques
+    const processedMetrics = {
+      pue: this.calculateAverages(metrics.pue),
+      availability: this.calculateAverages(metrics.availability),
+      compliance: this.analyzeComplianceData(metrics.compliance),
+      trends: this.identifyTrends(metrics)
+    };
+
+    this.analyzedData.metrics = processedMetrics;
+  }
+
+  private generateRecommendations(): void {
+    // Génération de recommandations basées sur l'analyse
+    const recommendations = this.createPrioritizedRecommendations(
+      this.analyzedData.keyFindings,
+      this.analyzedData.metrics,
+      this.analyzedData.risks
+    );
+
+    this.analyzedData.recommendations = recommendations;
+  }
+}
+
+class DocumentGenerator {
+  private analyzer: DocumentAnalyzer;
+  private template: DocumentTemplate;
+
+  constructor(collectedData: CollectedData, template: DocumentTemplate) {
+    this.analyzer = new DocumentAnalyzer(collectedData);
+    this.template = template;
+  }
+
+  async generateDocument(): Promise<GeneratedDocument> {
+    // Analyse complète des données
+    const analyzedData = await this.analyzer.analyzeAllData();
+
+    // Génération du document en utilisant le template
+    const document = await this.template.generate(analyzedData);
+
+    // Post-processing et validation
+    const finalDocument = await this.postProcess(document);
+
+    return finalDocument;
+  }
+
+  private async postProcess(doc: GeneratedDocument): Promise<GeneratedDocument> {
+    // Validation de la cohérence
+    this.validateContent(doc);
+    
+    // Formatage final
+    this.applyFormatting(doc);
+    
+    // Vérification des références
+    this.validateReferences(doc);
+
+    return doc;
+  }
+}
+
+// Usage
+const generator = new DocumentGenerator(collectedData, template);
+const document = await generator.generateDocument();

@@ -6,284 +6,284 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, Alignm
 
 // the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
+ apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 // Types de documents supportés
 export enum DocumentType {
-  TECHNICAL_OFFER = 'Offre Technique',
-  SPECIFICATIONS = 'Cahier des Charges',
-  AUDIT_REPORT = 'Rapport d\'Audit'
+ TECHNICAL_OFFER = 'Offre Technique',
+ SPECIFICATIONS = 'Cahier des Charges',
+ AUDIT_REPORT = 'Rapport d\'Audit'
 }
 
 async function generateWordDocument(content: string, title: string): Promise<Buffer> {
-  try {
-    console.log('[Word] Starting document generation with content length:', content.length);
+ try {
+   console.log('[Word] Starting document generation with content length:', content.length);
 
-    // Extraction et numérotation des sections
-    let sectionCounter = 0;
-    let subSectionCounter = 0;
-    let subSubSectionCounter = 0;
+   // Extraction et numérotation des sections
+   let sectionCounter = 0;
+   let subSectionCounter = 0;
+   let subSubSectionCounter = 0;
 
-    const sections = content.split('\n').reduce((acc, line) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) return acc;
+   const sections = content.split('\n').reduce((acc, line) => {
+     const trimmedLine = line.trim();
+     if (!trimmedLine) return acc;
 
-      if (trimmedLine.startsWith('# ')) {
-        sectionCounter++;
-        subSectionCounter = 0;
-        subSubSectionCounter = 0;
-        acc.push({
-          type: 'heading1',
-          text: `${sectionCounter}. ${trimmedLine.replace('# ', '')}`,
-          number: `${sectionCounter}`
-        });
-      } else if (trimmedLine.startsWith('## ')) {
-        subSectionCounter++;
-        subSubSectionCounter = 0;
-        acc.push({
-          type: 'heading2',
-          text: `${sectionCounter}.${subSectionCounter} ${trimmedLine.replace('## ', '')}`,
-          number: `${sectionCounter}.${subSectionCounter}`
-        });
-      } else if (trimmedLine.startsWith('### ')) {
-        subSubSectionCounter++;
-        acc.push({
-          type: 'heading3',
-          text: `${sectionCounter}.${subSectionCounter}.${subSubSectionCounter} ${trimmedLine.replace('### ', '')}`,
-          number: `${sectionCounter}.${subSectionCounter}.${subSubSectionCounter}`
-        });
-      } else if (trimmedLine.startsWith('- ')) {
-        acc.push({
-          type: 'bullet',
-          text: trimmedLine.replace('- ', '')
-        });
-      } else {
-        acc.push({
-          type: 'paragraph',
-          text: trimmedLine
-        });
-      }
-      return acc;
-    }, [] as Array<{
-      type: string;
-      text: string;
-      number?: string;
-    }>);
+     if (trimmedLine.startsWith('# ')) {
+       sectionCounter++;
+       subSectionCounter = 0;
+       subSubSectionCounter = 0;
+       acc.push({
+         type: 'heading1',
+         text: `${sectionCounter}. ${trimmedLine.replace('# ', '')}`,
+         number: `${sectionCounter}`
+       });
+     } else if (trimmedLine.startsWith('## ')) {
+       subSectionCounter++;
+       subSubSectionCounter = 0;
+       acc.push({
+         type: 'heading2',
+         text: `${sectionCounter}.${subSectionCounter} ${trimmedLine.replace('## ', '')}`,
+         number: `${sectionCounter}.${subSectionCounter}`
+       });
+     } else if (trimmedLine.startsWith('### ')) {
+       subSubSectionCounter++;
+       acc.push({
+         type: 'heading3',
+         text: `${sectionCounter}.${subSectionCounter}.${subSubSectionCounter} ${trimmedLine.replace('### ', '')}`,
+         number: `${sectionCounter}.${subSectionCounter}.${subSubSectionCounter}`
+       });
+     } else if (trimmedLine.startsWith('- ')) {
+       acc.push({
+         type: 'bullet',
+         text: trimmedLine.replace('- ', '')
+       });
+     } else {
+       acc.push({
+         type: 'paragraph',
+         text: trimmedLine
+       });
+     }
+     return acc;
+   }, [] as Array<{
+     type: string;
+     text: string;
+     number?: string;
+   }>);
 
-    // Création de la table des matières
-    const tocRows = sections
-      .filter(section => section.type.startsWith('heading'))
-      .map(section => {
-        const indent = section.type === 'heading1' ? 0 :
-          section.type === 'heading2' ? 1 : 2;
+   // Création de la table des matières
+   const tocRows = sections
+     .filter(section => section.type.startsWith('heading'))
+     .map(section => {
+       const indent = section.type === 'heading1' ? 0 :
+         section.type === 'heading2' ? 1 : 2;
 
-        return new TableRow({
-          children: [
-            new TableCell({
-              width: { size: 15, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: section.number || '', bold: true })],
-                  alignment: AlignmentType.LEFT,
-                }),
-              ],
-            }),
-            new TableCell({
-              width: { size: 85, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: section.text.replace(/^\d+(\.\d+)*\s*/, ''),
-                      bold: section.type === 'heading1',
-                      size: 24,
-                    }),
-                  ],
-                  indent: { left: indent * 360 },
-                }),
-              ],
-            }),
-          ],
-        });
-      });
+       return new TableRow({
+         children: [
+           new TableCell({
+             width: { size: 15, type: WidthType.PERCENTAGE },
+             children: [
+               new Paragraph({
+                 children: [new TextRun({ text: section.number || '', bold: true })],
+                 alignment: AlignmentType.LEFT,
+               }),
+             ],
+           }),
+           new TableCell({
+             width: { size: 85, type: WidthType.PERCENTAGE },
+             children: [
+               new Paragraph({
+                 children: [
+                   new TextRun({
+                     text: section.text.replace(/^\d+(\.\d+)*\s*/, ''),
+                     bold: section.type === 'heading1',
+                     size: 24,
+                   }),
+                 ],
+                 indent: { left: indent * 360 },
+               }),
+             ],
+           }),
+         ],
+       });
+     });
 
-    const tocTable = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: {
-        top: { style: BorderStyle.NONE },
-        bottom: { style: BorderStyle.NONE },
-        left: { style: BorderStyle.NONE },
-        right: { style: BorderStyle.NONE },
-        insideHorizontal: { style: BorderStyle.NONE },
-        insideVertical: { style: BorderStyle.NONE },
-      },
-      rows: tocRows,
-    });
+   const tocTable = new Table({
+     width: { size: 100, type: WidthType.PERCENTAGE },
+     borders: {
+       top: { style: BorderStyle.NONE },
+       bottom: { style: BorderStyle.NONE },
+       left: { style: BorderStyle.NONE },
+       right: { style: BorderStyle.NONE },
+       insideHorizontal: { style: BorderStyle.NONE },
+       insideVertical: { style: BorderStyle.NONE },
+     },
+     rows: tocRows,
+   });
 
-    // Création du document
-    const doc = new Document({
-      sections: [{
-        properties: {
-          page: {
-            margin: {
-              top: 1440, // 1 inch
-              right: 1440,
-              bottom: 1440,
-              left: 1440,
-            },
-          },
-        },
-        children: [
-          // Page de garde
-          new Paragraph({
-            text: "3R TECHNOLOGIE",
-            heading: HeadingLevel.TITLE,
-            spacing: { before: 700, after: 400 },
-            alignment: AlignmentType.CENTER,
-          }),
-          new Paragraph({
-            text: title,
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 400 },
-            alignment: AlignmentType.CENTER,
-          }),
-          new Paragraph({
-            text: new Date().toLocaleDateString('fr-FR'),
-            spacing: { before: 200, after: 400 },
-            alignment: AlignmentType.CENTER,
-          }),
-          // Nouvelle page pour la table des matières
-          new Paragraph({
-            text: "",
-            pageBreakBefore: true,
-          }),
-          new Paragraph({
-            text: "Table des matières",
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 400 },
-            alignment: AlignmentType.CENTER,
-            pageBreakBefore: false,
-          }),
-          tocTable,
-          // Nouvelle page pour le contenu
-          new Paragraph({
-            text: "",
-            pageBreakBefore: true,
-          }),
-          // Contenu du document
-          ...sections.map(section => {
-            switch (section.type) {
-              case 'heading1':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 400, after: 200 },
-                  pageBreakBefore: true,
-                });
-              case 'heading2':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { before: 300, after: 200 },
-                });
-              case 'heading3':
-                return new Paragraph({
-                  text: section.text,
-                  heading: HeadingLevel.HEADING_3,
-                  spacing: { before: 200, after: 100 },
-                });
-              case 'bullet':
-                return new Paragraph({
-                  text: section.text,
-                  bullet: { level: 0 },
-                  spacing: { before: 100, after: 100 },
-                  indent: { left: 720 },
-                });
-              default:
-                return new Paragraph({
-                  text: section.text,
-                  spacing: { before: 100, after: 100 },
-                });
-            }
-          }),
-        ],
-      }],
-      styles: {
-        paragraphStyles: [
-          {
-            id: "Title",
-            name: "Title",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
-            run: {
-              size: 44,
-              bold: true,
-              color: "000000",
-            },
-            paragraph: {
-              spacing: { before: 340, after: 340 },
-              alignment: AlignmentType.CENTER,
-            },
-          },
-          {
-            id: "Heading1",
-            name: "Heading 1",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
-            run: {
-              size: 36,
-              bold: true,
-              color: "000000",
-            },
-            paragraph: {
-              spacing: { before: 240, after: 120 },
-            },
-          },
-          {
-            id: "Heading2",
-            name: "Heading 2",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
-            run: {
-              size: 32,
-              bold: true,
-              color: "000000",
-            },
-            paragraph: {
-              spacing: { before: 240, after: 120 },
-            },
-          },
-          {
-            id: "Heading3",
-            name: "Heading 3",
-            basedOn: "Normal",
-            next: "Normal",
-            quickFormat: true,
-            run: {
-              size: 28,
-              bold: true,
-              color: "000000",
-            },
-            paragraph: {
-              spacing: { before: 240, after: 120 },
-            },
-          },
-        ],
-      },
-    });
+   // Création du document
+   const doc = new Document({
+     sections: [{
+       properties: {
+         page: {
+           margin: {
+             top: 1440, // 1 inch
+             right: 1440,
+             bottom: 1440,
+             left: 1440,
+           },
+         },
+       },
+       children: [
+         // Page de garde
+         new Paragraph({
+           text: "3R TECHNOLOGIE",
+           heading: HeadingLevel.TITLE,
+           spacing: { before: 700, after: 400 },
+           alignment: AlignmentType.CENTER,
+         }),
+         new Paragraph({
+           text: title,
+           heading: HeadingLevel.HEADING_1,
+           spacing: { before: 400, after: 400 },
+           alignment: AlignmentType.CENTER,
+         }),
+         new Paragraph({
+           text: new Date().toLocaleDateString('fr-FR'),
+           spacing: { before: 200, after: 400 },
+           alignment: AlignmentType.CENTER,
+         }),
+         // Nouvelle page pour la table des matières
+         new Paragraph({
+           text: "",
+           pageBreakBefore: true,
+         }),
+         new Paragraph({
+           text: "Table des matières",
+           heading: HeadingLevel.HEADING_1,
+           spacing: { before: 400, after: 400 },
+           alignment: AlignmentType.CENTER,
+           pageBreakBefore: false,
+         }),
+         tocTable,
+         // Nouvelle page pour le contenu
+         new Paragraph({
+           text: "",
+           pageBreakBefore: true,
+         }),
+         // Contenu du document
+         ...sections.map(section => {
+           switch (section.type) {
+             case 'heading1':
+               return new Paragraph({
+                 text: section.text,
+                 heading: HeadingLevel.HEADING_1,
+                 spacing: { before: 400, after: 200 },
+                 pageBreakBefore: true,
+               });
+             case 'heading2':
+               return new Paragraph({
+                 text: section.text,
+                 heading: HeadingLevel.HEADING_2,
+                 spacing: { before: 300, after: 200 },
+               });
+             case 'heading3':
+               return new Paragraph({
+                 text: section.text,
+                 heading: HeadingLevel.HEADING_3,
+                 spacing: { before: 200, after: 100 },
+               });
+             case 'bullet':
+               return new Paragraph({
+                 text: section.text,
+                 bullet: { level: 0 },
+                 spacing: { before: 100, after: 100 },
+                 indent: { left: 720 },
+               });
+             default:
+               return new Paragraph({
+                 text: section.text,
+                 spacing: { before: 100, after: 100 },
+               });
+           }
+         }),
+       ],
+     }],
+     styles: {
+       paragraphStyles: [
+         {
+           id: "Title",
+           name: "Title",
+           basedOn: "Normal",
+           next: "Normal",
+           quickFormat: true,
+           run: {
+             size: 44,
+             bold: true,
+             color: "000000",
+           },
+           paragraph: {
+             spacing: { before: 340, after: 340 },
+             alignment: AlignmentType.CENTER,
+           },
+         },
+         {
+           id: "Heading1",
+           name: "Heading 1",
+           basedOn: "Normal",
+           next: "Normal",
+           quickFormat: true,
+           run: {
+             size: 36,
+             bold: true,
+             color: "000000",
+           },
+           paragraph: {
+             spacing: { before: 240, after: 120 },
+           },
+         },
+         {
+           id: "Heading2",
+           name: "Heading 2",
+           basedOn: "Normal",
+           next: "Normal",
+           quickFormat: true,
+           run: {
+             size: 32,
+             bold: true,
+             color: "000000",
+           },
+           paragraph: {
+             spacing: { before: 240, after: 120 },
+           },
+         },
+         {
+           id: "Heading3",
+           name: "Heading 3",
+           basedOn: "Normal",
+           next: "Normal",
+           quickFormat: true,
+           run: {
+             size: 28,
+             bold: true,
+             color: "000000",
+           },
+           paragraph: {
+             spacing: { before: 240, after: 120 },
+           },
+         },
+       ],
+     },
+   });
 
-    console.log('[Word] Document object created, starting buffer generation');
-    const buffer = await Packer.toBuffer(doc);
-    console.log('[Word] Buffer generated successfully, size:', buffer.length);
-    return buffer;
-  } catch (error) {
-    console.error('[Word] Error generating document:', error);
-    throw new Error('Erreur lors de la génération du document Word');
-  }
+   console.log('[Word] Document object created, starting buffer generation');
+   const buffer = await Packer.toBuffer(doc);
+   console.log('[Word] Buffer generated successfully, size:', buffer.length);
+   return buffer;
+ } catch (error) {
+   console.error('[Word] Error generating document:', error);
+   throw new Error('Erreur lors de la génération du document Word');
+ }
 }
 
 function generatePrompt(input: any): string {
@@ -544,40 +544,52 @@ export function registerRoutes(app: Express): Server {
 
 export async function generateRecommendations(req: any, res: any) {
   try {
-    const auditData = req.body;
-    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées conformes aux normes EN 50600 et ISO/IEC.
-Données d'audit à analyser:
+    const { auditData, clientContext, constraints } = req.body;
+
+    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées conformes aux normes EN 50600, ISO/IEC, et TIA-942.
+
+CONTEXTE CLIENT :
+${JSON.stringify(clientContext, null, 2)}
+
+DONNÉES D'AUDIT :
 ${JSON.stringify(auditData, null, 2)}
 
-Instructions:
-Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans aucun texte additionnel:
+CONTRAINTES SPÉCIFIQUES :
+${JSON.stringify(constraints, null, 2)}
 
-{
-  "recommendations": [
-    {
-      "id": "string",
-      "title": "string",
-      "description": "string",
-      "normReference": {
-        "code": "string",
-        "description": "string",
-        "requirement": "string"
-      },
-      "priority": "critical|high|medium|low",
-      "timeFrame": "immediate|short_term|long_term",
-      "impact": {
-        "energyEfficiency": "number",
-        "performance": "number",
-        "compliance": "number",
-        "details": {
-          "energyEfficiency": "string",
-          "performance": "string",
-          "compliance": "string"
-        }
-      }
-    }
-  ]
-}`;
+INSTRUCTIONS DE GÉNÉRATION :
+
+1. Pour chaque recommandation :
+   - Analyser l'état actuel et son impact business
+   - Évaluer les risques de non-implémentation
+   - Proposer un plan d'implémentation détaillé
+   - Calculer le ROI et le temps de retour sur investissement
+   - Identifier les KPIs de suivi
+   - Définir les critères de validation
+
+2. Prendre en compte :
+   - La continuité de service
+   - Les contraintes budgétaires
+   - Les dépendances entre recommandations
+   - Les impacts sur les opérations
+   - La conformité réglementaire
+   - L'efficacité énergétique
+   - La scalabilité future
+
+3. Pour chaque norme citée :
+   - Référencer les sections spécifiques
+   - Expliquer les exigences précises
+   - Détailler les impacts sur la conformité
+
+4. Priorisation basée sur :
+   - Criticité des risques
+   - Impact business
+   - Coût d'implémentation
+   - Rapidité de mise en œuvre
+   - Dépendances techniques
+
+FORMAT DE RÉPONSE :
+Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans aucun texte additionnel.`;
 
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -593,12 +605,34 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
     }
 
     try {
+      // Parse and validate recommendations
       const recommendations = JSON.parse(response.content[0].text);
-      res.json(recommendations);
+      const validationResult = validateRecommendations(recommendations);
+
+      if (!validationResult.isValid) {
+        throw new Error(`Validation failed: ${JSON.stringify(validationResult.errors)}`);
+      }
+
+      // Enrich recommendations with additional context
+      const enrichedRecommendations = enrichRecommendations(recommendations, {
+        clientContext,
+        benchmarks: auditData.benchmarks,
+        regulations: auditData.regulations,
+        costs: auditData.costs
+      });
+
+      // Prioritize recommendations
+      const prioritizedRecommendations = prioritizeRecommendations(enrichedRecommendations, {
+        costWeight: 0.3,
+        riskWeight: 0.4,
+        impactWeight: 0.3
+      });
+
+      res.json(prioritizedRecommendations);
     } catch (parseError) {
-      console.error("Error parsing Anthropic response:", parseError);
+      console.error("Error processing recommendations:", parseError);
       res.status(500).json({
-        error: "Erreur lors du parsing de la réponse"
+        error: "Erreur lors du traitement des recommandations"
       });
     }
   } catch (error) {
@@ -607,4 +641,20 @@ Génère une réponse STRICTEMENT au format JSON suivant ce schéma exact sans a
       error: error instanceof Error ? error.message : 'Une erreur est survenue'
     });
   }
+}
+
+
+function validateRecommendations(recommendations: any): { isValid: boolean; errors: string[] } {
+  // Placeholder for validation logic
+  return { isValid: true, errors: [] };
+}
+
+function enrichRecommendations(recommendations: any, context: any): any {
+  // Placeholder for enrichment logic
+  return recommendations;
+}
+
+function prioritizeRecommendations(recommendations: any, weights: any): any {
+  // Placeholder for prioritization logic
+  return recommendations;
 }
