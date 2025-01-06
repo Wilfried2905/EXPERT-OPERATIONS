@@ -1,0 +1,115 @@
+const handleDownload = useCallback(async (e: React.MouseEvent, docKey: string, docTitle: string) => {
+  e.stopPropagation();
+  if (isGenerating) return;
+  
+  try {
+    setIsGenerating(true);
+    
+    // 1. Validation des données d'entrée
+    if (!clientName) {
+      throw new Error("Le nom du client est requis");
+    }
+
+    // 2. Notification plus détaillée
+    const toastId = toast({
+      title: "Génération en cours",
+      description: "Préparation des données...",
+      duration: null,
+    });
+
+    // 3. Collecte et validation des données
+    const input = {
+      type: getDocumentType(docKey),
+      clientInfo: {
+        name: clientName,
+        industry: "Technologie",
+        size: "Grande entreprise"
+      },
+      auditData: await collectAuditData()
+    };
+
+    // 4. Vérification des données collectées
+    validateInputData(input);
+
+    // 5. Mise à jour du statut
+    toast.update(toastId, {
+      description: "Génération du document...",
+    });
+
+    // 6. Génération avec gestion des erreurs détaillée
+    const blob = await generateDocument(input);
+    
+    if (!blob) {
+      throw new Error("La génération du document n'a pas produit de résultat");
+    }
+
+    // 7. Téléchargement sécurisé
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = generateFileName(docTitle);
+    
+    // 8. Nettoyage
+    try {
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      window.URL.revokeObjectURL(url);
+    }
+
+    // 9. Notification de succès
+    toast.dismiss(toastId);
+    toast({
+      title: "Document généré",
+      description: "Le document a été généré et téléchargé avec succès",
+      duration: 3000,
+    });
+
+  } catch (error) {
+    console.error('[Download] Detailed error:', error);
+    
+    // 10. Gestion d'erreur améliorée
+    let errorMessage = "Une erreur inattendue est survenue";
+    
+    if (error instanceof Error) {
+      if (error.message.includes("client")) {
+        errorMessage = "Erreur : informations client manquantes ou invalides";
+      } else if (error.message.includes("data")) {
+        errorMessage = "Erreur : données d'audit invalides ou incomplètes";
+      } else if (error.message.includes("generate")) {
+        errorMessage = "Erreur lors de la génération du document. Veuillez réessayer.";
+      }
+    }
+
+    toast({
+      title: "Erreur",
+      description: errorMessage,
+      variant: "destructive",
+      duration: 5000,
+    });
+  } finally {
+    setIsGenerating(false);
+  }
+}, [clientName, generateFileName, isGenerating, toast]);
+
+// Fonctions utilitaires
+function validateInputData(input: any) {
+  if (!input.type || !input.clientInfo || !input.auditData) {
+    throw new Error("Données d'entrée incomplètes");
+  }
+  // Ajoutez d'autres validations spécifiques
+}
+
+async function collectAuditData() {
+  try {
+    // Collecte des données d'audit
+    return {
+      metrics: {},
+      recommendations: [],
+      // ... autres données
+    };
+  } catch (error) {
+    throw new Error("Erreur lors de la collecte des données d'audit");
+  }
+}
