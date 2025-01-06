@@ -1,0 +1,97 @@
+const handleDownload = useCallback(async (e: React.MouseEvent, docKey: string, docTitle: string) => {
+  e.stopPropagation();
+  if (isGenerating) return;
+
+  try {
+    setIsGenerating(true);
+    const toastId = toast({
+      title: "Génération en cours",
+      description: "Préparation du document...",
+      duration: null,
+    });
+
+    // 1. Validation des entrées
+    const input = {
+      type: docKey === 'offreTechnique' 
+        ? DocumentType.TECHNICAL_OFFER
+        : docKey === 'cahierCharges'
+          ? DocumentType.SPECIFICATIONS
+          : DocumentType.AUDIT_REPORT,
+      clientInfo: {
+        name: clientName || 'Client',
+        industry: "Technologie",
+        size: "Grande entreprise"
+      },
+      auditData: {
+        recommendations: [],
+        metrics: {
+          pue: [1.8, 1.9, 1.7],
+          availability: [99.9, 99.8, 99.95],
+          tierLevel: 3,
+          complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
+        },
+        infrastructure: {
+          rooms: [],
+          equipment: []
+        },
+        compliance: {
+          matrix: {},
+          score: 85
+        }
+      }
+    };
+
+    // 2. Génération du document avec timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout lors de la génération')), 30000)
+    );
+    
+    const generationPromise = generateDocument(input);
+    
+    const blob = await Promise.race([generationPromise, timeoutPromise]);
+
+    if (!blob) {
+      throw new Error('Aucun document généré');
+    }
+
+    // 3. Téléchargement sécurisé
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = generateFileName(docTitle);
+
+    try {
+      document.body.appendChild(link);
+      link.click();
+    } finally {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+
+    toast.dismiss(toastId);
+    toast({
+      title: "Succès",
+      description: "Document généré et téléchargé avec succès",
+      duration: 3000,
+    });
+
+  } catch (error) {
+    console.error("Erreur détaillée:", error);
+    toast({
+      title: "Erreur",
+      description: error instanceof Error 
+        ? `Erreur de génération : ${error.message}`
+        : "Erreur lors de la génération du document",
+      variant: "destructive",
+      duration: 5000,
+    });
+  } finally {
+    setIsGenerating(false);
+  }
+}, [clientName, generateFileName, isGenerating, toast]);
+
+// Fonction utilitaire pour la génération du nom de fichier
+const generateFileName = (baseTitle: string) => {
+  const date = new Date().toISOString().split('T')[0];
+  return `${baseTitle}_${date}.pdf`.replace(/\s+/g, '_');
+};
