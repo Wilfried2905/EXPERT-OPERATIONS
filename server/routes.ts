@@ -20,32 +20,37 @@ async function generateRecommendations(req: any, res: any) {
     console.log('[Recommendations] Headers:', req.headers);
     console.log('[Recommendations] Body:', JSON.stringify(req.body, null, 2));
 
-    const { auditData } = req.body;
-
-    if (!auditData) {
+    if (!req.body || !req.body.auditData) {
       console.log('[Recommendations] Missing audit data');
       return res.status(400).json({
-        error: 'Données d\'audit manquantes'
+        error: "Données d'audit requises manquantes"
       });
     }
 
-    const prompt = `En tant qu'expert en audit de datacenters, analyse ces données et génère des recommandations détaillées:
+    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées.
 
-${JSON.stringify(auditData, null, 2)}
+    ${JSON.stringify(req.body.auditData, null, 2)}
 
-IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide avec cette structure exacte:
-{
-  "recommendations": [
+    IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide ayant cette structure exacte:
     {
-      "id": string,
-      "title": string,
-      "description": string,
-      "priority": "critical" | "high" | "medium" | "low",
-      "impact": object,
-      "implementation": object
-    }
-  ]
-}`;
+      "recommendations": [
+        {
+          "id": string,
+          "title": string,
+          "description": string,
+          "priority": "critical" | "high" | "medium" | "low",
+          "impact": {
+            "description": string,
+            "metrics": object
+          },
+          "implementation": {
+            "steps": string[],
+            "timeframe": string,
+            "resources": string[]
+          }
+        }
+      ]
+    }`;
 
     console.log('[Anthropic] Sending request with prompt length:', prompt.length);
 
@@ -56,11 +61,11 @@ IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide avec cette str
       messages: [{
         role: "user",
         content: prompt
-      }]
+      }],
+      response_format: { type: "json_object" }
     });
 
     console.log('[Anthropic] Response received');
-    console.log('[Anthropic] Content:', response.content?.[0]?.text);
 
     if (!response.content || !response.content[0]?.text) {
       throw new Error('Réponse invalide de l\'API');
@@ -69,8 +74,10 @@ IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide avec cette str
     try {
       const result = JSON.parse(response.content[0].text);
       console.log('[Recommendations] Parsed response:', result);
+
+      res.setHeader('Content-Type', 'application/json');
       return res.json(result);
-    } catch (parseError) {
+    } catch (parseError: any) {
       console.error('[Parse] Error:', parseError);
       console.error('[Parse] Raw response:', response.content[0].text);
       return res.status(500).json({
@@ -81,7 +88,8 @@ IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide avec cette str
   } catch (error: any) {
     console.error('[Recommendations] Error:', error);
     return res.status(500).json({
-      error: error.message || 'Erreur serveur'
+      error: "Erreur lors de la génération des recommandations",
+      details: error instanceof Error ? error.message : 'Erreur inconnue'
     });
   }
 }
@@ -153,10 +161,10 @@ export function registerRoutes(app: Express): Server {
       console.log('[Documents] Headers:', req.headers);
       console.log('[Documents] Body:', JSON.stringify(req.body, null, 2));
 
-      const { type, clientInfo, content } = req.body;
+      const { type, title, clientInfo, content, auditData } = req.body;
 
-      if (!type || !clientInfo || !content) {
-        console.log('[Documents] Missing required data:', { type, clientInfo, content });
+      if (!type || !clientInfo || !content || !auditData) {
+        console.log('[Documents] Missing required data:', { type, clientInfo, content, auditData });
         return res.status(400).json({
           error: 'Données requises manquantes'
         });

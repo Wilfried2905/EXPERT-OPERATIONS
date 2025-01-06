@@ -18,7 +18,8 @@ export function useDocumentGeneration() {
             metrics: {
               pue: [1.8, 1.9, 1.7],
               availability: [99.9, 99.8, 99.95],
-              tierLevel: 3
+              tierLevel: 3,
+              complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
             },
             infrastructure: {
               rooms: [],
@@ -58,7 +59,16 @@ export function useDocumentGeneration() {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('[Download] Starting process', { docKey, docTitle });
+    // Validation des données requises
+    if (!docKey || !docTitle) {
+      toast({
+        title: "Erreur",
+        description: "Informations du document manquantes",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
 
     if (isGenerating) {
       console.log('[Download] Generation already in progress');
@@ -81,17 +91,34 @@ export function useDocumentGeneration() {
           ? DocumentType.SPECIFICATIONS
           : DocumentType.AUDIT_REPORT;
 
-      const requestData = {
+      const documentData = {
         type: documentType,
+        title: docTitle,
         clientInfo: {
           name: 'Client Test',
           industry: 'Technologie',
           size: 'Grande entreprise'
         },
+        auditData: {
+          metrics: {
+            pue: [1.8, 1.9, 1.7],
+            availability: [99.9, 99.8, 99.95],
+            tierLevel: 3,
+            complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
+          },
+          infrastructure: {
+            rooms: [],
+            equipment: []
+          },
+          compliance: {
+            matrix: {},
+            score: 85
+          }
+        },
         content: `# ${documentType}\n\nContenu généré automatiquement pour le document ${documentType}.\n\nDate: ${new Date().toLocaleDateString('fr-FR')}\n\nCe document est un exemple de contenu généré.`
       };
 
-      console.log('[Download] Request data:', requestData);
+      console.log('[Download] Request data:', documentData);
 
       console.log('[Download] Sending request to server');
       const response = await fetch('/api/documents/generate', {
@@ -99,7 +126,7 @@ export function useDocumentGeneration() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(documentData)
       });
 
       console.log('[Download] Server response status:', response.status);
@@ -143,12 +170,7 @@ export function useDocumentGeneration() {
       });
 
     } catch (error: any) {
-      console.error('[Download] Error details:', {
-        error,
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
+      console.error('[Download] Error details:', error);
 
       toast.dismiss(toastId);
       toast({
