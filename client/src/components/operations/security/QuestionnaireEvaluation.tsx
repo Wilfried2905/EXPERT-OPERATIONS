@@ -139,11 +139,10 @@ const SecurityQuestionnaireEvaluation = () => {
     if (currentSection < sections.length - 1) {
       setCurrentSection(prev => prev + 1);
     } else {
-      setLocation('/operations/security/client-info');
+      setLocation('/recommendations');
     }
   };
 
-  const handlePrevious = () => setCurrentSection(prev => Math.max(0, prev - 1));
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
@@ -209,15 +208,9 @@ const SecurityQuestionnaireEvaluation = () => {
             ))}
           </div>
 
-          <div className="flex justify-between mt-6">
-            <Button
-              onClick={handlePrevious}
-              disabled={currentSection === 0}
-            >
-              Précédent
-            </Button>
+          <div className="flex justify-end mt-6">
             <Button onClick={handleNext}>
-              {currentSection === sections.length - 1 ? 'Terminer' : 'Suivant'}
+              {currentSection === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
             </Button>
           </div>
         </Card>
