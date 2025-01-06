@@ -1,0 +1,64 @@
+function generatePrompt(input: any): string {
+  // Validation des données d'entrée
+  if (!input.clientInfo || !input.auditData) {
+    throw new Error("Missing required input data");
+  }
+
+  // Enrichir la structure selon le type
+  const documentStructure = getDocumentStructure(input.type);
+  
+  // Ajouter la validation et le formatage des métriques
+  const metrics = formatMetrics(input.auditData.metrics);
+  
+  // Inclure les données d'infrastructure
+  const infrastructure = formatInfrastructure(input.auditData.infrastructure);
+
+  const baseContext = `
+En tant qu'expert en datacenters et infrastructure IT, générez un document professionnel détaillé de type "${input.type}" en suivant strictement la structure ci-dessous.
+
+IMPORTANT: Pour chaque section du document:
+1. Commencez par une introduction détaillée qui présente les objectifs et le contexte
+2. Développez chaque point avec au moins 2-3 paragraphes explicatifs
+3. Incluez des exemples concrets et des références aux normes TIA-942
+4. Ajoutez des données chiffrées et des métriques spécifiques
+5. Terminez par une conclusion et des recommandations
+
+FORMAT DU DOCUMENT:
+${documentStructure}
+
+CONTEXTE CLIENT:
+- Nom: ${input.clientInfo.name}
+- Secteur: ${input.clientInfo.industry}
+- Taille: ${input.clientInfo.size}
+
+INFRASTRUCTURE ACTUELLE:
+${infrastructure}
+
+MÉTRIQUES ACTUELLES:
+${metrics}
+
+PLAN DE TRANSITION:
+- Étapes de mise en œuvre
+- Planning détaillé
+- Gestion des risques
+- Plan de continuité
+- Tests et validations`;
+
+  return baseContext;
+}
+
+function formatMetrics(metrics: any) {
+  return `
+- PUE: ${metrics.pue ? metrics.pue.join(', ') : 'N/A'}
+- Disponibilité: ${metrics.availability ? metrics.availability.join(', ') : 'N/A'}%
+- Niveau TIER: ${metrics.tierLevel || 'N/A'}
+- Score de conformité: ${metrics.compliance?.score || 'N/A'}%
+- Points d'amélioration: ${metrics.complianceGaps?.join(', ') || 'N/A'}`;
+}
+
+function formatInfrastructure(infrastructure: any) {
+  return `
+- Superficie: ${infrastructure.totalArea || 'N/A'} m²
+- Nombre de salles: ${infrastructure.rooms?.length || 'N/A'}
+- Équipements principaux: ${infrastructure.equipment?.length || 'N/A'} unités`;
+}
