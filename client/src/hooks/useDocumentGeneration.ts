@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { generateDocument } from '@/services/documentGeneration';
-import type { DocumentData } from '@/types/document';
+import { DocumentType } from '@/types/document';
 
 export function useDocumentGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -15,7 +14,6 @@ export function useDocumentGeneration() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // Example audit data structure
           metrics: {
             pue: [1.8, 1.9, 1.7],
             availability: [99.9, 99.8, 99.95],
@@ -70,37 +68,68 @@ export function useDocumentGeneration() {
 
     try {
       setIsGenerating(true);
-      console.log('[Download] Preparing document data');
+      console.log('[Download] Preparing request data');
 
-      const input: DocumentData = {
-        title: docTitle,
-        type: docKey,
+      // Map docKey to correct document type
+      const documentType = docKey === 'offreTechnique' 
+        ? DocumentType.TECHNICAL_OFFER
+        : docKey === 'cahierCharges'
+          ? DocumentType.SPECIFICATIONS
+          : DocumentType.AUDIT_REPORT;
+
+      const requestData = {
+        type: documentType,
         clientInfo: {
           name: 'Client Test',
           industry: 'Technologie',
           size: 'Grande entreprise'
         },
-        metadata: {
-          date: new Date().toISOString(),
-          version: '1.0',
-          author: '3R TECHNOLOGIE'
-        },
-        content: 'Contenu test du document'
+        content: `Contenu du document ${documentType}\n\nCeci est un exemple de contenu généré pour le document.`
       };
 
-      console.log('[Download] Generating document with input:', input);
-      const blob = await generateDocument(input);
+      console.log('[Download] Request data:', requestData);
 
-      console.log('[Download] Document generated, starting download');
+      console.log('[Download] Sending request to server');
+      const response = await fetch('/api/documents/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      console.log('[Download] Server response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Download] Server error response:', errorText);
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.details || errorData.error;
+        } catch {
+          errorMessage = errorText;
+        }
+        throw new Error(errorMessage || 'Erreur de génération');
+      }
+
+      console.log('[Download] Getting response blob');
+      const blob = await response.blob();
+      console.log('[Download] Blob received, size:', blob.size);
+
       const url = window.URL.createObjectURL(blob);
+      console.log('[Download] Blob URL created:', url);
+
       const link = document.createElement('a');
       link.href = url;
       link.download = `${docTitle}_${new Date().toISOString().split('T')[0]}.docx`;
 
+      console.log('[Download] Starting file download');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      console.log('[Download] Download completed');
 
       toast.dismiss(toastId);
       toast({
@@ -124,8 +153,10 @@ export function useDocumentGeneration() {
         variant: "destructive",
         duration: 5000,
       });
+
     } finally {
       setIsGenerating(false);
+      console.log('[Download] Process completed');
     }
   }, [isGenerating]);
 
