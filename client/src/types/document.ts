@@ -1,7 +1,7 @@
 export interface CollectedData {
   documents: Document[];
   images?: ImageData[];
-  metrics: AuditMetrics;
+  metrics: AuditMetricsData;
   infrastructure: InfrastructureData;
   comments: Comment[];
 }
@@ -16,10 +16,39 @@ export interface Document {
   };
 }
 
+export interface AuditMetricsData {
+  pue: number[];
+  availability: number[];
+  compliance: {
+    score: number;
+    details: Record<string, any>;
+  };
+  trends: Record<string, any>;
+}
+
+export interface InfrastructureData {
+  totalArea?: number;
+  rooms?: {
+    id: string;
+    name: string;
+    type: string;
+    area: number;
+    equipment: Equipment[];
+  }[];
+  equipment?: Equipment[];
+}
+
+export interface Equipment {
+  id: string;
+  name: string;
+  type: string;
+  specifications: Record<string, any>;
+}
+
 export interface AnalyzedData {
   keyFindings: Finding[];
   metrics: ProcessedMetrics;
-  recommendations: RecommendationSchema; // Changed to use the new schema
+  recommendations: RecommendationSchema;
   risks: Risk[];
   timeline: TimelineEvent[];
 }
@@ -130,3 +159,36 @@ export interface TimelineEvent {
   description: string;
   type: string;
 }
+
+export interface DocumentData {
+  title: string;
+  type: DocumentType;
+  clientInfo: {
+    name: string;
+    industry: string;
+    size: string;
+  };
+  executiveSummary?: string;
+  content?: string;
+  metadata: {
+    date: string;
+    version: string;
+    author: string;
+  };
+  auditData?: {
+    recommendations: RecommendationSchema;
+    metrics: {
+      pue: number[];
+      availability: number[];
+      tierLevel: number;
+      complianceGaps: string[];
+    };
+    infrastructure: InfrastructureData;
+    compliance: {
+      matrix: any;
+      score: number;
+    };
+  };
+}
+
+export type DocumentType = 'audit' | 'report' | 'other';

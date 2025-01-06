@@ -1,4 +1,6 @@
 import type { Document } from 'docx';
+import { DocumentGenerator } from './documentGenerator';
+import type { DocumentData } from '@/types/document';
 
 // Types de documents supportés
 export enum DocumentType {
@@ -34,27 +36,19 @@ interface DocumentGenerationInput {
   };
 }
 
-export async function generateDocument(input: DocumentGenerationInput): Promise<Blob> {
+export async function generateDocument(input: DocumentData): Promise<Blob> {
   console.log('[Generation] Starting document generation process');
 
-  const response = await fetch('/api/anthropic/document', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(input)
-  });
+  try {
+    const generator = new DocumentGenerator();
+    const buffer = await generator.generateDocument(input);
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Erreur lors de la génération du document');
+    // Convertir le buffer en Blob
+    return new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+  } catch (error) {
+    console.error('[Generation] Error:', error);
+    throw new Error('Erreur lors de la génération du document');
   }
-
-  // Récupérer le blob directement de la réponse
-  const blob = await response.blob();
-  if (!blob) {
-    throw new Error('Le document généré est invalide');
-  }
-
-  return blob;
 }
