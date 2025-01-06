@@ -1,9 +1,55 @@
 import { useState, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { DocumentType } from '@/types/document';
+import { generateDocument } from '@/services/documentGeneration';
+import type { DocumentData } from '@/types/document';
 
 export function useDocumentGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleRecommendations = useCallback(async () => {
+    try {
+      console.log('[Recommendations] Starting request');
+      const response = await fetch('/api/recommendations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // Example audit data structure
+          metrics: {
+            pue: [1.8, 1.9, 1.7],
+            availability: [99.9, 99.8, 99.95],
+            tierLevel: 3
+          },
+          infrastructure: {
+            totalArea: 1000,
+            rooms: [],
+            equipment: []
+          }
+        })
+      });
+
+      console.log('[Recommendations] Response status:', response.status);
+      const responseText = await response.text();
+      console.log('[Recommendations] Raw response:', responseText);
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${responseText}`);
+      }
+
+      try {
+        const data = JSON.parse(responseText);
+        return data;
+      } catch (parseError) {
+        console.error('[Recommendations] Parse error:', parseError);
+        console.error('[Recommendations] Response text:', responseText);
+        throw new Error('Invalid JSON response from server');
+      }
+    } catch (error) {
+      console.error('[Recommendations] Error:', error);
+      throw error;
+    }
+  }, []);
 
   const handleDownload = useCallback(async (e: React.MouseEvent, docKey: string, docTitle: string) => {
     e.preventDefault();
@@ -24,54 +70,37 @@ export function useDocumentGeneration() {
 
     try {
       setIsGenerating(true);
-      console.log('[Download] Preparing request data');
+      console.log('[Download] Preparing document data');
 
-      const requestData = {
+      const input: DocumentData = {
+        title: docTitle,
         type: docKey,
         clientInfo: {
           name: 'Client Test',
           industry: 'Technologie',
           size: 'Grande entreprise'
         },
+        metadata: {
+          date: new Date().toISOString(),
+          version: '1.0',
+          author: '3R TECHNOLOGIE'
+        },
         content: 'Contenu test du document'
       };
 
-      console.log('[Download] Request data:', requestData);
+      console.log('[Download] Generating document with input:', input);
+      const blob = await generateDocument(input);
 
-      console.log('[Download] Sending request to server');
-      const response = await fetch('/api/documents/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      console.log('[Download] Server response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('[Download] Server error:', errorData);
-        throw new Error(errorData.details || errorData.error || 'Erreur de génération');
-      }
-
-      console.log('[Download] Getting response blob');
-      const blob = await response.blob();
-      console.log('[Download] Blob received, size:', blob.size);
-
+      console.log('[Download] Document generated, starting download');
       const url = window.URL.createObjectURL(blob);
-      console.log('[Download] Blob URL created:', url);
-
       const link = document.createElement('a');
       link.href = url;
       link.download = `${docTitle}_${new Date().toISOString().split('T')[0]}.docx`;
 
-      console.log('[Download] Starting file download');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      console.log('[Download] Download completed');
 
       toast.dismiss(toastId);
       toast({
@@ -95,12 +124,10 @@ export function useDocumentGeneration() {
         variant: "destructive",
         duration: 5000,
       });
-
     } finally {
       setIsGenerating(false);
-      console.log('[Download] Process completed');
     }
   }, [isGenerating]);
 
-  return { handleDownload, isGenerating };
+  return { handleDownload, handleRecommendations };
 }
