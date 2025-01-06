@@ -2,9 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Table, TableRow, TableCell, WidthType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 
-// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
@@ -15,77 +14,88 @@ export enum DocumentType {
   AUDIT_REPORT = 'Rapport d\'Audit'
 }
 
-export async function generateRecommendations(req: any, res: any) {
+async function generateRecommendations(req: any, res: any) {
   try {
+    console.log('[Recommendations] Request received');
+    console.log('[Recommendations] Headers:', req.headers);
+    console.log('[Recommendations] Body:', JSON.stringify(req.body, null, 2));
+
     const auditData = req.body;
 
-    // 1. Validation des données d'entrée
     if (!auditData) {
-      throw new Error('Données d\'audit manquantes');
+      console.log('[Recommendations] Missing audit data');
+      return res.status(400).json({
+        error: 'Données d\'audit manquantes'
+      });
     }
 
-    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées conformes aux normes EN 50600, ISO/IEC, et TIA-942.
+    const prompt = `En tant qu'expert en audit de datacenters, analyse ces données et génère des recommandations détaillées:
 
-DONNÉES D'AUDIT :
 ${JSON.stringify(auditData, null, 2)}
 
-FORMAT DE RÉPONSE :
-Génère une réponse au format JSON uniquement, sans texte additionnel.
-La réponse doit contenir un tableau de recommandations avec les champs suivants :
-- id: string (identifiant unique)
-- title: string (titre de la recommandation)
-- description: string (description détaillée)
-- priority: "critical" | "high" | "medium" | "low"
-- impact: object (impact sur différents aspects)
-- implementation: object (étapes de mise en œuvre)`;
+IMPORTANT: Ta réponse doit être UNIQUEMENT un objet JSON valide avec cette structure exacte:
+{
+  "recommendations": [
+    {
+      "id": string,
+      "title": string,
+      "description": string,
+      "priority": "critical" | "high" | "medium" | "low",
+      "impact": object,
+      "implementation": object
+    }
+  ]
+}`;
 
-    // 2. Configuration correcte de l'appel à l'API Anthropic
+    console.log('[Anthropic] Sending request with prompt length:', prompt.length);
+
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 4000,
+      temperature: 0.7,
       messages: [{
         role: "user",
-        content: prompt,
-      }],
-      temperature: 0.7
+        content: prompt
+      }]
     });
 
-    // 3. Validation de la réponse
-    if (!response.content?.[0]?.text) {
-      throw new Error('Format de réponse invalide de l\'API Anthropic');
+    console.log('[Anthropic] Response received');
+    console.log('[Anthropic] Content:', response.content?.[0]?.text);
+
+    if (!response.content || !response.content[0]?.text) {
+      throw new Error('Réponse invalide de l\'API');
     }
 
-    // 4. Parsing avec gestion d'erreur détaillée
     try {
-      const recommendations = JSON.parse(response.content[0].text);
-
-      // 5. Validation du format des recommandations
-      if (!Array.isArray(recommendations?.recommendations)) {
-        throw new Error('Format des recommandations invalide');
-      }
-
-      res.json(recommendations);
-    } catch (parseError: any) {
-      console.error("Erreur de parsing:", parseError, "Response:", response.content[0].text);
-      res.status(500).json({
-        error: "Erreur lors du parsing des recommandations",
+      const result = JSON.parse(response.content[0].text);
+      console.log('[Recommendations] Parsed response:', result);
+      return res.json(result);
+    } catch (parseError) {
+      console.error('[Parse] Error:', parseError);
+      console.error('[Parse] Raw response:', response.content[0].text);
+      return res.status(500).json({
+        error: 'Erreur de parsing',
         details: parseError.message
       });
     }
   } catch (error: any) {
-    console.error("Erreur complète:", error);
-    res.status(500).json({
-      error: error instanceof Error ? error.message : 'Erreur lors de la génération des recommandations',
-      type: 'RECOMMENDATION_GENERATION_ERROR'
+    console.error('[Recommendations] Error:', error);
+    return res.status(500).json({
+      error: error.message || 'Erreur serveur'
     });
   }
 }
 
 async function generateWordDocument(content: string, title: string): Promise<Buffer> {
   try {
-    console.log('[Word] Starting document generation with content length:', content.length);
+    console.log('[Word] Starting generation');
+    console.log('[Word] Content length:', content?.length);
+    console.log('[Word] Title:', title);
 
-    // Create document with basic structure
+    if (!content) {
+      throw new Error('Contenu du document manquant');
+    }
+
     const doc = new Document({
       sections: [{
         properties: {
@@ -94,85 +104,79 @@ async function generateWordDocument(content: string, title: string): Promise<Buf
               top: 1440,
               right: 1440,
               bottom: 1440,
-              left: 1440,
-            },
-          },
+              left: 1440
+            }
+          }
         },
         children: [
           new Paragraph({
             text: "3R TECHNOLOGIE",
             heading: HeadingLevel.TITLE,
             spacing: { before: 700, after: 400 },
-            alignment: AlignmentType.CENTER,
+            alignment: AlignmentType.CENTER
           }),
           new Paragraph({
             text: title,
             heading: HeadingLevel.HEADING_1,
             spacing: { before: 400, after: 400 },
-            alignment: AlignmentType.CENTER,
+            alignment: AlignmentType.CENTER
           }),
-          new Paragraph({
-            text: new Date().toLocaleDateString('fr-FR'),
-            spacing: { before: 200, after: 400 },
-            alignment: AlignmentType.CENTER,
-          }),
-          // Content sections
           ...content.split('\n').map(line => 
             new Paragraph({
               text: line,
-              spacing: { before: 200, after: 200 },
+              spacing: { before: 200, after: 200 }
             })
           )
-        ],
-      }],
+        ]
+      }]
     });
 
-    console.log('[Word] Document object created, starting buffer generation');
+    console.log('[Word] Document object created, generating buffer');
     const buffer = await Packer.toBuffer(doc);
-    console.log('[Word] Buffer generated successfully, size:', buffer.length);
+    console.log('[Word] Buffer generated, size:', buffer.length);
     return buffer;
+
   } catch (error) {
-    console.error('[Word] Error generating document:', error);
-    throw new Error('Erreur lors de la génération du document Word');
+    console.error('[Word] Generation error:', error);
+    throw error;
   }
 }
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
-  // Endpoint pour les recommandations
   app.post("/api/recommendations", generateRecommendations);
 
-  // Endpoint pour la génération de documents
   app.post("/api/documents/generate", async (req, res) => {
     try {
-      console.log('[Documents] Starting generation');
+      console.log('[Documents] Request received');
+      console.log('[Documents] Headers:', req.headers);
+      console.log('[Documents] Body:', JSON.stringify(req.body, null, 2));
+
       const { type, clientInfo, content } = req.body;
 
-      if (!type || !clientInfo) {
-        return res.status(400).json({ error: 'Données requises manquantes' });
+      if (!type || !clientInfo || !content) {
+        console.log('[Documents] Missing required data:', { type, clientInfo, content });
+        return res.status(400).json({
+          error: 'Données requises manquantes'
+        });
       }
 
       const documentTitle = `3R_${type}_${clientInfo.name}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '')}`;
+      console.log('[Documents] Generating document:', documentTitle);
 
-      // Add timeout for document generation
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout lors de la génération')), 30000)
-      );
-
-      const generationPromise = generateWordDocument(content || '', documentTitle);
-      const wordBuffer = await Promise.race([generationPromise, timeoutPromise]);
+      const wordBuffer = await generateWordDocument(content, documentTitle);
+      console.log('[Documents] Document generated, sending response');
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.setHeader('Content-Disposition', `attachment; filename="${documentTitle}.docx"`);
       res.setHeader('Content-Length', wordBuffer.length);
-      res.setHeader('Cache-Control', 'no-cache');
       res.send(wordBuffer);
 
     } catch (error: any) {
-      console.error('[Documents] Generation error:', error);
+      console.error('[Documents] Error:', error);
       res.status(500).json({
-        error: 'Erreur lors de la génération du document',
+        error: 'Erreur de génération',
         details: error.message
       });
     }
