@@ -6,6 +6,46 @@ import { format } from 'date-fns';
 import { generateDocument, DocumentType } from '@/services/documentGeneration';
 import { useToast } from "@/hooks/use-toast";
 
+// New utility functions
+const validateInput = (input: any) => {
+  if (!input.clientInfo?.name) {
+    throw new Error("Le nom du client est requis");
+  }
+  if (!input.type) {
+    throw new Error("Le type de document est requis");
+  }
+  if (!input.auditData?.metrics) {
+    throw new Error("Les métriques d'audit sont requises");
+  }
+};
+
+const enrichInputData = async (input: any) => {
+  // Enrichir les données avec des informations supplémentaires
+  return {
+    ...input,
+    generatedAt: new Date().toISOString(),
+    version: "1.0",
+    auditData: {
+      ...input.auditData,
+      metrics: {
+        ...input.auditData.metrics,
+        lastUpdate: new Date().toISOString()
+      }
+    }
+  };
+};
+
+const handleFileDownload = async (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 interface DocumentNavigationProps {
   section: 'collecte' | 'recommandations' | 'documents';
   onBack: () => void;
@@ -275,23 +315,13 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
     setShowPreview(true);
   }, []);
 
+  // Updated handleDownload function
   const handleDownload = useCallback(async (e: React.MouseEvent, docKey: string, docTitle: string) => {
     e.stopPropagation();
-
-    if (isGenerating) {
-      return;
-    }
+    if (isGenerating) return;
 
     try {
       setIsGenerating(true);
-      toast({
-        title: "Génération en cours",
-        description: "Veuillez patienter pendant la génération du document...",
-        duration: null,
-      });
-
-      const fileName = generateFileName(docTitle);
-      console.log(`[Download] Starting document generation for ${fileName}`);
 
       const input = {
         type: docKey === 'offreTechnique'
@@ -323,25 +353,33 @@ const DocumentNavigation: React.FC<DocumentNavigationProps> = ({ section, onBack
         }
       };
 
-      console.log(`[Download] Calling generateDocument with type: ${input.type}`);
-      const blob = await generateDocument(input);
-      console.log('[Download] Document generated successfully');
+      // Validate input data
+      validateInput(input);
 
-      // Téléchargement du document
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Show progress toast
+      const toastId = toast({
+        title: "Génération en cours",
+        description: "Veuillez patienter pendant la génération du document...",
+        duration: null,
+      });
 
+      // Enrich input data
+      const enrichedInput = await enrichInputData(input);
+      console.log(`[Download] Starting document generation for ${docTitle} with enriched data`);
+
+      // Generate and download document
+      const blob = await generateDocument(enrichedInput);
+      const fileName = generateFileName(docTitle);
+      await handleFileDownload(blob, fileName);
+
+      // Update UI after successful download
+      toast.dismiss(toastId);
       toast({
         title: "Document généré",
         description: "Le document a été généré et téléchargé avec succès",
         duration: 3000,
       });
+
     } catch (error) {
       console.error('[Download] Error during document generation/download:', error);
       toast({
