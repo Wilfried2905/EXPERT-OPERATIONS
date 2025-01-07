@@ -7,8 +7,8 @@ import { Upload } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 
 const SecurityQuestionnaireEvaluation = () => {
-  const [, setLocation] = useLocation();
   const [currentSection, setCurrentSection] = useState(0);
+  const [, setLocation] = useLocation();
   const [answers, setAnswers] = useState<Record<string, { conformity: string; comment: string }>>({});
 
   const sections = [
@@ -143,7 +143,6 @@ const SecurityQuestionnaireEvaluation = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-4xl mx-auto">
@@ -209,7 +208,10 @@ const SecurityQuestionnaireEvaluation = () => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={handleNext}>
+            <Button 
+              onClick={handleNext}
+              className="bg-[#003366] hover:bg-[#002347] text-white"
+            >
               {currentSection === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
             </Button>
           </div>
