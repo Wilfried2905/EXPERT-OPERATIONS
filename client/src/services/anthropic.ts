@@ -6,37 +6,29 @@ interface RecommendationsResponse {
     id: string;
     title: string;
     description: string;
-    priority: 'critical' | 'high' | 'medium' | 'low';
+    priority: 'critique' | 'élevée' | 'moyenne' | 'faible';
     impact: {
-      efficiency: number;
-      reliability: number;
-      compliance: number;
+      efficacite: number;
+      fiabilite: number;
+      conformite: number;
     };
     implementation: {
-      difficulty: 'high' | 'medium' | 'low';
-      estimatedCost: '€€€' | '€€' | '€';
-      timeframe: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
-      prerequisites: string[];
-    };
-    dataQuality: {
-      completeness: number;
-      missingData: string[];
+      difficulte: 'élevée' | 'moyenne' | 'faible';
+      delai: 'immediat' | 'court_terme' | 'moyen_terme' | 'long_terme';
+      prerequis: string[];
+      benefices: string[];
     };
   }>;
-  analysis: {
-    summary: string;
-    strengths: string[];
-    weaknesses: string[];
-    dataQuality: {
-      availableData: string[];
-      missingCriticalData: string[];
-      confidenceLevel: 'high' | 'medium' | 'low';
+  analyse: {
+    resume: string;
+    points_forts: string[];
+    points_amelioration: string[];
+    impacts: {
+      description: string;
+      analyse_efficacite: string;
+      analyse_fiabilite: string;
+      analyse_conformite: string;
     };
-  };
-  context: {
-    standards: string[];
-    constraints: string[];
-    assumptions: string[];
   };
 }
 
@@ -48,6 +40,7 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ auditData })
     });
@@ -59,35 +52,31 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
 
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Le serveur n'a pas renvoyé du JSON comme attendu");
+      throw new Error("La réponse du serveur n'est pas au format JSON");
     }
 
     const data = await response.json();
 
-    // Vérification de la structure de la réponse
-    if (!data || !Array.isArray(data.recommendations)) {
-      // Si la réponse n'a pas la bonne structure, on la formate correctement
-      return {
-        recommendations: data.recommendations || [],
-        analysis: data.analysis || {
-          summary: "",
-          strengths: [],
-          weaknesses: [],
-          dataQuality: {
-            availableData: [],
-            missingCriticalData: [],
-            confidenceLevel: "medium"
-          }
-        },
-        context: data.context || {
-          standards: [],
-          constraints: [],
-          assumptions: []
-        }
-      };
+    // Vérification et transformation des données
+    if (!data || typeof data !== 'object') {
+      throw new Error("Format de réponse invalide");
     }
 
-    return data;
+    // Construction d'une réponse valide même si certaines données sont manquantes
+    return {
+      recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
+      analyse: {
+        resume: data.analyse?.resume || "",
+        points_forts: Array.isArray(data.analyse?.points_forts) ? data.analyse.points_forts : [],
+        points_amelioration: Array.isArray(data.analyse?.points_amelioration) ? data.analyse.points_amelioration : [],
+        impacts: {
+          description: data.analyse?.impacts?.description || "",
+          analyse_efficacite: data.analyse?.impacts?.analyse_efficacite || "",
+          analyse_fiabilite: data.analyse?.impacts?.analyse_fiabilite || "",
+          analyse_conformite: data.analyse?.impacts?.analyse_conformite || ""
+        }
+      }
+    };
   } catch (error) {
     console.error('Error in generateRecommendations:', error);
     throw error instanceof Error ? error : new Error('Une erreur est survenue lors de la génération des recommandations');
@@ -159,10 +148,19 @@ export async function exportToWord(recommendations: any[]) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(errorText || `Erreur lors de l'export Word: ${response.status}`);
     }
 
-    return await response.blob();
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recommendations.docx';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   } catch (error) {
     console.error('Error in exportToWord:', error);
     throw error instanceof Error ? error : new Error('Une erreur est survenue lors de l\'export Word');
