@@ -329,24 +329,14 @@ const SecurityQuestionnaireEvaluation = () => {
           </div>
         </Card>
 
-        <div className="mt-6 flex justify-between">
+        <div className="mt-6 flex justify-end">
           <button 
-            onClick={() => window.history.back()}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode 
-                ? 'bg-[#002B47] text-white' 
-                : 'bg-[#003366] text-white'
-            }`}
-          >
-            Précédent
-          </button>
-          <button 
-            onClick={() => setLocation('/operations/security/client-info')}
+            onClick={() => setLocation('/recommendations')}
             className={`px-6 py-3 rounded font-medium ${
               isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
             } text-white`}
           >
-            Informations Client
+            {activeTab === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
           </button>
         </div>
       </div>
