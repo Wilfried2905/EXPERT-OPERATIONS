@@ -5,10 +5,9 @@ import { Info, Upload } from 'lucide-react';
 import '@/styles/progress.css';
 
 const SecurityQuestionnaireEvaluation = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const [results, setResults] = useState<Record<string, { status: 'conforme' | 'non-conforme' | null; comments: string }>>({});
+  const [currentSection, setCurrentSection] = useState(0);
   const [, setLocation] = useLocation();
+  const [answers, setAnswers] = useState<Record<string, { conformity: string; comment: string }>>({});
 
   const sections = [
     {
@@ -140,22 +139,22 @@ const SecurityQuestionnaireEvaluation = () => {
 
   const calculateProgress = () => {
     const totalQuestions = sections.reduce((acc, section) => acc + section.questions.length, 0);
-    const answeredQuestions = Object.keys(results).length;
+    const answeredQuestions = Object.keys(answers).length;
     return (answeredQuestions / totalQuestions) * 100;
   };
 
   const calculateConformity = () => {
-    const answeredQuestions = Object.values(results);
+    const answeredQuestions = Object.values(answers);
     if (answeredQuestions.length === 0) return 0;
-    const conformeCount = answeredQuestions.filter(r => r.status === 'conforme').length;
+    const conformeCount = answeredQuestions.filter(r => r.conformity === 'conforme').length;
     return (conformeCount / answeredQuestions.length) * 100;
   };
 
   const calculateSectionStats = (sectionIndex: number) => {
     const section = sections[sectionIndex];
     const questions = section.questions;
-    const answered = questions.filter(q => results[q.id]?.status).length;
-    const conforme = questions.filter(q => results[q.id]?.status === 'conforme').length;
+    const answered = questions.filter(q => answers[q.id]?.conformity).length;
+    const conforme = questions.filter(q => answers[q.id]?.conformity === 'conforme').length;
 
     return {
       progress: (answered / questions.length) * 100,
@@ -163,86 +162,96 @@ const SecurityQuestionnaireEvaluation = () => {
     };
   };
 
+  const handleNext = () => {
+    if (currentSection < sections.length - 1) {
+      setCurrentSection(prev => prev + 1);
+    } else {
+      setLocation('/recommendations');
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentSection > 0) {
+      setCurrentSection(prev => prev - 1);
+    }
+  };
+
   return (
-    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen p-6`}>
       <div className="max-w-6xl mx-auto mb-6">
-        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+        <h1 className={`text-3xl font-bold mb-4`}>
           Questionnaire d'évaluation - Audit de Sécurité
         </h1>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          <Card className={`p-4`}>
+            <h3 className={`text-lg font-semibold mb-2`}>
               Progression globale
             </h3>
             <div className="progress-bar">
-              <div 
+              <div
                 className="progress-bar-indicator green"
                 style={{ width: `${calculateProgress()}%` }}
               />
             </div>
-            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-sm mt-2`}>
               {calculateProgress().toFixed(1)}% complété
             </p>
           </Card>
-          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          <Card className={`p-4`}>
+            <h3 className={`text-lg font-semibold mb-2`}>
               Conformité globale
             </h3>
             <div className="progress-bar">
-              <div 
+              <div
                 className={`progress-bar-indicator ${
-                  calculateConformity() >= 75 ? 'green' : 
-                  calculateConformity() >= 50 ? 'yellow' : 
-                  'red'
+                  calculateConformity() >= 75 ? 'green' :
+                    calculateConformity() >= 50 ? 'yellow' :
+                      'red'
                 }`}
                 style={{ width: `${calculateConformity()}%` }}
               />
             </div>
-            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-sm mt-2`}>
               {calculateConformity().toFixed(1)}% conforme
             </p>
           </Card>
         </div>
 
-        <Card className={`p-4 mb-6 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
-            {sections[activeTab].title}
+        <Card className={`p-4 mb-6`}>
+          <h3 className={`text-lg font-semibold mb-4`}>
+            {sections[currentSection].title}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500 mb-1">Progression de la section</p>
               <div className="progress-bar">
-                <div className="progress-bar-indicator green" style={{ width: `${calculateSectionStats(activeTab).progress}%` }} />
+                <div className="progress-bar-indicator green" style={{ width: `${calculateSectionStats(currentSection).progress}%` }} />
               </div>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Conformité de la section</p>
               <div className="progress-bar">
-                <div 
-                  className={`progress-bar-indicator ${calculateSectionStats(activeTab).conformity >= 75 ? 'green' : 
-                    calculateSectionStats(activeTab).conformity >= 50 ? 'yellow' : 'red'}`} 
-                  style={{ width: `${calculateSectionStats(activeTab).conformity}%` }}
+                <div
+                  className={`progress-bar-indicator ${calculateSectionStats(currentSection).conformity >= 75 ? 'green' :
+                    calculateSectionStats(currentSection).conformity >= 50 ? 'yellow' : 'red'}`}
+                  style={{ width: `${calculateSectionStats(currentSection).conformity}%` }}
                 />
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
+        <Card className={`shadow-lg`}>
           <div className="flex border-b border-gray-200">
             {sections.map((section, index) => (
               <button
                 key={index}
-                onClick={() => setActiveTab(index)}
+                onClick={() => setCurrentSection(index)}
                 className={`flex-1 px-4 py-3 text-center font-medium transition-colors truncate
-                  ${activeTab === index 
-                    ? isDarkMode 
-                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]' 
-                      : 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
-                    : isDarkMode
-                      ? 'text-[#E0E0E0] hover:bg-[#001F33]'
-                      : 'text-[#003366] hover:bg-gray-50'
+                  ${currentSection === index
+                    ? 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
+                    : 'text-[#003366] hover:bg-gray-50'
                   }`}
               >
                 {section.title}
@@ -251,16 +260,14 @@ const SecurityQuestionnaireEvaluation = () => {
           </div>
 
           <div className="p-6">
-            {sections[activeTab].questions.map((q) => (
+            {sections[currentSection].questions.map((q) => (
               <div key={q.id} className="mb-8 last:mb-0">
                 <div className="flex flex-col space-y-4">
                   <div className="flex flex-col space-y-2">
-                    <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+                    <h3 className={`font-medium`}>
                       {q.question}
                     </h3>
-                    <div className={`text-sm p-3 rounded ${
-                      isDarkMode ? 'bg-[#001F33] text-[#E0E0E0]' : 'bg-blue-50 text-[#003366]'
-                    }`}>
+                    <div className={`text-sm p-3 rounded bg-blue-50 text-[#003366]`}>
                       <Info className="inline mr-2" size={16} />
                       {q.norm}
                     </div>
@@ -268,56 +275,46 @@ const SecurityQuestionnaireEvaluation = () => {
 
                   <div className="flex space-x-4">
                     <button
-                      onClick={() => setResults(prev => ({
+                      onClick={() => setAnswers(prev => ({
                         ...prev,
-                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
+                        [q.id]: { ...prev[q.id], conformity: 'conforme', comment: prev[q.id]?.comment || '' }
                       }))}
                       className={`px-4 py-2 rounded transition-colors ${
-                        results[q.id]?.status === 'conforme'
+                        answers[q.id]?.conformity === 'conforme'
                           ? 'bg-green-500 text-white'
-                          : isDarkMode
-                            ? 'bg-[#002B47] text-[#E0E0E0]'
-                            : 'bg-gray-100 text-[#003366]'
-                      }`}
+                          : 'bg-gray-100 text-[#003366]'
+                        }`}
                     >
                       Conforme
                     </button>
                     <button
-                      onClick={() => setResults(prev => ({
+                      onClick={() => setAnswers(prev => ({
                         ...prev,
-                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
+                        [q.id]: { ...prev[q.id], conformity: 'non-conforme', comment: prev[q.id]?.comment || '' }
                       }))}
                       className={`px-4 py-2 rounded transition-colors ${
-                        results[q.id]?.status === 'non-conforme'
+                        answers[q.id]?.conformity === 'non-conforme'
                           ? 'bg-red-500 text-white'
-                          : isDarkMode
-                            ? 'bg-[#002B47] text-[#E0E0E0]'
-                            : 'bg-gray-100 text-[#003366]'
-                      }`}
+                          : 'bg-gray-100 text-[#003366]'
+                        }`}
                     >
                       Non Conforme
                     </button>
                   </div>
 
                   <textarea
-                    value={results[q.id]?.comments || ''}
-                    onChange={(e) => setResults(prev => ({
+                    value={answers[q.id]?.comment || ''}
+                    onChange={(e) => setAnswers(prev => ({
                       ...prev,
-                      [q.id]: { ...prev[q.id], comments: e.target.value }
+                      [q.id]: { ...prev[q.id], comment: e.target.value }
                     }))}
                     placeholder="Commentaires et observations..."
-                    className={`w-full p-3 rounded border ${
-                      isDarkMode 
-                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]' 
-                        : 'bg-white border-gray-200 text-[#003366]'
-                    }`}
+                    className={`w-full p-3 rounded border bg-white border-gray-200 text-[#003366]`}
                     rows={3}
                   />
 
                   <div className="flex items-center space-x-4">
-                    <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
-                      isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
-                    } text-white`}>
+                    <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded bg-[#FF9900] text-white`}>
                       <Upload size={20} />
                       <span>Ajouter des fichiers</span>
                       <input type="file" multiple className="hidden" />
@@ -327,18 +324,22 @@ const SecurityQuestionnaireEvaluation = () => {
               </div>
             ))}
           </div>
+          <div className="p-6 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentSection === 0}
+              className="px-4 py-2 rounded bg-gray-100 text-[#003366] disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <button
+              onClick={handleNext}
+              className="px-4 py-2 rounded bg-[#003366] text-white"
+            >
+              {currentSection === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
+            </button>
+          </div>
         </Card>
-
-        <div className="mt-6 flex justify-end">
-          <button 
-            onClick={() => setLocation('/recommendations')}
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
-            } text-white`}
-          >
-            {activeTab === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
-          </button>
-        </div>
       </div>
     </div>
   );
