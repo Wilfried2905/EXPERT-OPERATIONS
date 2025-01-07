@@ -57,8 +57,8 @@ export default function EnvironmentalAuditStep1() {
   };
 
   const handleNext = () => {
-    // Sauvegarder les réponses (à implémenter avec le state management)
-    setLocation('/operations/environmental/step2');
+    // Rediriger vers les recommandations
+    setLocation('/recommendations');
   };
 
   return (
