@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PreAuditStep1() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
   // Questions pour l'analyse de l'existant du Pré-Audit de Certification
   const questions = [
@@ -66,15 +68,59 @@ export default function PreAuditStep1() {
   };
 
   const handleNext = () => {
-    // Sauvegarder les réponses (à implémenter avec le state management)
-    setLocation('/operations/preaudit/step2');
+    // Vérifier que toutes les questions obligatoires ont une réponse
+    const unansweredQuestions = questions.flatMap(section => 
+      section.items.filter(question => !answers[question] || answers[question].trim() === '')
+    );
+
+    if (unansweredQuestions.length > 0) {
+      toast({
+        title: "Champs requis",
+        description: "Veuillez répondre à toutes les questions avant de continuer",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Formater les données pour correspondre à la structure attendue
+    const formattedData = {
+      infrastructure: {
+        questionnaire: {
+          resultats: questions.reduce((acc, section) => {
+            acc[section.category] = section.items.reduce((items, question) => {
+              items[question] = answers[question];
+              return items;
+            }, {} as Record<string, string>);
+            return acc;
+          }, {} as Record<string, Record<string, string>>),
+          scores: {
+            global: {
+              score: 0,
+              repondu: Object.keys(answers).length,
+              nom: "Pré-audit"
+            },
+            parGroupe: questions.reduce((acc, section) => {
+              acc[section.category] = {
+                score: 0,
+                repondu: section.items.filter(q => answers[q] && answers[q].trim() !== '').length,
+                nom: section.category
+              };
+              return acc;
+            }, {} as Record<string, { score: number; repondu: number; nom: string; }>)
+          }
+        }
+      }
+    };
+
+    // Stocker les données formatées (à implémenter avec le state management)
+    console.log('Données formatées:', formattedData);
+
+    // Rediriger vers la page des recommandations
+    setLocation('/recommendations');
   };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{t('preaudit.analysis.title')}</h1>
-      <p className="text-gray-600">{t('preaudit.analysis.description')}</p>
-
       {questions.map((section, sectionIndex) => (
         <Card key={sectionIndex}>
           <CardContent className="pt-6">
@@ -98,7 +144,7 @@ export default function PreAuditStep1() {
 
       <div className="flex justify-end">
         <Button onClick={handleNext}>
-          {t('common.next')}
+          Voir les Recommandations
         </Button>
       </div>
     </div>
