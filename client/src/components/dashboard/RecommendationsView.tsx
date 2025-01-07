@@ -72,8 +72,21 @@ export const RecommendationsView = () => {
 
   const handleGenerateRecommendations = async () => {
     try {
+      console.log("Début de la génération des recommandations");
       setIsGenerating(true);
 
+      // Vérifier si au moins une question a été répondue
+      const hasResponses = questions.some(q => q.response !== null);
+      if (!hasResponses) {
+        toast({
+          title: "Attention",
+          description: "Veuillez répondre à au moins une question avant de générer les recommandations",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Préparer les données d'audit
       const auditData = {
         infrastructure: {
           questionnaire: {
@@ -97,6 +110,8 @@ export const RecommendationsView = () => {
         }
       };
 
+      console.log("Données d'audit préparées:", JSON.stringify(auditData, null, 2));
+
       const result = await generateRecommendations({ 
         auditData,
         options: {
@@ -105,6 +120,8 @@ export const RecommendationsView = () => {
           maxTokens: 2000
         }
       });
+
+      console.log("Résultat reçu:", result);
 
       if (result?.text) {
         localStorage.setItem('recommendationsData', JSON.stringify({
@@ -122,7 +139,7 @@ export const RecommendationsView = () => {
         throw new Error("Les données de recommandations sont invalides");
       }
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      console.error('Erreur lors de la génération des recommandations:', error);
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération des recommandations",
