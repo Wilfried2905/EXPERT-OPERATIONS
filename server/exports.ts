@@ -89,9 +89,12 @@ export async function exportToWord(req: Request, res: Response) {
 
     const buffer = await Packer.toBuffer(doc);
 
+    // Important: Set correct headers for Word document
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', 'attachment; filename=recommendations.docx');
+    res.setHeader('Content-Length', buffer.length);
 
+    // Send the buffer directly
     res.send(buffer);
   } catch (error) {
     console.error('Error in exportToWord:', error);
