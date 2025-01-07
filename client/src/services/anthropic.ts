@@ -64,8 +64,27 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
 
     const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error);
+    // Vérification de la structure de la réponse
+    if (!data || !Array.isArray(data.recommendations)) {
+      // Si la réponse n'a pas la bonne structure, on la formate correctement
+      return {
+        recommendations: data.recommendations || [],
+        analysis: data.analysis || {
+          summary: "",
+          strengths: [],
+          weaknesses: [],
+          dataQuality: {
+            availableData: [],
+            missingCriticalData: [],
+            confidenceLevel: "medium"
+          }
+        },
+        context: data.context || {
+          standards: [],
+          constraints: [],
+          assumptions: []
+        }
+      };
     }
 
     return data;
@@ -129,14 +148,46 @@ export async function generateGanttData(recommendations: any[]) {
   }
 }
 
-export async function exportToWord(recommendations: Recommendation[]) {
-  // TODO: Implement Word export using a library like docx
-  throw new Error('Not implemented');
+export async function exportToWord(recommendations: any[]) {
+  try {
+    const response = await fetch('/api/exports/word', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recommendations })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Error in exportToWord:', error);
+    throw error instanceof Error ? error : new Error('Une erreur est survenue lors de l\'export Word');
+  }
 }
 
-export async function exportToExcel(recommendations: Recommendation[]) {
-  // TODO: Implement Excel export using a library like xlsx
-  throw new Error('Not implemented');
+export async function exportToExcel(recommendations: any[]) {
+  try {
+    const response = await fetch('/api/exports/excel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recommendations })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Error in exportToExcel:', error);
+    throw error instanceof Error ? error : new Error('Une erreur est survenue lors de l\'export Excel');
+  }
 }
 
 interface Recommendation {
