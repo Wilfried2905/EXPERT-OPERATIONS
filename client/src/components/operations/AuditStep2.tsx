@@ -15,7 +15,7 @@ const AuditStep2 = () => {
     questions,
     updateQuestionResponse,
     getGlobalScore,
-  } = useEvaluationScores('questionnaire'); // Spécifier 'questionnaire'
+  } = useEvaluationScores('questionnaire');
 
   const sections = [
     {
@@ -44,7 +44,7 @@ const AuditStep2 = () => {
     if (activeTab < sections.length - 1) {
       setActiveTab(activeTab + 1);
     } else {
-      setLocation('/operations/audit/client-info');
+      setLocation('/recommendations');
     }
   };
 
@@ -172,14 +172,14 @@ const AuditStep2 = () => {
         </Card>
 
         <div className="mt-6 flex justify-end">
-          <button 
-            onClick={() => setLocation('/recommendations')}
+          <Button 
+            onClick={handleNext}
             className={`px-6 py-3 rounded font-medium ${
               isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
             } text-white`}
           >
-            Voir les Recommandations
-          </button>
+            {activeTab === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
+          </Button>
         </div>
       </div>
     </div>
