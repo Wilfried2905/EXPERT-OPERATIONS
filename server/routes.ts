@@ -1,6 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
 
 // Initialisation du client Anthropic
@@ -10,108 +9,75 @@ const anthropic = new Anthropic({
 
 async function generateRecommendations(req: any, res: any) {
   try {
-    console.log('[Recommendations] Starting recommendation generation');
-    const { auditData } = req.body;
+    console.log("Received request body:", req.body);
 
-    // Validation basique
+    const { auditData } = req.body || {};
+
+    // S'assurer que la réponse est toujours en JSON
+    res.setHeader('Content-Type', 'application/json');
+
+    // Validation basique avec réponse JSON
     if (!req.body) {
       return res.status(400).json({
-        error: "Aucune donnée fournie"
+        error: false,
+        recommendations: [],
+        message: "Aucune donnée fournie"
       });
     }
 
-    // Analyse des données disponibles
-    const availableData = {
-      hasMetrics: !!auditData?.metrics,
-      hasInfrastructure: !!auditData?.infrastructure,
-      hasCompliance: !!auditData?.compliance,
-    };
-
-    console.log('Available data categories:', availableData);
-
-    // Construction du prompt en fonction des données disponibles
-    let promptContent = `En tant qu'expert en audit de datacenters, analyse les données disponibles suivantes et génère des recommandations adaptées.\n\n`;
-
-    // Ajout des données disponibles au prompt
-    if (auditData?.metrics) {
-      promptContent += `Métriques actuelles:\n${JSON.stringify(auditData.metrics, null, 2)}\n\n`;
-    }
-
-    if (auditData?.infrastructure) {
-      promptContent += `Infrastructure existante:\n${JSON.stringify(auditData.infrastructure, null, 2)}\n\n`;
-    }
-
-    if (auditData?.compliance) {
-      promptContent += `Données de conformité:\n${JSON.stringify(auditData.compliance, null, 2)}\n\n`;
-    }
-
-    const prompt = `${promptContent}
-    Instructions:
-    1. Analyse les données fournies
-    2. Génère des recommandations basées uniquement sur les informations disponibles
-    3. Indique clairement si certaines recommandations nécessitent des données supplémentaires
-    4. Priorise les recommandations en fonction de leur faisabilité avec les données actuelles
-
-    Format de réponse attendu:
-    {
-      "recommendations": [
-        {
-          "id": string,
-          "title": string,
-          "description": string,
-          "priority": "critical|high|medium|low",
-          "confidence": "high|medium|low", // Niveau de confiance basé sur les données disponibles
-          "impact": {
-            "efficiency": number,
-            "reliability": number,
-            "compliance": number
-          },
-          "dataQuality": {
-            "completeness": number, // Indique si plus de données seraient nécessaires
-            "missingData": string[] // Liste des données supplémentaires qui seraient utiles
-          }
-        }
-      ],
-      "dataAnalysis": {
-        "availableData": string[], // Liste des types de données analysées
-        "missingCriticalData": string[], // Données importantes manquantes
-        "confidenceLevel": string // Niveau de confiance global
-      }
-    }`;
-
-    const response = await anthropic.messages.create({
-      model: "claude-3-sonnet-20241022",
-      max_tokens: 4000,
-      messages: [{
-        role: "user",
-        content: prompt
-      }],
-      temperature: 0.7,
-      system: "Tu es un expert en audit de datacenters. Tu dois toujours répondre avec un JSON valide selon le format demandé."
-    });
-
-    if (!response.content?.[0]) {
-      throw new Error('Réponse invalide de l\'API');
-    }
-
-    const content = response.content[0].text;
-    if (!content) {
-      throw new Error('Contenu de la réponse manquant');
-    }
-
     try {
-      const recommendations = JSON.parse(content);
-      return res.json(recommendations);
-    } catch (parseError) {
-      console.error('[Recommendations] JSON parse error:', parseError);
-      throw new Error('La réponse n\'est pas un JSON valide');
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: "Génère des recommandations basées sur: " + JSON.stringify(auditData)
+        }],
+        temperature: 0.7
+      });
+
+      // Vérification de la réponse de l'API
+      if (!response.content?.[0]?.text) {
+        return res.status(500).json({
+          error: true,
+          message: "Réponse invalide de l'API"
+        });
+      }
+
+      // Tentative de parse du JSON
+      try {
+        const recommendations = JSON.parse(response.content[0].text);
+        return res.json({
+          error: false,
+          recommendations: recommendations
+        });
+      } catch (parseError) {
+        console.error("Parse error:", parseError);
+        // Si le parsing échoue, renvoyer le texte brut dans un format JSON valide
+        return res.json({
+          error: false,
+          recommendations: [{
+            id: "default",
+            title: "Recommandation générale",
+            description: response.content[0].text,
+            priority: "medium"
+          }]
+        });
+      }
+
+    } catch (apiError) {
+      console.error("API error:", apiError);
+      return res.status(500).json({
+        error: true,
+        message: "Erreur lors de l'appel à l'API"
+      });
     }
 
   } catch (error) {
-    console.error("Error generating recommendations:", error);
+    console.error("Server error:", error);
     return res.status(500).json({
-      error: "Erreur lors de la génération des recommandations",
-      details: error instanceof Error ? error.message : 'Erreur inconnue'
+      error: true,
+      message: "Erreur serveur lors de la génération des recommandations"
     });
   }
 }

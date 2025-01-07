@@ -83,63 +83,50 @@ export default function PreAuditStep1() {
         return;
       }
 
-      // Créer les métriques initiales basées sur les réponses
-      const metrics = {
-        pue: [1.8, 1.9, 1.7],
-        availability: [99.9, 99.8, 99.95],
-        tierLevel: parseInt(answers["Quel est le niveau de certification visé par le client ?"] || "3"),
-      };
-
-      // Extraire les informations sur l'infrastructure des réponses
-      const infrastructure = {
-        rooms: answers["Quelle est la configuration actuelle des salles IT (superficie, disposition, contraintes) ?"]
-          .split(',')
-          .map(room => room.trim()),
-        equipment: answers["Quels sont les systèmes critiques actuellement en production ?"]
-          .split(',')
-          .map(equipment => equipment.trim()),
-      };
-
-      // Calculer un score de conformité basique
-      const compliance = {
-        score: 85,
-        matrix: {
-          security: answers["Comment est gérée la sécurité physique et logique ?"] ? 0.8 : 0.4,
-          documentation: answers["Comment est organisée la documentation technique de l'infrastructure ?"] ? 0.7 : 0.3,
-          procedures: answers["Existe-t-il des procédures documentées pour les opérations critiques ?"] ? 0.9 : 0.5
-        }
-      };
-
-      // Structure complète des données d'audit
+      // Préparer les données d'audit
       const auditData = {
-        metrics,
-        infrastructure,
-        compliance,
-        context: {
-          currentState: answers["Quels sont les principaux enjeux et motivations pour cette certification ?"],
-          previousAudits: answers["Y a-t-il eu des audits ou certifications précédents ?"],
-          timeConstraints: answers["Quelles sont les contraintes temporelles pour l'obtention de la certification ?"]
+        metrics: {
+          pue: [1.8, 1.9, 1.7],
+          availability: [99.9, 99.8, 99.95],
+          tierLevel: parseInt(answers["Quel est le niveau de certification visé par le client ?"] || "3")
+        },
+        infrastructure: {
+          rooms: answers["Quelle est la configuration actuelle des salles IT (superficie, disposition, contraintes) ?"]?.split(',').map(room => room.trim()) || [],
+          equipment: answers["Quels sont les systèmes critiques actuellement en production ?"]?.split(',').map(equipment => equipment.trim()) || []
+        },
+        compliance: {
+          score: 85,
+          matrix: {
+            security: answers["Comment est gérée la sécurité physique et logique ?"] ? 0.8 : 0.4,
+            documentation: answers["Comment est organisée la documentation technique de l'infrastructure ?"] ? 0.7 : 0.3,
+            procedures: answers["Existe-t-il des procédures documentées pour les opérations critiques ?"] ? 0.9 : 0.5
+          }
         }
       };
 
-      // Log des données envoyées pour debug
       console.log('Sending audit data:', auditData);
 
-      // Appel API avec les données complètes
       const response = await fetch('/api/recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ auditData }),
+        body: JSON.stringify({ auditData })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la génération des recommandations');
+      // Vérification explicite du type de contenu
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Le serveur n'a pas renvoyé du JSON comme attendu");
       }
 
-      // Rediriger vers la page des recommandations
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.message || "Erreur lors de la génération des recommandations");
+      }
+
+      // Redirection vers la page des recommandations
       setLocation('/recommendations');
 
     } catch (error) {
