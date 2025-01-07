@@ -1,37 +1,68 @@
-const generateRecommendationsPrompt = (auditData: any) => `En tant qu'expert en infrastructure datacenter, analysez les données d'audit suivantes et générez des recommandations détaillées.
+const generateRecommendationsPrompt = (auditData: any) => `En tant qu'expert en audit de datacenters, analysez les données d'audit suivantes et générez des recommandations détaillées.
 
-DONNÉES D'AUDIT :
+DONNÉES D'AUDIT FOURNIES :
 ${JSON.stringify(auditData, null, 2)}
 
-FORMAT DE SORTIE :
-Structurez la réponse avec :
+INSTRUCTIONS :
+1. Analysez en profondeur les données fournies
+2. Identifiez les points forts et les points d'amélioration 
+3. Proposez des recommandations concrètes et actionnables
+4. Priorisez les actions en fonction de leur impact et urgence
+5. Indiquez clairement si des données supplémentaires sont nécessaires
 
-### Synthèse
-[Résumé des points clés]  (Correspond à "analysis": {"summary": ...})
+FORMAT DE RÉPONSE ATTENDU :
+{
+  "recommendations": [
+    {
+      "id": "REC_001", // Identifiant unique de la recommandation
+      "title": "Titre concis de la recommandation",
+      "description": "Description détaillée expliquant le contexte, la problématique et la solution proposée",
+      "priority": "critical|high|medium|low",
+      "impact": {
+        "efficiency": 0-100, // Impact sur l'efficacité opérationnelle
+        "reliability": 0-100, // Impact sur la fiabilité
+        "compliance": 0-100 // Impact sur la conformité aux normes
+      },
+      "implementation": {
+        "difficulty": "high|medium|low",
+        "estimatedCost": "€€€|€€|€", 
+        "timeframe": "immediate|short_term|medium_term|long_term",
+        "prerequisites": ["Liste des prérequis nécessaires"]
+      },
+      "dataQuality": {
+        "completeness": 0-100, // Niveau de complétude des données pour cette recommandation
+        "missingData": ["Liste des données manquantes importantes"]
+      }
+    }
+  ],
+  "analysis": {
+    "summary": "Synthèse globale de l'analyse",
+    "strengths": ["Points forts identifiés"],
+    "weaknesses": ["Points d'amélioration identifiés"],
+    "dataQuality": {
+      "availableData": ["Liste des types de données analysées"],  
+      "missingCriticalData": ["Données importantes manquantes"],
+      "confidenceLevel": "high|medium|low"
+    }
+  },
+  "context": {
+    "standards": ["Normes et standards applicables"],
+    "constraints": ["Contraintes identifiées"],
+    "assumptions": ["Hypothèses prises en compte"]
+  }
+}
 
-### Points Forts
-- [Liste des aspects positifs identifiés] (Correspond à "analysis": {"strengths": ...})
+CRITÈRES D'ÉVALUATION :
+- Pertinence : Les recommandations doivent être directement liées aux données d'audit
+- Faisabilité : Chaque recommandation doit être réaliste et actionnable
+- Priorisation : L'ordre des recommandations doit refléter leur importance relative
+- Complétude : Toutes les dimensions critiques doivent être couvertes
+- Précision : Les impacts et coûts doivent être justifiés par les données disponibles
 
-### Points d'Amélioration
-- [Liste des aspects nécessitant une amélioration] (Correspond à "analysis": {"weaknesses": ...})
-
-### Recommandations Prioritaires
-(Correspond à "recommendations": [...])
-1. [Recommandation détaillée, incluant id, title, description, priority, impact, implementation, dataQuality comme dans le format JSON original]
-   - Impact attendu (Correspond à impact)
-   - Délai suggéré (Correspond à implementation.timeframe)
-   - Estimation budgétaire (Correspond à implementation.estimatedCost)
-
-
-### Plan d'Action
-1. Court terme (0-3 mois)
-2. Moyen terme (3-12 mois)
-3. Long terme (>12 mois)
-
-IMPORTANT : 
-- Les recommandations doivent être concrètes et actionnables
-- Chaque recommandation doit inclure une estimation de l'impact
-- Priorisez les actions selon leur urgence et leur importance
-- Basez les estimations sur les données disponibles`;
+IMPORTANT :
+- La réponse doit être uniquement au format JSON spécifié
+- Chaque recommandation doit être auto-suffisante et compréhensible
+- Les estimations doivent être basées sur les données disponibles
+- Indiquer clairement quand une recommandation nécessite des données supplémentaires`;
 
 export default generateRecommendationsPrompt;
