@@ -19,7 +19,7 @@ async function generateRecommendations(req: any, res: any) {
     }
 
     const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées en français.
-    Utilise le format JSON suivant pour la réponse:
+    Ta réponse doit être un objet JSON valide avec la structure suivante:
     {
       "recommendations": [
         {
@@ -37,8 +37,12 @@ async function generateRecommendations(req: any, res: any) {
       ]
     }
 
+    Important: Ta réponse doit être uniquement le JSON demandé, sans texte supplémentaire.
+
     Données d'audit à analyser:
     ${JSON.stringify(req.body.auditData, null, 2)}`;
+
+    console.log('[Recommendations] Sending request to Anthropic');
 
     const response = await anthropic.messages.create({
       model: "claude-3-sonnet-20241022",
@@ -47,15 +51,30 @@ async function generateRecommendations(req: any, res: any) {
         role: "user",
         content: prompt
       }],
-      temperature: 0.7
+      temperature: 0.7,
+      system: "Tu es un expert en audit de datacenters. Tu dois toujours répondre avec un JSON valide selon le format demandé."
     });
 
-    if (!response.content || !response.content[0]?.text) {
-      throw new Error('Réponse invalide de l\'API');
+    if (!response.content || !response.content[0]) {
+      throw new Error('Réponse invalide de l\'API Anthropic');
+    }
+
+    const content = response.content[0].text;
+    if (!content) {
+      throw new Error('Contenu de la réponse manquant');
+    }
+
+    console.log('[Recommendations] Parsing response');
+    let jsonResponse;
+    try {
+      jsonResponse = JSON.parse(content);
+    } catch (parseError) {
+      console.error('[Recommendations] JSON parse error:', parseError);
+      throw new Error('La réponse n\'est pas un JSON valide');
     }
 
     res.setHeader('Content-Type', 'application/json');
-    res.json({ text: response.content[0].text });
+    res.json({ text: JSON.stringify(jsonResponse) });
 
   } catch (error: any) {
     console.error('[Recommendations] Error:', error);
@@ -72,7 +91,6 @@ export function registerRoutes(app: Express): Server {
   // Route de génération des recommandations
   app.post("/api/anthropic/recommendations", generateRecommendations);
 
-  // Autres routes...
   const httpServer = createServer(app);
   return httpServer;
 }
