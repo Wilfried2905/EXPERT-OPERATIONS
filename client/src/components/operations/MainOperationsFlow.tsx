@@ -41,28 +41,46 @@ const MainOperationsFlow = () => {
 
   const handleStepClick = (stepId: number) => {
     console.log("Clicking step:", stepId);
+    setCurrentStep(stepId);
+
     if (stepId === 0) {
       setShowCollectionWorkflow(true);
       setShowDocuments(false);
       setShowRecommendations(false);
     } else if (stepId === 1) {
       setShowRecommendations(true);
-      setShowDocuments(false);
       setShowCollectionWorkflow(false);
+      setShowDocuments(false);
     } else if (stepId === 2) {
       setShowDocuments(true);
       setShowRecommendations(false);
       setShowCollectionWorkflow(false);
       setDocumentSection('documents');
     }
-    setCurrentStep(stepId);
+  };
+
+  // Navigate directly to recommendations
+  const handleNext = () => {
+    setShowRecommendations(true);
+    setShowCollectionWorkflow(false);
+    setShowDocuments(false);
+    setCurrentStep(1); // Set current step to recommendations
   };
 
   if (showCollectionWorkflow) {
-    return <DataCollectionWorkflow onBack={() => {
-      setShowCollectionWorkflow(false);
-      setCurrentStep(null);
-    }} />;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto p-6">
+          <DataCollectionWorkflow 
+            onBack={() => {
+              setShowCollectionWorkflow(false);
+              setCurrentStep(null);
+            }}
+            onNext={handleNext} // Add this prop to handle navigation to recommendations
+          />
+        </div>
+      </div>
+    );
   }
 
   if (showRecommendations) {
