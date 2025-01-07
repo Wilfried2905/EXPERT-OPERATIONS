@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useUser } from "./hooks/use-user";
@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import OperationsPage from "./pages/OperationsPage";
 import AdminPage from "./pages/AdminPage";
+import AuthPage from "./pages/AuthPage";
 import MainLayout from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
@@ -14,10 +15,18 @@ import GithubTokenInput from "./components/settings/GithubTokenInput";
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
 import DocumentNavigation from "@/components/operations/DocumentNavigation";
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
 
 function App() {
   const { user, isLoading } = useUser();
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setLocation('/auth');
+    }
+  }, [user, isLoading, setLocation]);
 
   if (isLoading) {
     return (
@@ -27,14 +36,15 @@ function App() {
     );
   }
 
+  // Si l'utilisateur n'est pas connecté, on ne montre que la page d'authentification
   if (!user) {
     return (
       <Switch>
-        <Route path="/">
-          <HomePage />
+        <Route path="/auth">
+          <AuthPage />
         </Route>
         <Route>
-          <HomePage />
+          <AuthPage />
         </Route>
       </Switch>
     );
