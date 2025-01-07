@@ -6,6 +6,7 @@ import {
   BarChart3,
   ClipboardCheck,
   ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -45,6 +46,12 @@ const OperationsWorkflow: React.FC<OperationsWorkflowProps> = () => {
       setCurrentStep(prev => prev + 1);
     } else {
       setLocation('/recommendations');
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
     }
   };
 
@@ -114,10 +121,19 @@ const OperationsWorkflow: React.FC<OperationsWorkflowProps> = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-between mt-6">
+          <Button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className="bg-[#003366] hover:bg-[#002347] text-white"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Précédent
+          </Button>
+
           <Button
             onClick={handleNext}
-            className="bg-[#003366] hover:bg-[#002347] text-white px-6 py-3 rounded font-medium"
+            className="bg-[#003366] hover:bg-[#002347] text-white"
           >
             {currentStep === steps.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
             <ChevronRight className="ml-2 h-4 w-4" />
