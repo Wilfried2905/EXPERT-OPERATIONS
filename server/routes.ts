@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import Anthropic from '@anthropic-ai/sdk';
 
-// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+// Initialisation du client Anthropic
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
@@ -18,12 +18,30 @@ async function generateRecommendations(req: any, res: any) {
       });
     }
 
-    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées.
+    const prompt = `En tant qu'expert en audit de datacenters, analyse les données suivantes et génère des recommandations détaillées en français.
+    Utilise le format JSON suivant pour la réponse:
+    {
+      "recommendations": [
+        {
+          "titre": "string",
+          "description": "string",
+          "priorite": "critique" | "haute" | "moyenne" | "basse",
+          "impact": {
+            "cout": number,
+            "performance": number,
+            "conformite": number
+          },
+          "delai": "immediat" | "court_terme" | "moyen_terme" | "long_terme",
+          "actions": string[]
+        }
+      ]
+    }
 
+    Données d'audit à analyser:
     ${JSON.stringify(req.body.auditData, null, 2)}`;
 
     const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-3-sonnet-20241022",
       max_tokens: 4000,
       messages: [{
         role: "user",
@@ -52,7 +70,7 @@ export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
   // Route de génération des recommandations
-  app.post("/api/recommendations", generateRecommendations);
+  app.post("/api/anthropic/recommendations", generateRecommendations);
 
   // Autres routes...
   const httpServer = createServer(app);

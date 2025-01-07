@@ -43,8 +43,9 @@ export const RecommendationsView = () => {
   ]);
 
   const [, setLocation] = useLocation();
-  const { generateRecommendations, isLoading } = useAnthropic();
+  const { generateRecommendations, isLoading: apiIsLoading } = useAnthropic();
   const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const calculateGroupScore = (groupName: string) => {
     const groupQuestions = questions.filter(q => q.group === groupName);
@@ -70,55 +71,65 @@ export const RecommendationsView = () => {
   };
 
   const handleGenerateRecommendations = async () => {
-    const auditData = {
-      infrastructure: {
-        questionnaire: {
-          resultats: questions.reduce((acc, q) => ({
-            ...acc,
-            [q.group]: {
-              ...acc[q.group],
-              [q.text]: q.response
-            }
-          }), {} as Record<string, any>),
-          scores: {
-            global: getGlobalScore(),
-            parGroupe: {
-              'Sécurité physique': calculateGroupScore('Sécurité physique'),
-              'Infrastructure électrique': calculateGroupScore('Infrastructure électrique'),
-              'Refroidissement': calculateGroupScore('Refroidissement'),
-              'Infrastructure réseau': calculateGroupScore('Infrastructure réseau')
+    try {
+      setIsGenerating(true);
+
+      const auditData = {
+        infrastructure: {
+          questionnaire: {
+            resultats: questions.reduce((acc, q) => ({
+              ...acc,
+              [q.group]: {
+                ...acc[q.group],
+                [q.text]: q.response
+              }
+            }), {} as Record<string, any>),
+            scores: {
+              global: getGlobalScore(),
+              parGroupe: {
+                'Sécurité physique': calculateGroupScore('Sécurité physique'),
+                'Infrastructure électrique': calculateGroupScore('Infrastructure électrique'),
+                'Refroidissement': calculateGroupScore('Refroidissement'),
+                'Infrastructure réseau': calculateGroupScore('Infrastructure réseau')
+              }
             }
           }
         }
-      }
-    };
+      };
 
-    try {
       const result = await generateRecommendations({ 
         auditData,
         options: {
-          model: "claude-3-5-sonnet-20241022",
+          model: "claude-3-sonnet-20241022",
           temperature: 0.7,
           maxTokens: 2000
         }
       });
 
-      if (result.text) {
-        const processedRecommendations = processRecommendations(result.text);
-
+      if (result?.text) {
         localStorage.setItem('recommendationsData', JSON.stringify({
-          recommendations: processedRecommendations,
+          recommendations: result.text,
           auditData
         }));
 
+        toast({
+          title: "Succès",
+          description: "Les recommandations ont été générées avec succès",
+        });
+
         setLocation('/recommendations-detail');
+      } else {
+        throw new Error("Les données de recommandations sont invalides");
       }
     } catch (error) {
+      console.error('Error generating recommendations:', error);
       toast({
         title: "Erreur",
-        description: error instanceof Error ? error.message : 'Une erreur est survenue lors de la génération des recommandations',
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération des recommandations",
         variant: "destructive"
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -148,10 +159,10 @@ export const RecommendationsView = () => {
         <h2 className="text-2xl font-bold">Analyse de l'Infrastructure</h2>
         <Button
           onClick={handleGenerateRecommendations}
-          disabled={isLoading}
+          disabled={isGenerating || apiIsLoading}
           className="bg-[#003366] hover:bg-[#004488] text-white"
         >
-          {isLoading ? (
+          {isGenerating ? (
             <>
               <FileText className="mr-2 h-4 w-4 animate-spin" />
               Génération en cours...
