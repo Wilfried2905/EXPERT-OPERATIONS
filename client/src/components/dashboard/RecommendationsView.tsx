@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { useAnthropic } from '@/hooks/use-anthropic';
 import { useToast } from '@/hooks/use-toast';
 import ProgressScoreCard from './ProgressScoreCard';
@@ -43,7 +43,7 @@ export const RecommendationsView = () => {
   ]);
 
   const [, setLocation] = useLocation();
-  const { generateRecommendations, isLoading: apiIsLoading } = useAnthropic();
+  const { generateRecommendations, isLoading } = useAnthropic();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -72,7 +72,6 @@ export const RecommendationsView = () => {
 
   const handleGenerateRecommendations = async () => {
     try {
-      console.log("Début de la génération des recommandations");
       setIsGenerating(true);
 
       // Vérifier si au moins une question a été répondue
@@ -86,7 +85,6 @@ export const RecommendationsView = () => {
         return;
       }
 
-      // Préparer les données d'audit
       const auditData = {
         infrastructure: {
           questionnaire: {
@@ -110,18 +108,7 @@ export const RecommendationsView = () => {
         }
       };
 
-      console.log("Données d'audit préparées:", JSON.stringify(auditData, null, 2));
-
-      const result = await generateRecommendations({ 
-        auditData,
-        options: {
-          model: "claude-3-sonnet-20241022",
-          temperature: 0.7,
-          maxTokens: 2000
-        }
-      });
-
-      console.log("Résultat reçu:", result);
+      const result = await generateRecommendations({ auditData });
 
       if (result?.text) {
         localStorage.setItem('recommendationsData', JSON.stringify({
@@ -150,33 +137,13 @@ export const RecommendationsView = () => {
     }
   };
 
-  const processRecommendations = (text: string) => {
-    // Implémentation du système de priorité basé sur le code Python
-    const priorities = {
-      critical: (impact: number) => impact > 0.8,
-      high: (impact: number) => 0.5 < impact && impact <= 0.8,
-      medium: (impact: number) => 0.3 < impact && impact <= 0.5,
-      low: (impact: number) => impact <= 0.3
-    };
-
-    //  This is a placeholder.  A robust implementation would require more sophisticated NLP techniques
-    //  to extract impact scores and apply priorities.  This example simply returns the original text.
-    return text;
-  };
-
-  const updateQuestionResponse = (id: string, response: 'conforme' | 'non-conforme') => {
-    setQuestions(prev => prev.map(q =>
-      q.id === id ? { ...q, response } : q
-    ));
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Analyse de l'Infrastructure</h2>
         <Button
           onClick={handleGenerateRecommendations}
-          disabled={isGenerating || apiIsLoading}
+          disabled={isGenerating || isLoading}
           className="bg-[#003366] hover:bg-[#004488] text-white"
         >
           {isGenerating ? (
@@ -209,7 +176,6 @@ export const RecommendationsView = () => {
       <Card className="hover:shadow-lg transition-shadow duration-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-[#003366]">
-            <AlertCircle className="h-5 w-4" />
             Questionnaire d'Évaluation
           </CardTitle>
         </CardHeader>
@@ -227,7 +193,9 @@ export const RecommendationsView = () => {
                         <Button
                           variant={question.response === 'conforme' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => updateQuestionResponse(question.id, 'conforme')}
+                          onClick={() => setQuestions(prev =>
+                            prev.map(q => q.id === question.id ? { ...q, response: 'conforme' } : q)
+                          )}
                           className={question.response === 'conforme' ? 'bg-green-600 hover:bg-green-700' : ''}
                         >
                           Conforme
@@ -235,7 +203,9 @@ export const RecommendationsView = () => {
                         <Button
                           variant={question.response === 'non-conforme' ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => updateQuestionResponse(question.id, 'non-conforme')}
+                          onClick={() => setQuestions(prev =>
+                            prev.map(q => q.id === question.id ? { ...q, response: 'non-conforme' } : q)
+                          )}
                           className={question.response === 'non-conforme' ? 'bg-red-600 hover:bg-red-700' : ''}
                         >
                           Non Conforme
