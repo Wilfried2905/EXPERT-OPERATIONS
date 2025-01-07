@@ -1,215 +1,136 @@
-const generateRecommendationsPrompt = (auditData: any) => `En tant qu'expert en audit de datacenters, analysez les données d'audit suivantes et générez des recommandations détaillées en français.
+const generateRecommendationsPrompt = (auditData: any) => `As a datacenter audit expert, analyze the following audit data and generate detailed recommendations.
 
-DONNÉES D'AUDIT :
+AUDIT DATA:
 ${JSON.stringify(auditData, null, 2)}
 
-FORMAT DE SORTIE :
-Structurez la réponse avec :
-### Synthèse
-[Résumé des points clés]
-
-### Points Forts
-- [Liste des aspects positifs identifiés]
-
-### Points d'Amélioration
-- [Liste des aspects nécessitant une amélioration]
-
-### Recommandations Prioritaires
-1. [Recommandation détaillée]
-   - Impact attendu
-   - Délai suggéré
-   - Estimation budgétaire
-
-### Plan d'Action
-1. Court terme (0-3 mois)
-2. Moyen terme (3-12 mois)
-3. Long terme (>12 mois)
-
-FORMAT JSON ATTENDU :
+EXPECTED JSON OUTPUT FORMAT:
 {
   "recommendations": [
     {
       "id": "REC_001",
-      "titre": "Titre concis de la recommandation",
-      "description": "Description détaillée expliquant le contexte, la problématique et la solution proposée",
-      "priorite": "critique|élevée|moyenne|faible",
+      "title": "Concise recommendation title",
+      "description": "Detailed description explaining context, issue and proposed solution",
+      "priority": "critical|high|medium|low",
       "impact": {
-        "efficacite": {
+        "efficiency": {
           "score": 0-100,
-          "explication": "Explication détaillée de l'impact sur l'efficacité"
+          "explanation": "Detailed explanation of efficiency impact"
         },
-        "fiabilite": {
+        "reliability": {
           "score": 0-100,
-          "explication": "Explication détaillée de l'impact sur la fiabilité"
+          "explanation": "Detailed explanation of reliability impact"
         },
-        "conformite": {
+        "compliance": {
           "score": 0-100,
-          "explication": "Explication détaillée de l'impact sur la conformité"
+          "explanation": "Detailed explanation of compliance impact"
         }
       },
-      "mise_en_oeuvre": {
-        "difficulte": "élevée|moyenne|faible",
-        "delai": "immediat|court_terme|moyen_terme|long_terme",
-        "prerequis": ["Liste des prérequis nécessaires"],
-        "benefices_client": ["Liste détaillée des bénéfices pour le client"]
+      "implementation": {
+        "difficulty": "high|medium|low",
+        "timeframe": "immediate|short_term|medium_term|long_term",
+        "prerequisites": ["List of required prerequisites"],
+        "benefits": ["Detailed list of benefits for the client"]
       },
-      "materiels": [
+      "equipment": [
         {
-          "nom": "Nom du matériel",
-          "description": "Description détaillée",
-          "specifications": ["Spécifications techniques"],
+          "name": "Equipment name",
+          "description": "Detailed description",
+          "specifications": ["Technical specifications"],
           "alternatives": [
             {
-              "nom": "Nom de l'alternative",
-              "description": "Description détaillée",
-              "avantages": ["Liste des avantages"],
-              "inconvenients": ["Liste des inconvénients"],
-              "benefices_client": ["Bénéfices spécifiques pour le client"]
+              "name": "Alternative name",
+              "description": "Detailed description",
+              "pros": ["List of advantages"],
+              "cons": ["List of disadvantages"],
+              "benefits": ["Specific client benefits"]
             }
           ],
-          "delai_mise_en_place": "Estimation du délai"
+          "implementation_time": "Time estimate"
         }
       ]
     }
   ],
-  "analyse": {
-    "resume": "Synthèse globale de l'analyse",
-    "points_forts": [
+  "analysis": {
+    "summary": "Global analysis summary",
+    "strengths": [
       {
-        "titre": "Titre du point fort",
-        "description": "Explication détaillée"
+        "title": "Strength title",
+        "description": "Detailed explanation"
       }
     ],
-    "points_amelioration": [
+    "weaknesses": [
       {
-        "titre": "Titre du point d'amélioration",
-        "description": "Explication détaillée"
+        "title": "Weakness title",
+        "description": "Detailed explanation"
       }
     ],
     "impacts": {
-      "description_generale": "Explication détaillée du graphique d'impacts",
-      "analyse_detaillee": {
-        "efficacite": "Analyse approfondie de l'impact sur l'efficacité",
-        "fiabilite": "Analyse approfondie de l'impact sur la fiabilité",
-        "conformite": "Analyse approfondie de l'impact sur la conformité"
+      "overview": "Detailed explanation of impact chart",
+      "detailed_analysis": {
+        "efficiency": "In-depth efficiency impact analysis",
+        "reliability": "In-depth reliability impact analysis",
+        "compliance": "In-depth compliance impact analysis"
       },
-      "recommandations_specifiques": ["Recommandations basées sur l'analyse d'impact"]
+      "specific_recommendations": ["Recommendations based on impact analysis"]
     }
   },
-  "matrice_conformite": {
-    "description": "Explication détaillée de la matrice de conformité",
-    "methodologie": "Description de la méthodologie d'évaluation",
+  "compliance_matrix": {
+    "description": "Detailed explanation of compliance matrix",
+    "methodology": "Description of evaluation methodology",
     "categories": [
       {
-        "nom": "Nom de la catégorie",
-        "niveau": 0-100,
-        "explication": "Explication détaillée du niveau de conformité",
-        "points_forts": ["Points forts identifiés"],
-        "points_amelioration": ["Points à améliorer"],
-        "actions_requises": ["Actions nécessaires avec justification"]
+        "name": "Category name",
+        "level": 0-100,
+        "explanation": "Detailed compliance level explanation",
+        "strengths": ["Identified strengths"],
+        "weaknesses": ["Areas to improve"],
+        "required_actions": ["Required actions with justification"]
       }
     ],
-    "synthese": "Synthèse globale de la conformité"
+    "summary": "Global compliance summary"
   },
   "planning": {
-    "description": "Vue d'ensemble du planning",
-    "objectifs": ["Objectifs principaux du planning"],
+    "description": "Planning overview",
+    "objectives": ["Main planning objectives"],
     "phases": [
       {
-        "nom": "Nom de la phase",
-        "description": "Description détaillée",
-        "duree": "Durée estimée",
-        "priorite": "haute|moyenne|basse",
-        "taches": [
+        "name": "Phase name",
+        "description": "Detailed description",
+        "duration": "Estimated duration",
+        "priority": "high|medium|low",
+        "tasks": [
           {
-            "nom": "Nom de la tâche",
-            "description": "Description détaillée",
-            "ressources_requises": ["Ressources nécessaires"],
-            "dependances": ["Dépendances avec justification"],
-            "impact_operations": "Impact sur les opérations courantes",
-            "resultats_attendus": ["Résultats attendus"]
+            "name": "Task name",
+            "description": "Detailed description",
+            "required_resources": ["Required resources"],
+            "dependencies": ["Dependencies with justification"],
+            "operations_impact": "Impact on current operations",
+            "expected_results": ["Expected results"]
           }
         ],
-        "jalons": ["Points de contrôle importants"]
+        "milestones": ["Important checkpoints"]
       }
     ],
-    "risques_mitigation": [
+    "risks_mitigation": [
       {
-        "risque": "Description du risque",
-        "impact": "Impact potentiel",
-        "mesures": ["Mesures de mitigation proposées"]
-      }
-    ]
-  },
-  "standards": {
-    "description": "Vue d'ensemble des standards applicables",
-    "normes": [
-      {
-        "nom": "Nom de la norme",
-        "version": "Version applicable",
-        "description": "Description détaillée",
-        "perimetre": "Périmètre d'application",
-        "clauses": [
-          {
-            "id": "Identifiant de la clause",
-            "titre": "Titre de la clause",
-            "exigences": "Description des exigences",
-            "niveau_conformite": 0-100,
-            "evaluation": "Évaluation détaillée",
-            "actions_requises": ["Actions requises pour la conformité"],
-            "impact_business": "Impact sur l'activité"
-          }
-        ],
-        "niveau_global": 0-100,
-        "prochaines_etapes": ["Actions recommandées"]
-      }
-    ],
-    "synthese_conformite": "Synthèse globale de la conformité aux standards"
-  },
-  "documentation": {
-    "description": "Vue d'ensemble de la documentation",
-    "categories": [
-      {
-        "nom": "Nom de la catégorie",
-        "description": "Description de la catégorie",
-        "importance": "Explication de l'importance",
-        "documents": [
-          {
-            "titre": "Titre du document",
-            "description": "Description détaillée",
-            "statut": "Complet|En révision|À mettre à jour",
-            "derniere_maj": "Date de dernière mise à jour",
-            "niveau_requis": "Niveau de certification requis",
-            "importance": "Explication de l'importance",
-            "contenu_requis": ["Éléments requis"],
-            "impact_conformite": "Impact sur la conformité"
-          }
-        ]
-      }
-    ],
-    "recommandations": [
-      {
-        "titre": "Titre de la recommandation",
-        "description": "Description détaillée",
-        "priorite": "haute|moyenne|basse",
-        "actions": ["Actions recommandées"]
+        "risk": "Risk description",
+        "impact": "Potential impact",
+        "measures": ["Proposed mitigation measures"]
       }
     ]
   }
 }
 
-CRITÈRES D'ÉVALUATION :
-- Pertinence : Les recommandations doivent être directement liées aux données d'audit
-- Faisabilité : Chaque recommandation doit être réaliste et actionnable
-- Priorisation : L'ordre des recommandations doit refléter leur importance relative
-- Complétude : Toutes les dimensions critiques doivent être couvertes
-- Clarté : Les explications doivent être compréhensibles par des non-experts
+EVALUATION CRITERIA:
+- Relevance: Recommendations must be directly related to audit data
+- Feasibility: Each recommendation must be realistic and actionable
+- Prioritization: Order recommendations by their relative importance
+- Completeness: Cover all critical dimensions
+- Clarity: Explanations must be understandable by non-experts
 
-IMPORTANT :
-- La réponse doit être uniquement au format JSON spécifié
-- Toutes les explications doivent être en français
-- Chaque section doit inclure des explications détaillées pour les non-experts
-- Ne pas inclure de références aux coûts monétaires
-- Mettre l'accent sur les bénéfices pour le client`;
+IMPORTANT:
+- Response must be in the specified JSON format only
+- Focus on actionable recommendations
+- Include detailed explanations for non-experts`;
 
 export default generateRecommendationsPrompt;

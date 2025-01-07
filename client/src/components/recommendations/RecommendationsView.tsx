@@ -2,14 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { generateRecommendations, generateMatrixCompliance, generateGanttData } from '@/services/anthropic';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { exportToWord, exportToExcel } from '@/services/exports';
 import { Download, ChevronLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { fr } from 'date-fns/locale';
+
+// Fonction pour traduire les priorités
+const translatePriority = (priority: string) => {
+  const translations: Record<string, string> = {
+    'critical': 'Critique',
+    'high': 'Élevée',
+    'medium': 'Moyenne',
+    'low': 'Faible'
+  };
+  return translations[priority] || priority;
+};
+
+// Fonction pour traduire les difficultés
+const translateDifficulty = (difficulty: string) => {
+  const translations: Record<string, string> = {
+    'high': 'Élevée',
+    'medium': 'Moyenne',
+    'low': 'Faible'
+  };
+  return translations[difficulty] || difficulty;
+};
+
+// Fonction pour traduire les délais
+const translateTimeframe = (timeframe: string) => {
+  const translations: Record<string, string> = {
+    'immediate': 'Immédiat',
+    'short_term': 'Court terme',
+    'medium_term': 'Moyen terme',
+    'long_term': 'Long terme'
+  };
+  return translations[timeframe] || timeframe;
+};
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
@@ -85,7 +116,7 @@ export default function RecommendationsView() {
         return;
       }
 
-      const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.docx`;
+      const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd', { locale: fr })}.docx`;
       const blob = await exportToWord(recommendations);
 
       const url = window.URL.createObjectURL(blob);
@@ -117,7 +148,7 @@ export default function RecommendationsView() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+      a.download = `Recommandations_${format(new Date(), 'yyyy-MM-dd', { locale: fr })}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -185,8 +216,8 @@ export default function RecommendationsView() {
         <TabsList>
           <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
           <TabsTrigger value="impacts">Impacts</TabsTrigger>
-          <TabsTrigger value="equipment">Matériels Requis</TabsTrigger>
-          <TabsTrigger value="compliance">Matrice de Conformité</TabsTrigger>
+          <TabsTrigger value="equipment">Matériels</TabsTrigger>
+          <TabsTrigger value="compliance">Conformité</TabsTrigger>
           <TabsTrigger value="planning">Planning</TabsTrigger>
         </TabsList>
 
@@ -203,7 +234,7 @@ export default function RecommendationsView() {
                       rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
-                      {rec.priority}
+                      {translatePriority(rec.priority)}
                     </span>
                   </div>
                 </CardHeader>
@@ -217,10 +248,15 @@ export default function RecommendationsView() {
                         {Object.entries(rec.impact).map(([key, value]: [string, any]) => (
                           <div key={key}>
                             <div className="flex justify-between text-sm mb-1">
-                              <span className="capitalize">{key}</span>
-                              <span>{value}%</span>
+                              <span className="capitalize">
+                                {key === 'efficiency' ? 'Efficacité' :
+                                 key === 'reliability' ? 'Fiabilité' :
+                                 key === 'compliance' ? 'Conformité' : key}
+                              </span>
+                              <span>{value.score}%</span>
                             </div>
-                            <Progress value={value} />
+                            <Progress value={value.score} />
+                            <p className="text-sm text-gray-600 mt-1">{value.explanation}</p>
                           </div>
                         ))}
                       </div>
@@ -231,15 +267,15 @@ export default function RecommendationsView() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm font-medium">Difficulté</p>
-                          <p className="text-sm">{rec.implementation.difficulty}</p>
+                          <p className="text-sm">{translateDifficulty(rec.implementation.difficulty)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Délai</p>
+                          <p className="text-sm">{translateTimeframe(rec.implementation.timeframe)}</p>
                         </div>
                         <div>
                           <p className="text-sm font-medium">Coût estimé</p>
                           <p className="text-sm">{rec.implementation.estimatedCost}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Délai</p>
-                          <p className="text-sm">{rec.implementation.timeframe}</p>
                         </div>
                       </div>
                     </div>
