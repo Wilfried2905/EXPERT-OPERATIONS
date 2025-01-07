@@ -10,9 +10,10 @@ import ClientInfo from './operational/ClientInfo';
 
 interface DataCollectionWorkflowProps {
   onBack: () => void;
+  onNext?: () => void;
 }
 
-const DataCollectionWorkflow: React.FC<DataCollectionWorkflowProps> = ({ onBack }) => {
+const DataCollectionWorkflow: React.FC<DataCollectionWorkflowProps> = ({ onBack, onNext }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [, setLocation] = useLocation();
 
@@ -27,6 +28,13 @@ const DataCollectionWorkflow: React.FC<DataCollectionWorkflowProps> = ({ onBack 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
+    } else {
+      // Si c'est la dernière étape, naviguer vers les recommandations
+      if (onNext) {
+        onNext();
+      } else {
+        setLocation('/recommendations');
+      }
     }
   };
 
@@ -86,19 +94,19 @@ const DataCollectionWorkflow: React.FC<DataCollectionWorkflowProps> = ({ onBack 
         {/* Navigation */}
         <div className="flex justify-between">
           <Button
-            onClick={currentStep === 0 ? onBack : handlePrevious}
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
             className="bg-[#003366] text-white hover:bg-[#002347]"
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
-            {currentStep === 0 ? 'Retour' : 'Précédent'}
+            Précédent
           </Button>
 
           <Button
             onClick={handleNext}
-            disabled={currentStep === steps.length - 1}
             className="bg-[#003366] text-white hover:bg-[#002347]"
           >
-            Suivant
+            {currentStep === steps.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
