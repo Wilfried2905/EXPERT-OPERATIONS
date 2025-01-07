@@ -1,42 +1,55 @@
 import { useToast } from '@/hooks/use-toast';
+import { AuditData } from '@/types/audit';
 
-interface AuditData {
-  infrastructure: {
-    questionnaire: {
-      resultats: Record<string, Record<string, string | null>>;
-      scores: {
-        global: ScoreInfo;
-        parGroupe: Record<string, ScoreInfo>;
-      };
+interface RecommendationsResponse {
+  recommendations: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'critical' | 'high' | 'medium' | 'low';
+    impact: {
+      efficiency: number;
+      reliability: number;
+      compliance: number;
     };
+    implementation: {
+      difficulty: 'high' | 'medium' | 'low';
+      estimatedCost: '€€€' | '€€' | '€';
+      timeframe: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+      prerequisites: string[];
+    };
+    dataQuality: {
+      completeness: number;
+      missingData: string[];
+    };
+  }>;
+  analysis: {
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    dataQuality: {
+      availableData: string[];
+      missingCriticalData: string[];
+      confidenceLevel: 'high' | 'medium' | 'low';
+    };
+  };
+  context: {
+    standards: string[];
+    constraints: string[];
+    assumptions: string[];
   };
 }
 
-interface ScoreInfo {
-  score: number;
-  repondu: number;
-  nom: string;
-}
-
-interface AnthropicOptions {
-  model?: string;
-  temperature?: number;
-  maxTokens?: number;
-}
-
-interface GenerateRecommendationsParams {
-  auditData: AuditData;
-  options?: AnthropicOptions;
-}
-
-export async function generateRecommendations({ auditData, options = {} }: GenerateRecommendationsParams) {
+export async function generateRecommendations(auditData: AuditData): Promise<RecommendationsResponse> {
   try {
-    const response = await fetch('/api/anthropic/recommendations', {
+    console.log('Service client - generateRecommendations:', { auditData });
+
+    const response = await fetch('/api/recommendations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ auditData, options })
+      body: JSON.stringify({ auditData })
     });
 
     if (!response.ok) {
@@ -49,7 +62,13 @@ export async function generateRecommendations({ auditData, options = {} }: Gener
       throw new Error("Le serveur n'a pas renvoyé du JSON comme attendu");
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    return data;
   } catch (error) {
     console.error('Error in generateRecommendations:', error);
     throw error instanceof Error ? error : new Error('Une erreur est survenue lors de la génération des recommandations');
@@ -122,4 +141,21 @@ export async function exportToExcel(recommendations: Recommendation[]) {
 
 interface Recommendation {
   // Add your Recommendation interface here if needed.
+}
+
+interface ScoreInfo {
+  score: number;
+  repondu: number;
+  nom: string;
+}
+
+interface AnthropicOptions {
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+interface GenerateRecommendationsParams {
+  auditData: AuditData;
+  options?: AnthropicOptions;
 }
