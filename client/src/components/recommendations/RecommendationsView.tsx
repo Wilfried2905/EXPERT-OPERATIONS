@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import StandardsDocsTabs from './StandardsDocsTabs';
+import StandardsTabs from './StandardsTabs';
+import DocumentationTabs from './DocumentationTabs';
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
@@ -395,11 +396,11 @@ export default function RecommendationsView() {
         </TabsContent>
 
         <TabsContent value="standards">
-          <StandardsDocsTabs activeTab="standards" />
+          <StandardsTabs />
         </TabsContent>
 
         <TabsContent value="documentation">
-          <StandardsDocsTabs activeTab="documentation" />
+          <DocumentationTabs />
         </TabsContent>
       </Tabs>
     </div>
