@@ -18,16 +18,13 @@ export default function RecommendationsView() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [complianceMatrix, setComplianceMatrix] = useState<any>(null);
   const [ganttData, setGanttData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      setError(null);
       try {
-        // Mock audit data - À remplacer par les vraies données d'audit
         const auditData = {
           infrastructure: {
             questionnaire: {
@@ -56,26 +53,16 @@ export default function RecommendationsView() {
         };
 
         const response = await generateRecommendations(auditData);
-        if (!response || !response.recommendations) {
-          throw new Error("Données de recommandations invalides");
-        }
-        setRecommendations(response.recommendations);
+        setRecommendations(response.recommendations || []);
 
         const matrix = await generateMatrixCompliance(auditData);
-        if (!matrix) {
-          throw new Error("Données de matrice de conformité invalides");
-        }
         setComplianceMatrix(matrix);
 
-        const gantt = await generateGanttData(response.recommendations);
-        if (!gantt) {
-          throw new Error("Données de planning invalides");
-        }
+        const gantt = await generateGanttData(response.recommendations || []);
         setGanttData(gantt);
 
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError(error instanceof Error ? error.message : "Une erreur est survenue lors du chargement des données");
         toast({
           title: "Erreur",
           description: error instanceof Error ? error.message : "Une erreur est survenue",
@@ -192,27 +179,6 @@ export default function RecommendationsView() {
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg">Chargement des recommandations...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md mx-4">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-red-600 mb-2">Erreur</h2>
-              <p className="text-gray-600">{error}</p>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="mt-4"
-              >
-                Réessayer
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   }
