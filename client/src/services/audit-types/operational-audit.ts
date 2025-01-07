@@ -30,8 +30,7 @@ FORMAT DE RÉPONSE ATTENDU :
         "businessImpact": "string"
       }
     ]
-  },
-  /* ... Le reste du format JSON comme spécifié dans le prompt ... */
+  }
 }
 
 DOMAINES D'ÉVALUATION :

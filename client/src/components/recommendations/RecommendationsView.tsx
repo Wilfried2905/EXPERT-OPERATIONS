@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import StandardsDocsTabs from './StandardsDocsTabs';
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
@@ -188,6 +189,8 @@ export default function RecommendationsView() {
           <TabsTrigger value="equipment">Matériels Requis</TabsTrigger>
           <TabsTrigger value="compliance">Matrice de Conformité</TabsTrigger>
           <TabsTrigger value="planning">Planning</TabsTrigger>
+          <TabsTrigger value="standards">Standards</TabsTrigger>
+          <TabsTrigger value="documentation">Documentation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recommendations">
@@ -389,6 +392,14 @@ export default function RecommendationsView() {
               ))}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="standards">
+          <StandardsDocsTabs activeTab="standards" />
+        </TabsContent>
+
+        <TabsContent value="documentation">
+          <StandardsDocsTabs activeTab="documentation" />
         </TabsContent>
       </Tabs>
     </div>

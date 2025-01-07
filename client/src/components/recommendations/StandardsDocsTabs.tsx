@@ -5,6 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { FileText, Download } from 'lucide-react';
 
+interface StandardsDocsTabsProps {
+  activeTab?: 'standards' | 'documentation';
+}
+
 const ComplianceStatus = ({ status, percentage }: { status: string; percentage: number }) => {
   const getColor = () => {
     if (percentage >= 80) return 'text-green-600';
@@ -23,7 +27,7 @@ const ComplianceStatus = ({ status, percentage }: { status: string; percentage: 
   );
 };
 
-const StandardsDocsTabs = () => {
+export const StandardsDocsTabs: React.FC<StandardsDocsTabsProps> = ({ activeTab = 'standards' }) => {
   const standards = [
     {
       name: 'TIA-942-B',
@@ -92,7 +96,7 @@ const StandardsDocsTabs = () => {
   ];
 
   return (
-    <Tabs defaultValue="standards" className="w-full">
+    <Tabs defaultValue={activeTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="standards">Standards</TabsTrigger>
         <TabsTrigger value="documentation">Documentation</TabsTrigger>
