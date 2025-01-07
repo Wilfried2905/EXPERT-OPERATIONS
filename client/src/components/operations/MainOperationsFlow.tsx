@@ -40,7 +40,6 @@ const MainOperationsFlow = () => {
   ];
 
   const handleStepClick = (stepId: number) => {
-    console.log("Clicking step:", stepId);
     setCurrentStep(stepId);
 
     if (stepId === 0) {
@@ -68,34 +67,13 @@ const MainOperationsFlow = () => {
   };
 
   if (showCollectionWorkflow) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-6">
-          <DataCollectionWorkflow 
-            onBack={() => {
-              setShowCollectionWorkflow(false);
-              setCurrentStep(null);
-            }}
-            onNext={handleNext} // Add this prop to handle navigation to recommendations
-          />
-        </div>
-      </div>
-    );
+    return <DataCollectionWorkflow onNext={handleNext} />;
   }
 
   if (showRecommendations) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-6">
-          <Button 
-            onClick={() => {
-              setShowRecommendations(false);
-              setCurrentStep(null);
-            }}
-            className="mb-4"
-          >
-            Retour
-          </Button>
           <RecommendationsView />
         </div>
       </div>
@@ -125,14 +103,15 @@ const MainOperationsFlow = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {mainSteps.map((step) => {
                 const StepIcon = step.icon;
+                const isSelected = currentStep === step.id;
                 return (
                   <div
                     key={step.id}
                     className={`
                       p-6 rounded-lg border-2 cursor-pointer
-                      transition-all duration-200
-                      ${currentStep === step.id 
-                        ? 'border-[#003366] text-[#003366]' 
+                      transition-all duration-200 h-full
+                      ${isSelected 
+                        ? 'border-[#003366] text-[#003366] md:col-span-3'
                         : 'border-gray-200 text-gray-400'}
                       hover:border-[#FF9900] hover:shadow-lg
                     `}
