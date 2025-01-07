@@ -57,8 +57,8 @@ export default function MultisiteAuditStep1() {
   };
 
   const handleNext = () => {
-    // Sauvegarder les réponses (à implémenter avec le state management)
-    setLocation('/operations/multisite/step2');
+    // Sauvegarder les réponses et rediriger vers les recommandations
+    setLocation('/recommendations');
   };
 
   return (
@@ -88,7 +88,10 @@ export default function MultisiteAuditStep1() {
       ))}
 
       <div className="flex justify-end">
-        <Button onClick={handleNext}>
+        <Button 
+          onClick={handleNext}
+          className="bg-[#003366] hover:bg-[#002347] text-white"
+        >
           {t('common.next')}
         </Button>
       </div>
