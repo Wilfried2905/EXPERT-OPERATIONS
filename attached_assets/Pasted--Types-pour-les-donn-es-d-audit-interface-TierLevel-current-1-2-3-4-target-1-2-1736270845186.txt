@@ -1,0 +1,180 @@
+// Types pour les données d'audit
+interface TierLevel {
+  current: 1 | 2 | 3 | 4;
+  target: 1 | 2 | 3 | 4;
+}
+
+interface DomainCompliance {
+  compliance: number;
+  gaps: string[];
+  requirements: string[];
+  criticalIssues: string[];
+}
+
+interface TIA942Domains {
+  architectural: DomainCompliance;
+  electrical: DomainCompliance;
+  mechanical: DomainCompliance;
+  telecommunications: DomainCompliance;
+}
+
+interface AuditData {
+  facilityInfo: any;
+  measurements: any;
+  tierLevel: TierLevel;
+  compliance: TIA942Domains;
+}
+
+const generateRecommendationsPrompt = (auditData: AuditData): string => `
+En tant qu'expert en audit de datacenters, spécialisé dans la norme TIA-942 et ses normes associées (ANSI/TIA-942-B, TIA-942-A, standards complémentaires), analysez les données d'audit suivantes et générez des recommandations détaillées pour l'amélioration de l'infrastructure.
+
+DONNÉES D'AUDIT FOURNIES :
+${JSON.stringify(auditData, null, 2)}
+
+INSTRUCTIONS DÉTAILLÉES :
+1. Analysez en profondeur les données fournies selon les critères TIA-942
+2. Évaluez la conformité actuelle et les écarts par rapport au TIER visé
+3. Identifiez les points forts et les points d'amélioration pour chaque domaine
+4. Proposez des recommandations concrètes et actionnables
+5. Priorisez les actions en fonction de leur impact sur le niveau de TIER
+6. Indiquez clairement les prérequis et dépendances entre recommandations
+7. Évaluez les risques business et techniques associés
+8. Établissez une feuille de route vers la certification
+
+DOMAINES D'ÉVALUATION TIA-942 :
+- Architecture : redondance, sécurité physique, zonage, protection incendie
+- Électrique : alimentation, distribution, systèmes secours, monitoring
+- Mécanique : refroidissement, circulation d'air, maintenance, redondance
+- Télécommunications : connectivité, câblage, redondance, sécurité réseau
+
+FORMAT DE RÉPONSE ATTENDU :
+{
+  "recommendations": [
+    {
+      "id": "REC_001",
+      "title": "Titre concis de la recommandation",
+      "description": "Description détaillée expliquant le contexte, la problématique et la solution proposée",
+      "tia942Domain": "architectural|electrical|mechanical|telecommunications",
+      "tierImpact": {
+        "currentTier": 1-4,
+        "targetTier": 1-4,
+        "contributionToTarget": 0-100
+      },
+      "priority": "critical|high|medium|low",
+      "impact": {
+        "efficiency": 0-100,
+        "reliability": 0-100,
+        "compliance": 0-100,
+        "security": 0-100
+      },
+      "implementation": {
+        "difficulty": "high|medium|low",
+        "estimatedCost": "€€€|€€|€",
+        "timeframe": "immediate|short_term|medium_term|long_term",
+        "prerequisites": ["Liste des prérequis nécessaires"],
+        "dependencies": ["REC_XXX", "REC_YYY"],
+        "risks": ["Liste des risques potentiels"],
+        "mitigations": ["Stratégies de mitigation proposées"]
+      },
+      "certification": {
+        "requirementIds": ["Liste des exigences TIA-942 concernées"],
+        "impactOnCertification": "high|medium|low",
+        "mandatoryForTier": true|false
+      },
+      "dataQuality": {
+        "completeness": 0-100,
+        "missingData": ["Liste des données manquantes importantes"],
+        "assumptions": ["Hypothèses prises"]
+      }
+    }
+  ],
+  "tia942Analysis": {
+    "currentStatus": {
+      "overallTier": 1-4,
+      "domainCompliance": {
+        "architectural": {
+          "tier": 1-4,
+          "compliance": 0-100,
+          "criticalGaps": ["Liste des écarts critiques"],
+          "strengths": ["Points forts"]
+        },
+        "electrical": { /* même structure */ },
+        "mechanical": { /* même structure */ },
+        "telecommunications": { /* même structure */ }
+      }
+    },
+    "certificationReadiness": {
+      "overallReadiness": 0-100,
+      "majorObstacles": ["Liste des obstacles majeurs"],
+      "estimatedTimeframe": "0-3|3-6|6-12|12+ months",
+      "requiredActions": ["Actions nécessaires"]
+    }
+  },
+  "analysis": {
+    "summary": "Synthèse globale de l'analyse",
+    "strengths": ["Points forts identifiés"],
+    "weaknesses": ["Points d'amélioration identifiés"],
+    "dataQuality": {
+      "availableData": ["Liste des types de données analysées"],
+      "missingCriticalData": ["Données importantes manquantes"],
+      "confidenceLevel": "high|medium|low"
+    },
+    "riskAssessment": {
+      "businessRisks": ["Risques business identifiés"],
+      "technicalRisks": ["Risques techniques identifiés"],
+      "complianceRisks": ["Risques de conformité"]
+    }
+  },
+  "context": {
+    "standards": {
+      "primary": "TIA-942-B",
+      "associated": ["Liste des normes associées applicables"],
+      "requirements": ["Exigences spécifiques applicables"]
+    },
+    "constraints": {
+      "technical": ["Contraintes techniques"],
+      "operational": ["Contraintes opérationnelles"],
+      "business": ["Contraintes business"]
+    },
+    "assumptions": ["Hypothèses prises en compte"]
+  }
+}
+
+CRITÈRES D'ÉVALUATION :
+1. Conformité TIA-942
+   - Alignement avec les exigences du TIER visé
+   - Couverture des quatre domaines fondamentaux
+   - Respect des normes associées
+
+2. Pertinence technique
+   - Adéquation des solutions proposées
+   - Faisabilité technique
+   - Impact sur l'infrastructure existante
+
+3. Impact business
+   - Retour sur investissement
+   - Continuité de service
+   - Évolutivité des solutions
+
+4. Priorisation
+   - Criticité pour la certification
+   - Dépendances techniques
+   - Rapport coût/bénéfice
+
+5. Qualité des données
+   - Complétude des informations
+   - Fiabilité des mesures
+   - Validation des hypothèses
+
+IMPORTANT :
+- La réponse doit strictement respecter le format JSON spécifié
+- Chaque recommandation doit être auto-suffisante et traçable
+- Les estimations doivent être basées sur les données disponibles
+- Indiquer clairement les prérequis pour la certification
+- Tous les impacts doivent être quantifiés selon les échelles définies
+- Les délais doivent prendre en compte les dépendances
+- Les risques doivent être accompagnés de stratégies de mitigation
+- La conformité TIA-942 doit être évaluée pour chaque domaine
+`;
+
+export default generateRecommendationsPrompt;

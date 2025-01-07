@@ -1,0 +1,273 @@
+const generateOperationalAuditPrompt = (auditData: AuditData): string => `
+En tant qu'expert en audit opérationnel de datacenters, analysez les données d'audit suivantes et générez un rapport détaillé sur l'efficacité opérationnelle de l'infrastructure.
+
+DONNÉES D'AUDIT FOURNIES :
+${JSON.stringify(auditData, null, 2)}
+
+FORMAT DE RÉPONSE ATTENDU :
+{
+  "overview": {
+    "operationalMaturity": {
+      "score": 0-100,
+      "level": "initial|managed|defined|measured|optimized",
+      "keyFindings": ["string"]
+    },
+    "domainScores": {
+      "processManagement": 0-100,
+      "incidentResponse": 0-100,
+      "changeManagement": 0-100,
+      "capacityManagement": 0-100,
+      "securityOperations": 0-100,
+      "performanceMonitoring": 0-100
+    },
+    "criticalIssues": [
+      {
+        "domain": "string",
+        "description": "string",
+        "risk": "critical|high|medium|low",
+        "businessImpact": "string"
+      }
+    ]
+  },
+
+  "recommendations": [
+    {
+      "id": "REC_XXX",
+      "title": "string",
+      "description": "string",
+      "category": "process|people|tools|governance",
+      "priority": "critical|high|medium|low",
+      "operationalImpact": {
+        "availability": 0-100,
+        "efficiency": 0-100,
+        "quality": 0-100,
+        "security": 0-100
+      }
+    }
+  ],
+
+  "impacts": {
+    "operational": [
+      {
+        "metric": "MTTR|MTBF|SLA|OEE",
+        "currentValue": "string",
+        "targetValue": "string",
+        "improvement": "string",
+        "businessValue": "string"
+      }
+    ],
+    "organizational": [
+      {
+        "area": "staffing|skills|processes|tools",
+        "currentState": "string",
+        "targetState": "string",
+        "gap": "string"
+      }
+    ],
+    "performance": {
+      "metrics": [
+        {
+          "name": "string",
+          "current": "string",
+          "target": "string",
+          "industry_benchmark": "string"
+        }
+      ],
+      "kpis": [
+        {
+          "name": "string",
+          "value": "string",
+          "target": "string",
+          "trend": "improving|stable|degrading"
+        }
+      ]
+    }
+  },
+
+  "billOfMaterials": {
+    "tools": [
+      {
+        "category": "monitoring|automation|management|security",
+        "items": [
+          {
+            "name": "string",
+            "purpose": "string",
+            "estimatedCost": "string",
+            "roi": "string",
+            "priority": "high|medium|low"
+          }
+        ]
+      }
+    ],
+    "training": [
+      {
+        "category": "technical|process|security|compliance",
+        "programs": [
+          {
+            "title": "string",
+            "audience": "string",
+            "duration": "string",
+            "estimatedCost": "string"
+          }
+        ]
+      }
+    ],
+    "totalEstimate": "string"
+  },
+
+  "planning": {
+    "phases": [
+      {
+        "name": "string",
+        "duration": "string",
+        "activities": ["string"],
+        "deliverables": ["string"],
+        "dependencies": ["string"],
+        "resources": {
+          "internal": ["string"],
+          "external": ["string"]
+        },
+        "risks": [
+          {
+            "description": "string",
+            "impact": "high|medium|low",
+            "mitigation": "string"
+          }
+        ]
+      }
+    ],
+    "timeline": {
+      "estimatedDuration": "string",
+      "milestones": [
+        {
+          "name": "string",
+          "date": "string",
+          "criteria": ["string"]
+        }
+      ]
+    }
+  },
+
+  "standards": {
+    "operationalProcedures": [
+      {
+        "name": "string",
+        "status": "existing|missing|outdated",
+        "compliance": 0-100,
+        "lastReview": "string",
+        "nextReview": "string"
+      }
+    ],
+    "sops": [
+      {
+        "category": "string",
+        "procedures": [
+          {
+            "name": "string",
+            "status": "active|draft|review",
+            "lastUpdate": "string",
+            "coverage": 0-100
+          }
+        ]
+      }
+    ],
+    "metrics": {
+      "operational": ["string"],
+      "performance": ["string"],
+      "compliance": ["string"]
+    }
+  },
+
+  "documentation": {
+    "operationalDocs": [
+      {
+        "category": "string",
+        "documents": [
+          {
+            "title": "string",
+            "type": "procedure|policy|guideline",
+            "status": "current|outdated|missing",
+            "lastUpdate": "string",
+            "owner": "string"
+          }
+        ]
+      }
+    ],
+    "knowledgeBase": {
+      "articles": [
+        {
+          "title": "string",
+          "category": "string",
+          "status": "string",
+          "useFrequency": "high|medium|low"
+        }
+      ],
+      "gaps": ["string"]
+    }
+  }
+}
+
+DOMAINES D'ÉVALUATION :
+1. Gestion des processus
+   - Documentation des procédures
+   - Maturité des processus
+   - Efficacité des workflows
+
+2. Réponse aux incidents
+   - Procédures d'escalade
+   - Temps de résolution
+   - Communication de crise
+
+3. Gestion des changements
+   - Processus de validation
+   - Tests et rollback
+   - Impact assessment
+
+4. Gestion de la capacité
+   - Monitoring des ressources
+   - Planification
+   - Optimisation
+
+5. Opérations de sécurité
+   - Contrôles d'accès
+   - Surveillance
+   - Réponse aux incidents
+
+6. Monitoring de performance
+   - KPIs opérationnels
+   - Reporting
+   - Amélioration continue
+
+CRITÈRES D'ÉVALUATION :
+1. Efficacité opérationnelle
+   - Temps de réponse
+   - Qualité de service
+   - Utilisation des ressources
+
+2. Maturité des processus
+   - Documentation
+   - Standardisation
+   - Mesurabilité
+
+3. Gestion des risques
+   - Identification
+   - Mitigation
+   - Surveillance
+
+4. Performance
+   - SLAs
+   - KPIs
+   - Benchmarks
+
+IMPORTANT :
+- La réponse doit être au format JSON spécifié
+- Les recommandations doivent être actionables
+- Les métriques doivent être quantifiables
+- Les risques doivent être évalués
+- Les délais doivent être réalistes
+- Les coûts doivent être estimés
+- Les dépendances doivent être identifiées
+- Les priorités doivent être justifiées
+`;
+
+export default generateOperationalAuditPrompt;
