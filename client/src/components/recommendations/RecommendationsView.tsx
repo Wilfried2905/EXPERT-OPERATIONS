@@ -3,113 +3,74 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Download, ChevronLeft, FileText } from 'lucide-react';
+import { Download, ChevronLeft, FileText, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { fr } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
 
-// Fonction pour traduire les priorités
-const translatePriority = (priority: string) => {
-  const translations: Record<string, string> = {
-    'critical': 'Critique',
-    'high': 'Élevée',
-    'medium': 'Moyenne',
-    'low': 'Faible'
-  };
-  return translations[priority] || priority;
-};
+// Services
+async function generateRecommendations(data: any) {
+  const response = await fetch('/api/recommendations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
-// Fonction pour traduire les difficultés
-const translateDifficulty = (difficulty: string) => {
-  const translations: Record<string, string> = {
-    'high': 'Élevée',
-    'medium': 'Moyenne',
-    'low': 'Faible'
-  };
-  return translations[difficulty] || difficulty;
-};
+  if (!response.ok) {
+    throw new Error(`Erreur lors de la génération des recommandations: ${response.statusText}`);
+  }
 
-// Fonction pour traduire les délais
-const translateTimeframe = (timeframe: string) => {
-  const translations: Record<string, string> = {
-    'immediate': 'Immédiat',
-    'short_term': 'Court terme',
-    'medium_term': 'Moyen terme',
-    'long_term': 'Long terme'
-  };
-  return translations[timeframe] || timeframe;
-};
+  return response.json();
+}
+
+async function exportToWord(data: any) {
+  const response = await fetch('/api/exports/word', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur lors de l'export Word: ${response.statusText}`);
+  }
+
+  return response.blob();
+}
+
+async function exportToExcel(data: any) {
+  const response = await fetch('/api/exports/excel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur lors de l'export Excel: ${response.statusText}`);
+  }
+
+  return response.blob();
+}
 
 export default function RecommendationsView() {
   const [, setLocation] = useLocation();
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [complianceMatrix, setComplianceMatrix] = useState<any>(null);
-  const [ganttData, setGanttData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const auditData = {
-          infrastructure: {
-            questionnaire: {
-              resultats: {
-                "Sécurité physique": {
-                  "Contrôle d'accès": "conforme",
-                  "Vidéosurveillance": "non-conforme"
-                }
-              },
-              scores: {
-                global: {
-                  score: 75,
-                  repondu: 80,
-                  nom: "Score Global"
-                },
-                parGroupe: {
-                  "Sécurité physique": {
-                    score: 70,
-                    repondu: 100,
-                    nom: "Sécurité"
-                  }
-                }
-              }
-            }
-          }
-        };
-
-        const response = await generateRecommendations(auditData);
-        setRecommendations(response.recommendations || []);
-
-        const matrix = await generateMatrixCompliance(auditData);
-        setComplianceMatrix(matrix);
-
-        const gantt = await generateGanttData(response.recommendations || []);
-        setGanttData(gantt);
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast({
-          title: "Erreur",
-          description: error instanceof Error ? error.message : "Une erreur est survenue",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { data: recommendations = [], isLoading, error } = useQuery({
+    queryKey: ['recommendations'],
+    queryFn: () => generateRecommendations({ /* données d'audit ici */ }),
+    enabled: true
+  });
 
   const handleExportWord = async () => {
     try {
+      setIsExporting(true);
       if (!recommendations?.length) {
         toast({
-          title: "Erreur",
+          title: "Attention",
           description: "Aucune recommandation à exporter",
           variant: "destructive"
         });
@@ -118,7 +79,6 @@ export default function RecommendationsView() {
 
       const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd', { locale: fr })}.docx`;
       const blob = await exportToWord(recommendations);
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -133,17 +93,20 @@ export default function RecommendationsView() {
         description: "Export Word réussi"
       });
     } catch (error) {
-      console.error('Error exporting to Word:', error);
+      console.error('Erreur lors de l\'export Word:', error);
       toast({
         title: "Erreur",
         description: "Erreur lors de l'export Word",
         variant: "destructive"
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
   const handleExportExcel = async () => {
     try {
+      setIsExporting(true);
       const blob = await exportToExcel(recommendations);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -159,19 +122,39 @@ export default function RecommendationsView() {
         description: "Export Excel réussi"
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      console.error('Erreur lors de l\'export Excel:', error);
       toast({
         title: "Erreur",
         description: "Erreur lors de l'export Excel",
         variant: "destructive"
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-lg">Chargement des recommandations...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="pt-6">
+            <div className="flex mb-4 gap-2 text-red-500">
+              <AlertCircle className="h-8 w-8" />
+              <h1 className="text-2xl font-bold">Erreur</h1>
+            </div>
+            <p className="mt-4 text-sm text-gray-600">
+              Une erreur est survenue lors du chargement des recommandations.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -180,8 +163,9 @@ export default function RecommendationsView() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <Button 
-          onClick={() => setLocation('/dashboard')}
-          className="bg-primary hover:bg-primary/90"
+          onClick={() => setLocation('/tableau-de-bord')}
+          variant="outline"
+          className="hover:bg-gray-100"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Retour
@@ -190,24 +174,21 @@ export default function RecommendationsView() {
         <div className="flex gap-2">
           <Button
             onClick={handleExportWord}
-            className="bg-primary hover:bg-primary/90"
+            variant="outline"
+            className="hover:bg-gray-100"
+            disabled={isExporting}
           >
             <Download className="w-4 h-4 mr-2" />
             Export Word
           </Button>
           <Button
             onClick={handleExportExcel}
-            className="bg-primary hover:bg-primary/90"
+            variant="outline"
+            className="hover:bg-gray-100"
+            disabled={isExporting}
           >
             <Download className="w-4 h-4 mr-2" />
             Export Excel
-          </Button>
-          <Button
-            onClick={() => setLocation('/documents')}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            Générer Rapport
           </Button>
         </div>
       </div>
@@ -216,14 +197,14 @@ export default function RecommendationsView() {
         <TabsList>
           <TabsTrigger value="recommendations">Recommandations</TabsTrigger>
           <TabsTrigger value="impacts">Impacts</TabsTrigger>
-          <TabsTrigger value="equipment">Matériels</TabsTrigger>
+          <TabsTrigger value="equipment">Équipements</TabsTrigger>
           <TabsTrigger value="compliance">Conformité</TabsTrigger>
           <TabsTrigger value="planning">Planning</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recommendations">
           <div className="grid gap-6">
-            {recommendations.map((rec) => (
+            {recommendations.map((rec: any) => (
               <Card key={rec.id}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -234,63 +215,75 @@ export default function RecommendationsView() {
                       rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
-                      {translatePriority(rec.priority)}
+                      {rec.priority === 'critical' ? 'Critique' :
+                       rec.priority === 'high' ? 'Élevée' :
+                       rec.priority === 'medium' ? 'Moyenne' :
+                       'Faible'}
                     </span>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="mb-4">{rec.description}</p>
 
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Impact</h4>
-                      <div className="space-y-2">
-                        {Object.entries(rec.impact).map(([key, value]: [string, any]) => (
-                          <div key={key}>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span className="capitalize">
-                                {key === 'efficiency' ? 'Efficacité' :
-                                 key === 'reliability' ? 'Fiabilité' :
-                                 key === 'compliance' ? 'Conformité' : key}
-                              </span>
-                              <span>{value.score}%</span>
-                            </div>
-                            <Progress value={value.score} />
-                            <p className="text-sm text-gray-600 mt-1">{value.explanation}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium mb-2">Mise en œuvre</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium">Difficulté</p>
-                          <p className="text-sm">{translateDifficulty(rec.implementation.difficulty)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Délai</p>
-                          <p className="text-sm">{translateTimeframe(rec.implementation.timeframe)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Coût estimé</p>
-                          <p className="text-sm">{rec.implementation.estimatedCost}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {rec.implementation.prerequisites?.length > 0 && (
+                  {rec.impact && (
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="font-medium mb-2">Prérequis</h4>
-                        <ul className="list-disc list-inside text-sm">
-                          {rec.implementation.prerequisites.map((prereq: string, index: number) => (
-                            <li key={index}>{prereq}</li>
+                        <h4 className="font-medium mb-2">Impact</h4>
+                        <div className="space-y-2">
+                          {Object.entries(rec.impact).map(([key, value]: [string, any]) => (
+                            <div key={key}>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="capitalize">
+                                  {key === 'efficiency' ? 'Efficacité' :
+                                   key === 'reliability' ? 'Fiabilité' :
+                                   key === 'compliance' ? 'Conformité' : key}
+                                </span>
+                                <span>{value.score}%</span>
+                              </div>
+                              <Progress value={value.score} />
+                              <p className="text-sm text-gray-600 mt-1">{value.explanation}</p>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
-                    )}
-                  </div>
+
+                      {rec.implementation && (
+                        <div>
+                          <h4 className="font-medium mb-2">Mise en œuvre</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm font-medium">Difficulté</p>
+                              <p className="text-sm">
+                                {rec.implementation.difficulty === 'high' ? 'Élevée' :
+                                 rec.implementation.difficulty === 'medium' ? 'Moyenne' :
+                                 rec.implementation.difficulty === 'low' ? 'Faible' : 'Non spécifiée'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Délai</p>
+                              <p className="text-sm">
+                                {rec.implementation.timeframe === 'immediate' ? 'Immédiat' :
+                                 rec.implementation.timeframe === 'short_term' ? 'Court terme' :
+                                 rec.implementation.timeframe === 'medium_term' ? 'Moyen terme' :
+                                 rec.implementation.timeframe === 'long_term' ? 'Long terme' : 'Non spécifié'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {rec.implementation?.prerequisites?.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Prérequis</h4>
+                          <ul className="list-disc list-inside text-sm">
+                            {rec.implementation.prerequisites.map((prereq: string, index: number) => (
+                              <li key={index}>{prereq}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -301,22 +294,30 @@ export default function RecommendationsView() {
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-xl font-semibold mb-4">Analyse des Impacts</h3>
-              <div className="mb-6">
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={recommendations.map(rec => ({
-                    name: rec.title.substring(0, 20) + '...',
-                    ...rec.impact
-                  }))}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="efficiency" fill="#10b981" name="Efficacité" />
-                    <Bar dataKey="reliability" fill="#3b82f6" name="Fiabilité" />
-                    <Bar dataKey="compliance" fill="#f59e0b" name="Conformité" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {recommendations.length > 0 && (
+                <div className="mb-6">
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={recommendations.map((rec: any) => ({
+                      name: rec.title.substring(0, 20) + '...',
+                      efficacite: rec.impact?.efficiency?.score || 0,
+                      fiabilite: rec.impact?.reliability?.score || 0,
+                      conformite: rec.impact?.compliance?.score || 0
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="efficacite" fill="#10b981" name="Efficacité" />
+                      <Bar dataKey="fiabilite" fill="#3b82f6" name="Fiabilité" />
+                      <Bar dataKey="conformite" fill="#f59e0b" name="Conformité" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <p className="text-sm text-gray-600 mt-4">
+                    Ce graphique montre l'impact de chaque recommandation sur trois aspects clés :
+                    l'efficacité opérationnelle, la fiabilité des systèmes et la conformité aux normes.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -324,28 +325,29 @@ export default function RecommendationsView() {
         <TabsContent value="equipment">
           <Card>
             <CardContent className="pt-6">
-              {recommendations.map((rec) => (
+              {recommendations.map((rec: any) => (
                 <div key={rec.id} className="mb-6">
                   <h3 className="text-xl font-semibold mb-4">{rec.title}</h3>
                   {rec.equipment?.map((eq: any, index: number) => (
                     <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg">
                       <h4 className="font-medium mb-2">{eq.name}</h4>
                       <p className="text-sm text-gray-600 mb-2">{eq.description}</p>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <h5 className="text-sm font-medium mb-1">Spécifications</h5>
-                          <ul className="list-disc list-inside text-sm">
-                            {eq.specifications?.map((spec: string, i: number) => (
-                              <li key={i}>{spec}</li>
-                            ))}
-                          </ul>
+                      {eq.specifications?.length > 0 && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h5 className="text-sm font-medium mb-1">Spécifications techniques</h5>
+                            <ul className="list-disc list-inside text-sm">
+                              {eq.specifications.map((spec: string, i: number) => (
+                                <li key={i}>{spec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h5 className="text-sm font-medium mb-1">Délai de mise en place</h5>
+                            <p className="text-sm">{eq.implementation_time}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h5 className="text-sm font-medium mb-1">Estimation</h5>
-                          <p className="text-sm">Coût: {eq.cost}</p>
-                          <p className="text-sm">Délai: {eq.deliveryTime}</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -357,29 +359,34 @@ export default function RecommendationsView() {
         <TabsContent value="compliance">
           <Card>
             <CardContent className="pt-6">
-              {complianceMatrix && Object.entries(complianceMatrix).map(([category, data]: [string, any]) => (
-                <div key={category} className="mb-6">
-                  <h3 className="text-xl font-semibold mb-4">{category}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Niveau de Conformité</h4>
-                      <div className="flex items-center gap-2">
-                        <Progress value={data.level} />
-                        <span>{data.level}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Actions Requises</h4>
-                      {data.actions?.map((action: any, index: number) => (
-                        <div key={index} className="mb-2 p-3 bg-gray-50 rounded">
-                          <p className="font-medium">{action.title}</p>
-                          <p className="text-sm text-gray-600">{action.description}</p>
+              <h3 className="text-xl font-semibold mb-4">Matrice de conformité</h3>
+              {recommendations.length > 0 && recommendations[0].compliance_matrix && (
+                Object.entries(recommendations[0].compliance_matrix.categories || {}).map(([category, data]: [string, any]) => (
+                  <div key={category} className="mb-6">
+                    <h4 className="font-medium mb-2">{category}</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium mb-1">Niveau de conformité</p>
+                        <div className="flex items-center gap-2">
+                          <Progress value={data.level} />
+                          <span>{data.level}%</span>
                         </div>
-                      ))}
+                        <p className="text-sm text-gray-600 mt-1">{data.explanation}</p>
+                      </div>
+                      {data.required_actions?.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium mb-2">Actions requises</p>
+                          {data.required_actions.map((action: string, index: number) => (
+                            <div key={index} className="mb-2 p-3 bg-gray-50 rounded">
+                              <p className="text-sm">{action}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -387,35 +394,38 @@ export default function RecommendationsView() {
         <TabsContent value="planning">
           <Card>
             <CardContent className="pt-6">
-              {ganttData && ganttData.phases?.map((phase: any, index: number) => (
+              <h3 className="text-xl font-semibold mb-4">Planning de mise en œuvre</h3>
+              {recommendations.length > 0 && recommendations[0].planning?.phases?.map((phase: any, index: number) => (
                 <div key={index} className="mb-6">
-                  <h3 className="text-xl font-semibold mb-4">{phase.name}</h3>
+                  <h4 className="font-medium mb-2">{phase.name}</h4>
                   <div className="space-y-4">
+                    <p className="text-sm text-gray-600">{phase.description}</p>
+                    <div>
+                      <p className="text-sm font-medium">Durée estimée: {phase.duration}</p>
+                      <p className="text-sm font-medium">
+                        Priorité: {
+                          phase.priority === 'high' ? 'Élevée' :
+                          phase.priority === 'medium' ? 'Moyenne' :
+                          phase.priority === 'low' ? 'Faible' : 'Non spécifiée'
+                        }
+                      </p>
+                    </div>
                     {phase.tasks?.map((task: any, taskIndex: number) => (
                       <div key={taskIndex} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-medium">{task.name}</h4>
-                          <span className="text-sm text-gray-600">
-                            Durée: {task.duration}
-                          </span>
-                        </div>
+                        <h5 className="font-medium mb-2">{task.name}</h5>
                         <p className="text-sm text-gray-600 mb-2">{task.description}</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <h5 className="text-sm font-medium mb-1">Ressources</h5>
+                            <p className="text-sm font-medium mb-1">Ressources requises</p>
                             <ul className="list-disc list-inside text-sm">
-                              {task.resources?.map((resource: string, i: number) => (
+                              {task.required_resources?.map((resource: string, i: number) => (
                                 <li key={i}>{resource}</li>
                               ))}
                             </ul>
                           </div>
                           <div>
-                            <h5 className="text-sm font-medium mb-1">Dépendances</h5>
-                            <ul className="list-disc list-inside text-sm">
-                              {task.dependencies?.map((dep: string, i: number) => (
-                                <li key={i}>{dep}</li>
-                              ))}
-                            </ul>
+                            <p className="text-sm font-medium mb-1">Impact sur les opérations</p>
+                            <p className="text-sm">{task.operations_impact}</p>
                           </div>
                         </div>
                       </div>
