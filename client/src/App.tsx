@@ -1,14 +1,19 @@
 import { Switch, Route } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
-import RecommendationsView from "@/components/dashboard/RecommendationsView";
+import { RecommendationsView } from "@/components/dashboard/RecommendationsView";
+import RecommendationsDetail from "@/components/dashboard/RecommendationsDetail";
 
 function App() {
   return (
-    <Switch>
-      <Route path="/recommendations" component={RecommendationsView} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="container mx-auto py-6">
+      <Switch>
+        <Route path="/" component={RecommendationsView} />
+        <Route path="/analyse" component={RecommendationsView} />
+        <Route path="/recommendations-detail" component={RecommendationsDetail} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
 }
 
