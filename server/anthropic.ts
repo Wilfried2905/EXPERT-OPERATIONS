@@ -45,54 +45,62 @@ export async function generateRecommendations(req: Request, res: Response) {
       throw new Error('La réponse de l\'API est vide');
     }
 
-    // Tentative de parse du JSON
+    // Réponse par défaut si le parsing échoue
+    const defaultResponse = {
+      recommendations: [{
+        id: "REC_001",
+        title: "Recommandation générale",
+        description: content,
+        priority: "medium",
+        impact: {
+          efficiency: 50,
+          reliability: 50,
+          compliance: 50
+        },
+        implementation: {
+          difficulty: "medium",
+          timeframe: "medium_term",
+          prerequisites: []
+        },
+        dataQuality: {
+          completeness: 70,
+          missingData: []
+        }
+      }],
+      analysis: {
+        summary: "Analyse basée sur les données fournies",
+        strengths: [],
+        weaknesses: [],
+        dataQuality: {
+          availableData: [],
+          missingCriticalData: [],
+          confidenceLevel: "medium"
+        }
+      },
+      context: {
+        standards: [],
+        constraints: [],
+        assumptions: []
+      }
+    };
+
+    // Tentative de parse du JSON avec fallback sur la réponse par défaut
     try {
+      console.log('Anthropic service: Tentative de parse JSON');
       const recommendations = JSON.parse(content);
+      console.log('Anthropic service: Parse JSON réussi');
+      res.setHeader('Content-Type', 'application/json');
       return res.json(recommendations);
     } catch (parseError) {
       console.error('Erreur de parsing JSON:', parseError);
-      return res.json({
-        recommendations: [{
-          id: "REC_001",
-          title: "Recommandation générale",
-          description: content,
-          priority: "medium",
-          impact: {
-            efficiency: 50,
-            reliability: 50,
-            compliance: 50
-          },
-          implementation: {
-            difficulty: "medium",
-            estimatedCost: "€€",
-            timeframe: "medium_term",
-            prerequisites: []
-          },
-          dataQuality: {
-            completeness: 70,
-            missingData: []
-          }
-        }],
-        analysis: {
-          summary: "Analyse basée sur les données fournies",
-          strengths: [],
-          weaknesses: [],
-          dataQuality: {
-            availableData: [],
-            missingCriticalData: [],
-            confidenceLevel: "medium"
-          }
-        },
-        context: {
-          standards: [],
-          constraints: [],
-          assumptions: []
-        }
-      });
+      console.log('Anthropic service: Utilisation de la réponse par défaut');
+      res.setHeader('Content-Type', 'application/json');
+      return res.json(defaultResponse);
     }
   } catch (error: unknown) {
     console.error('Anthropic service: Erreur:', error);
     const err = error as Error;
+    res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({ 
       error: `Erreur lors de la génération des recommandations: ${err.message}`
     });
