@@ -18,13 +18,16 @@ export default function RecommendationsView() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [complianceMatrix, setComplianceMatrix] = useState<any>(null);
   const [ganttData, setGanttData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
       try {
+        // Mock audit data - À remplacer par les vraies données d'audit
         const auditData = {
           infrastructure: {
             questionnaire: {
@@ -53,16 +56,26 @@ export default function RecommendationsView() {
         };
 
         const response = await generateRecommendations(auditData);
-        setRecommendations(response.recommendations || []);
+        if (!response || !response.recommendations) {
+          throw new Error("Données de recommandations invalides");
+        }
+        setRecommendations(response.recommendations);
 
         const matrix = await generateMatrixCompliance(auditData);
+        if (!matrix) {
+          throw new Error("Données de matrice de conformité invalides");
+        }
         setComplianceMatrix(matrix);
 
-        const gantt = await generateGanttData(response.recommendations || []);
+        const gantt = await generateGanttData(response.recommendations);
+        if (!gantt) {
+          throw new Error("Données de planning invalides");
+        }
         setGanttData(gantt);
 
       } catch (error) {
         console.error("Error fetching data:", error);
+        setError(error instanceof Error ? error.message : "Une erreur est survenue lors du chargement des données");
         toast({
           title: "Erreur",
           description: error instanceof Error ? error.message : "Une erreur est survenue",
@@ -87,54 +100,37 @@ export default function RecommendationsView() {
         return;
       }
 
-      // Format data according to ExportData interface
       const exportData = {
         recommendations: recommendations.map(rec => ({
           title: rec.title,
           description: rec.description,
           priority: rec.priority,
-          progress: 0, // Default value since we don't track progress
+          progress: rec.progress || 0,
           impact: {
-            energyEfficiency: rec.impact.efficiency || 0,
-            performance: rec.impact.reliability || 0,
-            compliance: rec.impact.compliance || 0
+            energyEfficiency: rec.impact?.efficiency || 0,
+            performance: rec.impact?.reliability || 0,
+            compliance: rec.impact?.compliance || 0
           }
         })),
         impacts: recommendations.map(rec => ({
           title: rec.title,
           impacts: {
             energyEfficiency: { 
-              value: rec.impact.efficiency || 0, 
+              value: rec.impact?.efficiency || 0, 
               details: "Impact sur l'efficacité énergétique" 
             },
             performance: { 
-              value: rec.impact.reliability || 0, 
+              value: rec.impact?.reliability || 0, 
               details: "Impact sur la performance" 
             },
             compliance: { 
-              value: rec.impact.compliance || 0, 
+              value: rec.impact?.compliance || 0, 
               details: "Impact sur la conformité" 
             }
           }
         })),
-        matrix: [{
-          category: "Standards TIA-942",
-          description: "Évaluation de la conformité aux standards",
-          level: 75, // Default value
-          actions: recommendations.map(rec => ({
-            name: rec.title,
-            requirement: rec.description
-          }))
-        }],
-        planning: recommendations.map(rec => ({
-          name: rec.title,
-          description: rec.description,
-          duration: rec.implementation.timeframe,
-          phases: [{
-            name: "Implementation",
-            duration: rec.implementation.timeframe
-          }]
-        }))
+        matrix: complianceMatrix ? [complianceMatrix] : [],
+        planning: ganttData?.phases || []
       };
 
       const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.docx`;
@@ -192,7 +188,31 @@ export default function RecommendationsView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg">Chargement des recommandations...</p>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg">Chargement des recommandations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-red-600 mb-2">Erreur</h2>
+              <p className="text-gray-600">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()}
+                className="mt-4"
+              >
+                Réessayer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -202,7 +222,7 @@ export default function RecommendationsView() {
       <div className="flex justify-between items-center mb-6">
         <Button 
           onClick={() => setLocation('/dashboard')}
-          className="bg-primary hover:bg-primary/90"
+          variant="outline"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Retour
@@ -246,8 +266,8 @@ export default function RecommendationsView() {
 
         <TabsContent value="recommendations">
           <div className="grid gap-6">
-            {recommendations.map((rec) => (
-              <Card key={rec.id}>
+            {recommendations.map((rec, index) => (
+              <Card key={index}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold">{rec.title}</h3>
@@ -268,13 +288,13 @@ export default function RecommendationsView() {
                     <div>
                       <h4 className="font-medium mb-2">Impact</h4>
                       <div className="space-y-2">
-                        {Object.entries(rec.impact).map(([key, value]: [string, any]) => (
+                        {Object.entries(rec.impact || {}).map(([key, value]) => (
                           <div key={key}>
                             <div className="flex justify-between text-sm mb-1">
                               <span className="capitalize">{key}</span>
                               <span>{value}%</span>
                             </div>
-                            <Progress value={value} />
+                            <Progress value={Number(value)} className="h-2" />
                           </div>
                         ))}
                       </div>
@@ -285,20 +305,20 @@ export default function RecommendationsView() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm font-medium">Difficulté</p>
-                          <p className="text-sm">{rec.implementation.difficulty}</p>
+                          <p className="text-sm">{rec.implementation?.difficulty || 'Non spécifié'}</p>
                         </div>
                         <div>
                           <p className="text-sm font-medium">Coût estimé</p>
-                          <p className="text-sm">{rec.implementation.estimatedCost}</p>
+                          <p className="text-sm">{rec.implementation?.estimatedCost || 'Non spécifié'}</p>
                         </div>
                         <div>
                           <p className="text-sm font-medium">Délai</p>
-                          <p className="text-sm">{rec.implementation.timeframe}</p>
+                          <p className="text-sm">{rec.implementation?.timeframe || 'Non spécifié'}</p>
                         </div>
                       </div>
                     </div>
 
-                    {rec.implementation.prerequisites?.length > 0 && (
+                    {rec.implementation?.prerequisites?.length > 0 && (
                       <div>
                         <h4 className="font-medium mb-2">Prérequis</h4>
                         <ul className="list-disc list-inside text-sm">
@@ -322,7 +342,7 @@ export default function RecommendationsView() {
               <div className="mb-6">
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={recommendations.map(rec => ({
-                    name: rec.title.substring(0, 20) + '...',
+                    name: rec.title?.substring(0, 20) + '...',
                     ...rec.impact
                   }))}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -342,19 +362,19 @@ export default function RecommendationsView() {
         <TabsContent value="equipment">
           <Card>
             <CardContent className="pt-6">
-              {recommendations.map((rec) => (
-                <div key={rec.id} className="mb-6">
+              {recommendations.map((rec, index) => (
+                <div key={index} className="mb-6">
                   <h3 className="text-xl font-semibold mb-4">{rec.title}</h3>
-                  {rec.equipment?.map((eq: any, index: number) => (
-                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg">
+                  {rec.equipment?.map((eq: any, eqIndex: number) => (
+                    <div key={eqIndex} className="mb-4 p-4 bg-gray-50 rounded-lg">
                       <h4 className="font-medium mb-2">{eq.name}</h4>
                       <p className="text-sm text-gray-600 mb-2">{eq.description}</p>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <h5 className="text-sm font-medium mb-1">Spécifications</h5>
                           <ul className="list-disc list-inside text-sm">
-                            {eq.specifications?.map((spec: string, i: number) => (
-                              <li key={i}>{spec}</li>
+                            {eq.specifications?.map((spec: string, specIndex: number) => (
+                              <li key={specIndex}>{spec}</li>
                             ))}
                           </ul>
                         </div>
@@ -382,7 +402,7 @@ export default function RecommendationsView() {
                     <div>
                       <h4 className="font-medium mb-2">Niveau de Conformité</h4>
                       <div className="flex items-center gap-2">
-                        <Progress value={data.level} />
+                        <Progress value={data.level} className="h-2" />
                         <span>{data.level}%</span>
                       </div>
                     </div>
