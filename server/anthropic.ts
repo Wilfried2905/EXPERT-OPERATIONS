@@ -13,6 +13,7 @@ export async function generateRecommendations(req: Request, res: Response) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('Anthropic service: Clé API manquante');
+      res.setHeader('Content-Type', 'application/json');
       return res.status(500).json({ 
         error: "La clé API Anthropic n'est pas configurée"
       });
@@ -20,6 +21,7 @@ export async function generateRecommendations(req: Request, res: Response) {
 
     // Validation des données d'audit
     if (!auditData) {
+      res.setHeader('Content-Type', 'application/json');
       return res.status(400).json({ 
         error: "Les données d'audit sont requises"
       });
@@ -45,45 +47,6 @@ export async function generateRecommendations(req: Request, res: Response) {
       throw new Error('La réponse de l\'API est vide');
     }
 
-    // Réponse par défaut si le parsing échoue
-    const defaultResponse = {
-      recommendations: [{
-        id: "REC_001",
-        title: "Recommandation générale",
-        description: content,
-        priority: "medium",
-        impact: {
-          efficiency: 50,
-          reliability: 50,
-          compliance: 50
-        },
-        implementation: {
-          difficulty: "medium",
-          timeframe: "medium_term",
-          prerequisites: []
-        },
-        dataQuality: {
-          completeness: 70,
-          missingData: []
-        }
-      }],
-      analysis: {
-        summary: "Analyse basée sur les données fournies",
-        strengths: [],
-        weaknesses: [],
-        dataQuality: {
-          availableData: [],
-          missingCriticalData: [],
-          confidenceLevel: "medium"
-        }
-      },
-      context: {
-        standards: [],
-        constraints: [],
-        assumptions: []
-      }
-    };
-
     // Tentative de parse du JSON avec fallback sur la réponse par défaut
     try {
       console.log('Anthropic service: Tentative de parse JSON');
@@ -94,6 +57,46 @@ export async function generateRecommendations(req: Request, res: Response) {
     } catch (parseError) {
       console.error('Erreur de parsing JSON:', parseError);
       console.log('Anthropic service: Utilisation de la réponse par défaut');
+
+      // Réponse par défaut si le parsing échoue
+      const defaultResponse = {
+        recommendations: [{
+          id: "REC_001",
+          title: "Recommandation générale",
+          description: content,
+          priority: "medium",
+          impact: {
+            efficiency: 50,
+            reliability: 50,
+            compliance: 50
+          },
+          implementation: {
+            difficulty: "medium",
+            timeframe: "medium_term",
+            prerequisites: []
+          },
+          dataQuality: {
+            completeness: 70,
+            missingData: []
+          }
+        }],
+        analysis: {
+          summary: "Analyse basée sur les données fournies",
+          strengths: [],
+          weaknesses: [],
+          dataQuality: {
+            availableData: [],
+            missingCriticalData: [],
+            confidenceLevel: "medium"
+          }
+        },
+        context: {
+          standards: [],
+          constraints: [],
+          assumptions: []
+        }
+      };
+
       res.setHeader('Content-Type', 'application/json');
       return res.json(defaultResponse);
     }
