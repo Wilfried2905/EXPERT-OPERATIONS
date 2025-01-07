@@ -143,7 +143,6 @@ const EnvironmentalQuestionnaireEvaluation = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-4xl mx-auto">
@@ -209,7 +208,10 @@ const EnvironmentalQuestionnaireEvaluation = () => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={handleNext}>
+            <Button 
+              onClick={handleNext}
+              className="bg-[#003366] hover:bg-[#002347] text-white"
+            >
               {currentSection === sections.length - 1 ? 'Voir les Recommandations' : 'Suivant'}
             </Button>
           </div>
