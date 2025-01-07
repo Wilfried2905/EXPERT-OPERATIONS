@@ -87,8 +87,58 @@ export default function RecommendationsView() {
         return;
       }
 
+      // Format data according to ExportData interface
+      const exportData = {
+        recommendations: recommendations.map(rec => ({
+          title: rec.title,
+          description: rec.description,
+          priority: rec.priority,
+          progress: 0, // Default value since we don't track progress
+          impact: {
+            energyEfficiency: rec.impact.efficiency || 0,
+            performance: rec.impact.reliability || 0,
+            compliance: rec.impact.compliance || 0
+          }
+        })),
+        impacts: recommendations.map(rec => ({
+          title: rec.title,
+          impacts: {
+            energyEfficiency: { 
+              value: rec.impact.efficiency || 0, 
+              details: "Impact sur l'efficacité énergétique" 
+            },
+            performance: { 
+              value: rec.impact.reliability || 0, 
+              details: "Impact sur la performance" 
+            },
+            compliance: { 
+              value: rec.impact.compliance || 0, 
+              details: "Impact sur la conformité" 
+            }
+          }
+        })),
+        matrix: [{
+          category: "Standards TIA-942",
+          description: "Évaluation de la conformité aux standards",
+          level: 75, // Default value
+          actions: recommendations.map(rec => ({
+            name: rec.title,
+            requirement: rec.description
+          }))
+        }],
+        planning: recommendations.map(rec => ({
+          name: rec.title,
+          description: rec.description,
+          duration: rec.implementation.timeframe,
+          phases: [{
+            name: "Implementation",
+            duration: rec.implementation.timeframe
+          }]
+        }))
+      };
+
       const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.docx`;
-      const blob = await exportToWord(recommendations);
+      const blob = await exportToWord(exportData);
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
