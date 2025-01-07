@@ -63,9 +63,6 @@ export default function EnvironmentalAuditStep1() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{t('environmental.analysis.title')}</h1>
-      <p className="text-gray-600">{t('environmental.analysis.description')}</p>
-
       {questions.map((section, sectionIndex) => (
         <Card key={sectionIndex}>
           <CardContent className="pt-6">
@@ -89,7 +86,7 @@ export default function EnvironmentalAuditStep1() {
 
       <div className="flex justify-end">
         <Button onClick={handleNext}>
-          {t('common.next')}
+          Voir les Recommandations
         </Button>
       </div>
     </div>
