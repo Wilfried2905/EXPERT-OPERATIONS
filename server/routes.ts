@@ -129,7 +129,7 @@ export function registerRoutes(app: Express): Server {
 
       // Génération des recommandations pour chaque section
       const sectionResults = await Promise.all(
-        sections.map((section, index) => 
+        sections.map((section, index) =>
           generateRecommendationSection(prompt, section.name, index)
             .catch(error => {
               console.error(`Erreur section ${section.name}:`, error);
@@ -146,7 +146,7 @@ export function registerRoutes(app: Express): Server {
 
       // Préparer la réponse finale
       const combinedResponse = {
-        recommendations: validSectionResults.flatMap(section => 
+        recommendations: validSectionResults.flatMap(section =>
           section.recommendations.map(rec => ({
             ...rec,
             section: section.sectionName
@@ -168,8 +168,63 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Routes d'export
-  app.post("/api/exports/word", exportToWord);
-  app.post("/api/exports/excel", exportToExcel);
+  app.post("/api/exports/word", async (req, res) => {
+    try {
+      const { recommendations, clientInfo, auditType } = req.body;
+
+      if (!recommendations || !clientInfo || !auditType) {
+        return res.status(400).json({
+          error: "Données manquantes pour l'export",
+          details: "Les recommandations, les informations client et le type d'audit sont requis"
+        });
+      }
+
+      const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const fileName = `3R_Recommandations_${auditType}_${clientInfo.name}_${currentDate}`;
+
+      const wordBuffer = await exportToWord(recommendations, fileName);
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}.docx"`);
+      res.send(wordBuffer);
+
+    } catch (error) {
+      console.error('Erreur dans l\'export Word:', error);
+      res.status(500).json({
+        error: "Erreur lors de l'export Word",
+        details: error instanceof Error ? error.message : "Erreur inconnue"
+      });
+    }
+  });
+
+  app.post("/api/exports/excel", async (req, res) => {
+    try {
+      const { recommendations, clientInfo, auditType } = req.body;
+
+      if (!recommendations || !clientInfo || !auditType) {
+        return res.status(400).json({
+          error: "Données manquantes pour l'export",
+          details: "Les recommandations, les informations client et le type d'audit sont requis"
+        });
+      }
+
+      const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const fileName = `3R_Recommandations_${auditType}_${clientInfo.name}_${currentDate}`;
+
+      const excelBuffer = await exportToExcel(recommendations, fileName);
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}.xlsx"`);
+      res.send(excelBuffer);
+
+    } catch (error) {
+      console.error('Erreur dans l\'export Excel:', error);
+      res.status(500).json({
+        error: "Erreur lors de l'export Excel",
+        details: error instanceof Error ? error.message : "Erreur inconnue"
+      });
+    }
+  });
 
   // Route de la matrice de conformité
   app.post("/api/anthropic/compliance-matrix", async (req, res) => {
