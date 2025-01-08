@@ -13,6 +13,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import MainOperationsFlow from "./components/operations/MainOperationsFlow";
 import GithubTokenInput from "./components/settings/GithubTokenInput";
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
+import DocumentGenerator from "@/components/documents/DocumentGenerator";
 import DocumentNavigation from "@/components/operations/DocumentNavigation";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect } from "react";
@@ -86,6 +87,12 @@ function App() {
         <Route path="/recommendations">
           <ProtectedRoute>
             <RecommendationsView />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/documents/generate">
+          <ProtectedRoute>
+            <DocumentGenerator />
           </ProtectedRoute>
         </Route>
 
