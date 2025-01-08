@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Upload, Info } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const AuditOperationnel = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeMainSection, setActiveMainSection] = useState<'analyse' | 'evaluation'>('analyse');
   const [activeTab, setActiveTab] = useState(0);
-  const [conformityData, setConformityData] = useState({});
+  const [conformityData, setConformityData] = useState<Record<string, string>>({});
 
   const sections = [
     {
@@ -138,6 +138,118 @@ const AuditOperationnel = () => {
     return (answeredQuestions / totalQuestions) * 100;
   };
 
+  const handleSubmitAudit = async () => {
+    try {
+      const auditData = {
+        facilityInfo: {
+          organization: sections[0].title,
+          processes: sections[1].title,
+          incidentManagement: sections[2].title,
+          maintenance: sections[3].title,
+          performance: sections[4].title,
+          improvement: sections[5].title
+        },
+        measurements: {
+          organization: {
+            structureScore: conformityData['org1'] === 'conforme' ? 1 : 0,
+            organigramScore: conformityData['org2'] === 'conforme' ? 1 : 0,
+            rolesScore: conformityData['org3'] === 'conforme' ? 1 : 0
+          },
+          processes: {
+            sopScore: conformityData['proc1'] === 'conforme' ? 1 : 0,
+            changeManagementScore: conformityData['proc2'] === 'conforme' ? 1 : 0,
+            emergencyProceduresScore: conformityData['proc3'] === 'conforme' ? 1 : 0
+          },
+          incidents: {
+            managementScore: conformityData['inc1'] === 'conforme' ? 1 : 0,
+            trackingScore: conformityData['inc2'] === 'conforme' ? 1 : 0,
+            escalationScore: conformityData['inc3'] === 'conforme' ? 1 : 0
+          },
+          maintenance: {
+            preventiveScore: conformityData['maint1'] === 'conforme' ? 1 : 0,
+            supportScore: conformityData['maint2'] === 'conforme' ? 1 : 0,
+            documentationScore: conformityData['maint3'] === 'conforme' ? 1 : 0
+          }
+        },
+        tierLevel: {
+          current: 3,
+          target: 3
+        },
+        compliance: {
+          architectural: {
+            compliance: calculateComplianceScore(['org1', 'org2', 'org3']),
+            gaps: getComplianceGaps(['org1', 'org2', 'org3']),
+            requirements: ['Structure organisationnelle claire', 'Organigramme à jour', 'Documentation des rôles'],
+            criticalIssues: getCriticalIssues(['org1', 'org2', 'org3'])
+          },
+          electrical: {
+            compliance: calculateComplianceScore(['proc1', 'proc2', 'proc3']),
+            gaps: getComplianceGaps(['proc1', 'proc2', 'proc3']),
+            requirements: ['Procédures standardisées', 'Gestion des changements', 'Procédures d\'urgence'],
+            criticalIssues: getCriticalIssues(['proc1', 'proc2', 'proc3'])
+          },
+          mechanical: {
+            compliance: calculateComplianceScore(['inc1', 'inc2', 'inc3']),
+            gaps: getComplianceGaps(['inc1', 'inc2', 'inc3']),
+            requirements: ['Gestion des incidents', 'Traçabilité', 'Procédures d\'escalade'],
+            criticalIssues: getCriticalIssues(['inc1', 'inc2', 'inc3'])
+          },
+          telecommunications: {
+            compliance: calculateComplianceScore(['maint1', 'maint2', 'maint3']),
+            gaps: getComplianceGaps(['maint1', 'maint2', 'maint3']),
+            requirements: ['Maintenance préventive', 'Support technique', 'Documentation des interventions'],
+            criticalIssues: getCriticalIssues(['maint1', 'maint2', 'maint3'])
+          }
+        }
+      };
+
+      const response = await generateRecommendations(auditData);
+      window.location.href = '/recommendations';
+    } catch (error) {
+      console.error('Error submitting audit data:', error);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de l'envoi des données d'audit",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const calculateComplianceScore = (questionIds: string[]) => {
+    const conformCount = questionIds.filter(id => conformityData[id] === 'conforme').length;
+    return (conformCount / questionIds.length) * 100;
+  };
+
+  const getComplianceGaps = (questionIds: string[]) => {
+    return questionIds
+      .filter(id => conformityData[id] !== 'conforme')
+      .map(id => {
+        const question = sections.find(s => 
+          s.questions.some(q => q.id === id)
+        )?.questions.find(q => q.id === id);
+        return question?.norm || '';
+      })
+      .filter(gap => gap !== '');
+  };
+
+  const getCriticalIssues = (questionIds: string[]) => {
+    return questionIds
+      .filter(id => conformityData[id] === 'non-conforme')
+      .map(id => {
+        const question = sections.find(s => 
+          s.questions.some(q => q.id === id)
+        )?.questions.find(q => q.id === id);
+        return question?.question || '';
+      });
+  };
+
+  const generateRecommendations = async (auditData: any) => {
+    // Replace this with your actual recommendation generation logic.  This is a placeholder.
+    console.log("Audit data submitted:", auditData);
+    return new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+
   return (
     <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto mb-6">
@@ -254,15 +366,25 @@ const AuditOperationnel = () => {
           >
             Précédent
           </button>
-          <button 
-            className={`px-6 py-3 rounded font-medium ${
-              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
-            } text-white`}
-            disabled={activeTab === sections.length - 1}
-            onClick={() => setActiveTab(prev => prev + 1)}
-          >
-            Suivant
-          </button>
+          {activeTab === sections.length - 1 ? (
+            <button 
+              className={`px-6 py-3 rounded font-medium ${
+                isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+              } text-white`}
+              onClick={handleSubmitAudit}
+            >
+              Générer les Recommandations
+            </button>
+          ) : (
+            <button 
+              className={`px-6 py-3 rounded font-medium ${
+                isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+              } text-white`}
+              onClick={() => setActiveTab(prev => prev + 1)}
+            >
+              Suivant
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -42,7 +42,10 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ auditData })
+      body: JSON.stringify({ 
+        auditData,
+        auditType: 'operational' // Indiquer explicitement le type d'audit
+      })
     });
 
     if (!response.ok) {
@@ -57,12 +60,10 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
 
     const data = await response.json();
 
-    // Vérification et transformation des données
     if (!data || typeof data !== 'object') {
       throw new Error("Format de réponse invalide");
     }
 
-    // Construction d'une réponse valide même si certaines données sont manquantes
     return {
       recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
       analyse: {
