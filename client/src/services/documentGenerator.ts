@@ -75,8 +75,164 @@ export class DocumentGenerator {
     });
   }
 
+  private async getDocumentStructure(data: DocumentData): Promise<Paragraph[]> {
+    const documentSections = this.getDefaultSections(data.type);
+    const paragraphs: Paragraph[] = [];
+
+    // Add page break before first section
+    paragraphs.push(
+      new Paragraph({
+        text: "",
+        pageBreakBefore: true
+      })
+    );
+
+    for (const section of documentSections) {
+      // Add section title
+      paragraphs.push(
+        new Paragraph({
+          text: section.title,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 400, after: 200 }
+        })
+      );
+
+      // Add section content
+      if (section.items && section.items.length > 0) {
+        for (const item of section.items) {
+          paragraphs.push(
+            new Paragraph({
+              text: `• ${item}`,
+              spacing: { before: 100, after: 100 }
+            })
+          );
+        }
+      }
+
+      // Add subsections if any
+      if (section.subsections) {
+        for (const subsection of section.subsections) {
+          paragraphs.push(
+            new Paragraph({
+              text: subsection.title,
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 300, after: 150 }
+            })
+          );
+
+          if (subsection.items) {
+            for (const item of subsection.items) {
+              paragraphs.push(
+                new Paragraph({
+                  text: `• ${item}`,
+                  spacing: { before: 100, after: 100 }
+                })
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return paragraphs;
+  }
+
   private getDefaultSections(type: string) {
     switch (type) {
+      case 'Cahier des Charges':
+        return [
+          {
+            title: "1. Présentation du Projet",
+            items: [
+              "Contexte général",
+              "Objectifs du projet",
+              "Périmètre d'intervention",
+              "Classification Tier visée",
+              "Parties prenantes",
+              "Budget prévisionnel",
+              "Critères de succès"
+            ]
+          },
+          {
+            title: "2. Exigences TIA-942",
+            items: [
+              "Conformité architecturale",
+              "Conformité électrique",
+              "Conformité climatisation",
+              "Conformité sécurité"
+            ],
+            subsections: [
+              {
+                title: "2.1. Spécifications Techniques",
+                items: [
+                  "Niveaux de redondance requis",
+                  "Métriques de performance attendues",
+                  "Exigences de monitoring"
+                ]
+              },
+              {
+                title: "2.2. Exigences Opérationnelles",
+                items: [
+                  "Disponibilité et SLA",
+                  "Maintenance préventive",
+                  "Gestion des incidents"
+                ]
+              }
+            ]
+          },
+          {
+            title: "3. Infrastructure Technique",
+            items: [
+              "Architecture physique",
+              "Infrastructure électrique",
+              "Système de refroidissement"
+            ],
+            subsections: [
+              {
+                title: "3.1. Sécurité et Monitoring",
+                items: [
+                  "Contrôle d'accès",
+                  "Vidéosurveillance",
+                  "Systèmes de détection"
+                ]
+              },
+              {
+                title: "3.2. Réseaux et Connectivité",
+                items: [
+                  "Architecture réseau",
+                  "Redondance des liens",
+                  "Sécurité périmétrique"
+                ]
+              }
+            ]
+          },
+          {
+            title: "4. Modalités de Réalisation",
+            items: [
+              "Planning de déploiement",
+              "Organisation projet",
+              "Plan de transition"
+            ],
+            subsections: [
+              {
+                title: "4.1. Tests et Recette",
+                items: [
+                  "Stratégie de test",
+                  "Critères d'acceptation",
+                  "Procédures de validation"
+                ]
+              },
+              {
+                title: "4.2. Documentation",
+                items: [
+                  "Livrables attendus",
+                  "Documentation technique",
+                  "Manuels d'exploitation"
+                ]
+              }
+            ]
+          }
+        ];
       case 'Offre Technique':
         return [
           {
@@ -174,7 +330,26 @@ export class DocumentGenerator {
             items: [
               "Objectifs de l'audit",
               "Méthodologie d'évaluation",
-              "Synthèse des conclusions majeures"
+              "Synthèse des conclusions majeures",
+              "Recommandations prioritaires"
+            ],
+            subsections: [
+              {
+                title: "1.1. Contexte",
+                items: [
+                  "Présentation du site",
+                  "Périmètre de l'audit",
+                  "Classification TIA-942 visée"
+                ]
+              },
+              {
+                title: "1.2. Points Clés",
+                items: [
+                  "Principaux constats",
+                  "Risques identifiés",
+                  "Opportunités d'amélioration"
+                ]
+              }
             ]
           },
           {
@@ -187,19 +362,19 @@ export class DocumentGenerator {
             ],
             subsections: [
               {
-                title: "2.1. Évaluation de l'Architecture",
+                title: "2.1. Infrastructure Physique",
                 items: [
                   "Configuration des salles",
-                  "Systèmes de sécurité",
-                  "Contrôle d'accès"
+                  "Chemins de câbles",
+                  "Systèmes de sécurité"
                 ]
               },
               {
-                title: "2.2. Infrastructure Électrique",
+                title: "2.2. Systèmes Critiques",
                 items: [
-                  "Alimentation principale",
-                  "Systèmes de secours",
-                  "Distribution électrique"
+                  "Alimentation électrique",
+                  "Climatisation",
+                  "Protection incendie"
                 ]
               }
             ]
@@ -216,27 +391,44 @@ export class DocumentGenerator {
                 title: "3.1. Actions Immédiates",
                 items: [
                   "Corrections critiques",
-                  "Mises à niveau urgentes"
+                  "Mises à niveau urgentes",
+                  "Risques à traiter"
                 ]
               },
               {
-                title: "3.2. Plan à Moyen Terme",
+                title: "3.2. Améliorations",
                 items: [
                   "Optimisations recommandées",
-                  "Améliorations de performance"
+                  "Évolutions proposées",
+                  "Gains attendus"
                 ]
               }
             ]
-          }
-        ];
-      case 'Cahier des Charges':
-        return [
+          },
           {
-            title: "1. Introduction",
+            title: "4. Plan de Mise en Conformité",
             items: [
-              "Contexte du projet",
-              "Objectifs",
-              "Périmètre"
+              "Calendrier de déploiement",
+              "Priorisation des actions",
+              "Budget prévisionnel"
+            ],
+            subsections: [
+              {
+                title: "4.1. Planning",
+                items: [
+                  "Court terme (0-6 mois)",
+                  "Moyen terme (6-12 mois)",
+                  "Long terme (12+ mois)"
+                ]
+              },
+              {
+                title: "4.2. Suivi",
+                items: [
+                  "Indicateurs de performance",
+                  "Points de contrôle",
+                  "Revues périodiques"
+                ]
+              }
             ]
           }
         ];
