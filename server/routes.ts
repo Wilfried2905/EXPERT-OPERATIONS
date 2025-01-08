@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { generateOperationalAuditPrompt } from '../client/src/services/audit-types/operational-audit';
 import { exportToWord, exportToExcel } from './exports';
 
-async function generateRecommendationSection(prompt: string, section: string) {
+async function generateRecommendationSection(prompt: string, section: string, sectionIndex: number) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -15,11 +15,78 @@ async function generateRecommendationSection(prompt: string, section: string) {
       model: "claude-3-sonnet-20240229",
       messages: [{
         role: "user",
-        content: `Analyse cette section des données d'audit (${section}) et génère une partie des recommandations en français:
+        content: `Tu es un expert en audit de datacenters. Analyse la section ${section} (partie ${sectionIndex + 1}) des données d'audit et génère des recommandations détaillées en français pour cette section spécifique.
 
-${prompt}
+Les recommandations doivent être adaptées au contexte de ${section}.
 
-Réponds uniquement avec un objet JSON contenant les recommandations pour cette section.`
+Données d'audit pour cette section : ${prompt}
+
+Format de réponse JSON attendu :
+{
+  "sectionId": "${sectionIndex + 1}",
+  "sectionName": "${section}",
+  "recommendations": [
+    {
+      "id": "REC_${sectionIndex + 1}_X",
+      "titre": "string",
+      "description": "string",
+      "priorite": "critique|elevee|moyenne|faible",
+      "impact": {
+        "efficacite": number,
+        "fiabilite": number,
+        "conformite": number
+      },
+      "contexte": "string"
+    }
+  ]
+}`
+      }],
+      temperature: 0.7,
+      max_tokens: 4096
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Erreur API Anthropic: ${response.status} - ${errorText}`);
+  }
+
+  const rawData = await response.json();
+  return JSON.parse(rawData.content[0].text);
+}
+
+async function generateAnalyseGlobale(allSectionData: any[], prompt: string) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'x-api-key': process.env.ANTHROPIC_API_KEY || ''
+    },
+    body: JSON.stringify({
+      model: "claude-3-sonnet-20240229",
+      messages: [{
+        role: "user",
+        content: `Analyse l'ensemble des données d'audit et génère une synthèse globale en français.
+Utilise les recommandations déjà générées pour créer une analyse cohérente.
+
+Données d'audit complètes : ${prompt}
+Recommandations par section : ${JSON.stringify(allSectionData)}
+
+Format de réponse JSON attendu :
+{
+  "analyse": {
+    "resume": "string",
+    "points_forts": ["string"],
+    "points_amelioration": ["string"],
+    "impacts": {
+      "description": "string",
+      "analyse_efficacite": "string",
+      "analyse_fiabilite": "string",
+      "analyse_conformite": "string"
+    }
+  }
+}`
       }],
       temperature: 0.7,
       max_tokens: 4096
@@ -50,7 +117,7 @@ export function registerRoutes(app: Express): Server {
 
       const prompt = generateOperationalAuditPrompt(auditData);
 
-      // Diviser l'analyse en sections
+      // Définition des sections avec leurs données spécifiques
       const sections = [
         { name: "Organisation", data: auditData.facilityInfo?.organization },
         { name: "Processus", data: auditData.facilityInfo?.processes },
@@ -60,9 +127,10 @@ export function registerRoutes(app: Express): Server {
 
       console.log('Anthropic service: Génération des recommandations par section');
 
+      // Génération des recommandations pour chaque section
       const sectionResults = await Promise.all(
-        sections.map(section => 
-          generateRecommendationSection(prompt, section.name)
+        sections.map((section, index) => 
+          generateRecommendationSection(prompt, section.name, index)
             .catch(error => {
               console.error(`Erreur section ${section.name}:`, error);
               return null;
@@ -70,35 +138,25 @@ export function registerRoutes(app: Express): Server {
         )
       );
 
-      // Combiner les résultats
-      const combinedRecommendations = sectionResults.reduce((acc, result) => {
-        if (result && result.recommendations) {
-          acc.recommendations.push(...result.recommendations);
-        }
-        return acc;
-      }, { 
-        recommendations: [],
-        analyse: {
-          resume: "",
-          points_forts: [],
-          points_amelioration: [],
-          impacts: {
-            description: "",
-            analyse_efficacite: "",
-            analyse_fiabilite: "",
-            analyse_conformite: ""
-          }
-        }
-      });
+      // Filtrer les sections valides et combiner les recommandations
+      const validSectionResults = sectionResults.filter(result => result !== null);
 
-      // Générer l'analyse globale
-      const analyseGlobale = await generateRecommendationSection(prompt, "analyse_globale");
-      if (analyseGlobale && analyseGlobale.analyse) {
-        combinedRecommendations.analyse = analyseGlobale.analyse;
-      }
+      // Générer l'analyse globale avec toutes les recommandations
+      const analyseGlobale = await generateAnalyseGlobale(validSectionResults, prompt);
 
-      console.log('Anthropic service: Réponse combinée:', JSON.stringify(combinedRecommendations, null, 2));
-      res.json(combinedRecommendations);
+      // Préparer la réponse finale
+      const combinedResponse = {
+        recommendations: validSectionResults.flatMap(section => 
+          section.recommendations.map(rec => ({
+            ...rec,
+            section: section.sectionName
+          }))
+        ),
+        analyse: analyseGlobale.analyse
+      };
+
+      console.log('Anthropic service: Réponse finale générée');
+      res.json(combinedResponse);
 
     } catch (error) {
       console.error('Erreur dans generateRecommendations:', error);
