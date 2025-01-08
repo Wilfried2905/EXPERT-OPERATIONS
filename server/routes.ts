@@ -32,12 +32,37 @@ export function registerRoutes(app: Express): Server {
           model: "claude-3-sonnet-20240229",
           messages: [{
             role: "user",
-            content: prompt
+            content: `Agis comme un expert en audit de datacenters. Analyse ces données d'audit et génère des recommandations détaillées en français. Réponds en format JSON avec la structure suivante : 
+            {
+              "recommendations": [
+                {
+                  "titre": string,
+                  "description": string,
+                  "priorite": "critique" | "elevee" | "moyenne" | "faible",
+                  "impact": {
+                    "efficacite": number,
+                    "fiabilite": number,
+                    "conformite": number
+                  }
+                }
+              ],
+              "analyse": {
+                "resume": string,
+                "points_forts": string[],
+                "points_amelioration": string[],
+                "impacts": {
+                  "description": string,
+                  "analyse_efficacite": string,
+                  "analyse_fiabilite": string,
+                  "analyse_conformite": string
+                }
+              }
+            }
+
+            Données d'audit : ${prompt}`
           }],
-          max_tokens: 4000,
           temperature: 0.7,
-          system: "You are an expert in datacenter operational audits. Generate recommendations based on the provided audit data in French. Format your response as a JSON object.",
-          response_format: { type: "json_object" }
+          max_tokens: 100000
         })
       });
 
@@ -52,7 +77,7 @@ export function registerRoutes(app: Express): Server {
 
       // S'assurer que nous avons le bon format de réponse
       const formattedResponse = {
-        recommendations: rawData.content && Array.isArray(rawData.content) ? rawData.content[0].text : [],
+        recommendations: rawData.content[0].text ? JSON.parse(rawData.content[0].text) : [],
         analyse: {
           resume: "",
           points_forts: [],
