@@ -1,31 +1,42 @@
 import type { Request, Response } from 'express';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, StyleLevel } from 'docx';
 
-export async function exportToWord(req: Request, res: Response) {
+export async function exportToWord(recommendations: any[], fileName: string) {
   try {
-    const { recommendations } = req.body;
-
-    if (!Array.isArray(recommendations)) {
-      return res.status(400).json({
-        error: "Format de recommandations invalide"
-      });
-    }
-
     const doc = new Document({
+      title: fileName,
+      description: "Rapport de recommandations d'audit",
+      styles: {
+        paragraphStyles: [
+          {
+            id: "Normal",
+            name: "Normal",
+            quickFormat: true,
+            run: {
+              font: "Calibri",
+              size: 24
+            }
+          }
+        ]
+      },
       sections: [{
         properties: {},
         children: [
           new Paragraph({
             text: "Rapport de Recommandations",
             heading: HeadingLevel.HEADING_1,
+            spacing: {
+              before: 240,
+              after: 120
+            }
           }),
           ...recommendations.flatMap(rec => [
             new Paragraph({
-              text: rec.title,
+              text: rec.titre,
               heading: HeadingLevel.HEADING_2,
               spacing: {
-                before: 400,
-                after: 200
+                before: 240,
+                after: 120
               }
             }),
             new Paragraph({
@@ -35,7 +46,11 @@ export async function exportToWord(req: Request, res: Response) {
                   bold: true
                 }),
                 new TextRun(rec.description)
-              ]
+              ],
+              spacing: {
+                before: 120,
+                after: 120
+              }
             }),
             new Paragraph({
               children: [
@@ -43,8 +58,25 @@ export async function exportToWord(req: Request, res: Response) {
                   text: "Priorité : ",
                   bold: true
                 }),
-                new TextRun(rec.priority)
-              ]
+                new TextRun(rec.priorite)
+              ],
+              spacing: {
+                before: 120,
+                after: 120
+              }
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Section : ",
+                  bold: true
+                }),
+                new TextRun(rec.section || "Non spécifiée")
+              ],
+              spacing: {
+                before: 120,
+                after: 120
+              }
             }),
             new Paragraph({
               children: [
@@ -52,61 +84,50 @@ export async function exportToWord(req: Request, res: Response) {
                   text: "Impact : ",
                   bold: true
                 })
-              ]
+              ],
+              spacing: {
+                before: 120,
+                after: 60
+              }
             }),
             ...Object.entries(rec.impact || {}).map(([key, value]) =>
               new Paragraph({
                 children: [
                   new TextRun(`${key}: ${value}%`)
                 ],
-                indent: { left: 720 }
+                indent: { left: 720 },
+                spacing: {
+                  before: 60,
+                  after: 60
+                }
               })
             ),
             new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Mise en œuvre : ",
-                  bold: true
-                })
-              ]
-            }),
-            new Paragraph({
-              children: [
-                new TextRun(`Difficulté : ${rec.implementation.difficulty}`),
-              ],
-              indent: { left: 720 }
-            }),
-            new Paragraph({
-              children: [
-                new TextRun(`Délai : ${rec.implementation.timeframe}`),
-              ],
-              indent: { left: 720 }
+              text: "",
+              spacing: {
+                before: 120,
+                after: 120
+              }
             })
           ])
         ]
       }]
     });
 
-    const buffer = await Packer.toBuffer(doc);
-
-    // Important: Set correct headers for Word document
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', 'attachment; filename=recommendations.docx');
-    res.setHeader('Content-Length', buffer.length);
-
-    // Send the buffer directly
-    res.send(buffer);
+    return await Packer.toBuffer(doc);
   } catch (error) {
     console.error('Error in exportToWord:', error);
-    res.status(500).json({
-      error: "Erreur lors de l'export Word"
-    });
+    throw error;
   }
 }
 
 export async function exportToExcel(req: Request, res: Response) {
-  // À implémenter si nécessaire
-  res.status(501).json({
-    error: "Export Excel pas encore implémenté"
-  });
+  try{
+    throw new Error("Export Excel pas encore implémenté");
+  } catch (error) {
+    console.error('Error in exportToExcel:', error);
+    res.status(501).json({
+      error: "Export Excel pas encore implémenté"
+    });
+  }
 }
