@@ -28,7 +28,49 @@ export async function generateRecommendations(req: Request, res: Response) {
     }
 
     console.log('Anthropic service: Préparation du prompt');
-    const prompt = generateRecommendationsPrompt(auditData);
+    const prompt = `Analysez les données d'audit suivantes et générez des recommandations au format JSON strict.
+
+    DONNÉES D'AUDIT:
+    ${JSON.stringify(auditData, null, 2)}
+
+    FORMAT DE SORTIE REQUIS (Strictement JSON):
+    {
+      "recommendations": [{
+        "id": "string",
+        "title": "string",
+        "description": "string",
+        "priority": "high" | "medium" | "low",
+        "impact": {
+          "efficiency": number,
+          "reliability": number,
+          "compliance": number
+        },
+        "implementation": {
+          "difficulty": "high" | "medium" | "low",
+          "timeframe": "short_term" | "medium_term" | "long_term",
+          "prerequisites": string[]
+        },
+        "dataQuality": {
+          "completeness": number,
+          "missingData": string[]
+        }
+      }],
+      "analysis": {
+        "summary": "string",
+        "strengths": string[],
+        "weaknesses": string[],
+        "dataQuality": {
+          "availableData": string[],
+          "missingCriticalData": string[],
+          "confidenceLevel": "high" | "medium" | "low"
+        }
+      },
+      "context": {
+        "standards": string[],
+        "constraints": string[],
+        "assumptions": string[]
+      }
+    }`;
 
     console.log('Anthropic service: Envoi de la requête à Claude');
     const message = await anthropic.messages.create({
@@ -56,49 +98,8 @@ export async function generateRecommendations(req: Request, res: Response) {
       return res.json(recommendations);
     } catch (parseError) {
       console.error('Erreur de parsing JSON:', parseError);
-      console.log('Anthropic service: Utilisation de la réponse par défaut');
-
-      // Réponse par défaut si le parsing échoue
-      const defaultResponse = {
-        recommendations: [{
-          id: "REC_001",
-          title: "Recommandation générale",
-          description: content,
-          priority: "medium",
-          impact: {
-            efficiency: 50,
-            reliability: 50,
-            compliance: 50
-          },
-          implementation: {
-            difficulty: "medium",
-            timeframe: "medium_term",
-            prerequisites: []
-          },
-          dataQuality: {
-            completeness: 70,
-            missingData: []
-          }
-        }],
-        analysis: {
-          summary: "Analyse basée sur les données fournies",
-          strengths: [],
-          weaknesses: [],
-          dataQuality: {
-            availableData: [],
-            missingCriticalData: [],
-            confidenceLevel: "medium"
-          }
-        },
-        context: {
-          standards: [],
-          constraints: [],
-          assumptions: []
-        }
-      };
-
-      res.setHeader('Content-Type', 'application/json');
-      return res.json(defaultResponse);
+      console.log('Contenu reçu:', content);
+      throw new Error('La réponse de l\'API n\'est pas au format JSON valide');
     }
   } catch (error: unknown) {
     console.error('Anthropic service: Erreur:', error);
