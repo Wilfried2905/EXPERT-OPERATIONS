@@ -3,8 +3,39 @@ import { createServer, type Server } from "http";
 import { generateOperationalAuditPrompt } from '../client/src/services/audit-types/operational-audit';
 import { exportToWord, exportToExcel } from './exports';
 
+async function generateRecommendationSection(prompt: string, section: string) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'x-api-key': process.env.ANTHROPIC_API_KEY || ''
+    },
+    body: JSON.stringify({
+      model: "claude-3-sonnet-20240229",
+      messages: [{
+        role: "user",
+        content: `Analyse cette section des données d'audit (${section}) et génère une partie des recommandations en français:
+
+${prompt}
+
+Réponds uniquement avec un objet JSON contenant les recommandations pour cette section.`
+      }],
+      temperature: 0.7,
+      max_tokens: 4096
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Erreur API Anthropic: ${response.status} - ${errorText}`);
+  }
+
+  const rawData = await response.json();
+  return JSON.parse(rawData.content[0].text);
+}
+
 export function registerRoutes(app: Express): Server {
-  // Route de génération des recommandations
   app.post("/api/recommendations", async (req, res) => {
     try {
       console.log('Anthropic service: Début de generateRecommendations');
@@ -17,96 +48,58 @@ export function registerRoutes(app: Express): Server {
         });
       }
 
-      console.log('Anthropic service: Préparation du prompt');
       const prompt = generateOperationalAuditPrompt(auditData);
 
-      console.log('Anthropic service: Envoi de la requête à Claude');
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01',
-          'x-api-key': process.env.ANTHROPIC_API_KEY || ''
-        },
-        body: JSON.stringify({
-          model: "claude-3-sonnet-20240229",
-          messages: [{
-            role: "user",
-            content: `Agis comme un expert en audit de datacenters. Analyse ces données d'audit et génère des recommandations détaillées en français. 
+      // Diviser l'analyse en sections
+      const sections = [
+        { name: "Organisation", data: auditData.facilityInfo?.organization },
+        { name: "Processus", data: auditData.facilityInfo?.processes },
+        { name: "GestionIncidents", data: auditData.facilityInfo?.incidentManagement },
+        { name: "Maintenance", data: auditData.facilityInfo?.maintenance }
+      ];
 
-Données d'audit : ${prompt}
+      console.log('Anthropic service: Génération des recommandations par section');
 
-Format de réponse attendu :
-{
-  "recommendations": [
-    {
-      "titre": "string",
-      "description": "string",
-      "priorite": "critique|elevee|moyenne|faible",
-      "impact": {
-        "efficacite": "number",
-        "fiabilite": "number",
-        "conformite": "number"
-      }
-    }
-  ],
-  "analyse": {
-    "resume": "string",
-    "points_forts": ["string"],
-    "points_amelioration": ["string"],
-    "impacts": {
-      "description": "string",
-      "analyse_efficacite": "string",
-      "analyse_fiabilite": "string",
-      "analyse_conformite": "string"
-    }
-  }
-}`
-          }],
-          temperature: 0.7,
-          max_tokens: 100000
-        })
-      });
+      const sectionResults = await Promise.all(
+        sections.map(section => 
+          generateRecommendationSection(prompt, section.name)
+            .catch(error => {
+              console.error(`Erreur section ${section.name}:`, error);
+              return null;
+            })
+        )
+      );
 
-      console.log('Anthropic service: Réponse reçue de Claude');
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erreur API Anthropic:', errorText);
-        throw new Error(`Erreur API Anthropic: ${response.status} - ${errorText}`);
-      }
-
-      const rawData = await response.json();
-      console.log('Anthropic service: Réponse brute reçue:', JSON.stringify(rawData, null, 2));
-
-      let parsedContent;
-      try {
-        // La réponse de Claude-3 est dans content[0].text
-        parsedContent = JSON.parse(rawData.content[0].text);
-        console.log('Anthropic service: Contenu parsé:', parsedContent);
-      } catch (parseError) {
-        console.error('Erreur de parsing JSON:', parseError);
-        throw new Error('Erreur lors du parsing de la réponse de Claude');
-      }
-
-      // Vérification et formatage de la réponse
-      const formattedResponse = {
-        recommendations: Array.isArray(parsedContent.recommendations) ? parsedContent.recommendations : [],
+      // Combiner les résultats
+      const combinedRecommendations = sectionResults.reduce((acc, result) => {
+        if (result && result.recommendations) {
+          acc.recommendations.push(...result.recommendations);
+        }
+        return acc;
+      }, { 
+        recommendations: [],
         analyse: {
-          resume: parsedContent.analyse?.resume || "",
-          points_forts: Array.isArray(parsedContent.analyse?.points_forts) ? parsedContent.analyse.points_forts : [],
-          points_amelioration: Array.isArray(parsedContent.analyse?.points_amelioration) ? parsedContent.analyse.points_amelioration : [],
+          resume: "",
+          points_forts: [],
+          points_amelioration: [],
           impacts: {
-            description: parsedContent.analyse?.impacts?.description || "",
-            analyse_efficacite: parsedContent.analyse?.impacts?.analyse_efficacite || "",
-            analyse_fiabilite: parsedContent.analyse?.impacts?.analyse_fiabilite || "",
-            analyse_conformite: parsedContent.analyse?.impacts?.analyse_conformite || ""
+            description: "",
+            analyse_efficacite: "",
+            analyse_fiabilite: "",
+            analyse_conformite: ""
           }
         }
-      };
+      });
 
-      console.log('Anthropic service: Réponse formatée:', JSON.stringify(formattedResponse, null, 2));
-      res.json(formattedResponse);
+      // Générer l'analyse globale
+      const analyseGlobale = await generateRecommendationSection(prompt, "analyse_globale");
+      if (analyseGlobale && analyseGlobale.analyse) {
+        combinedRecommendations.analyse = analyseGlobale.analyse;
+      }
+
+      console.log('Anthropic service: Réponse combinée:', JSON.stringify(combinedRecommendations, null, 2));
+      res.json(combinedRecommendations);
+
     } catch (error) {
       console.error('Erreur dans generateRecommendations:', error);
       res.status(500).json({
