@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, PageNumber, AlignmentType, WidthType, Header, Footer, convertInchesToTwip } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, PageNumber, AlignmentType, WidthType, Header, Footer, TableOfContents, convertInchesToTwip } from 'docx';
 import type { DocumentData } from '@/types/document';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -50,6 +50,7 @@ export class DocumentGenerator {
           },
           children: [
             ...this.createCoverPage(data),
+            this.createTableOfContents(),
             ...sections
           ]
         }]
@@ -58,14 +59,33 @@ export class DocumentGenerator {
       console.log('[DocumentGenerator] Document structure created, generating buffer');
       return await Packer.toBuffer(doc);
     } catch (error) {
-      console.error('[DocumentGenerator] Error generating document:', error);
+      console.error('[DocumentGenerator] Error:', error);
       throw new Error('Erreur lors de la génération du document');
     }
+  }
+
+  private createTableOfContents(): TableOfContents {
+    return new TableOfContents("Table des matières", {
+      hyperlink: true,
+      headingStyleRange: "1-5",
+      stylesWithLevels: [
+        { level: 1, paragraphStyle: "Heading1" },
+        { level: 2, paragraphStyle: "Heading2" }
+      ]
+    });
   }
 
   private async getDocumentStructure(data: DocumentData): Promise<Paragraph[]> {
     const documentSections = this.getDefaultSections(data.type);
     const paragraphs: Paragraph[] = [];
+
+    // Add page break before first section
+    paragraphs.push(
+      new Paragraph({
+        text: "",
+        pageBreakBefore: true
+      })
+    );
 
     for (const section of documentSections) {
       // Add section title
@@ -73,8 +93,7 @@ export class DocumentGenerator {
         new Paragraph({
           text: section.title,
           heading: HeadingLevel.HEADING_1,
-          spacing: { before: 400, after: 200 },
-          pageBreakBefore: true
+          spacing: { before: 400, after: 200 }
         })
       );
 
@@ -119,7 +138,6 @@ export class DocumentGenerator {
   }
 
   private getDefaultSections(type: string) {
-    // Define default sections based on document type
     switch (type) {
       case 'Rapport d\'Audit':
         return [
@@ -138,6 +156,24 @@ export class DocumentGenerator {
               "Système Électrique",
               "Système de Refroidissement",
               "Sécurité et Contrôle d'Accès"
+            ],
+            subsections: [
+              {
+                title: "2.1. Évaluation de l'Architecture",
+                items: [
+                  "Configuration des salles",
+                  "Systèmes de sécurité",
+                  "Contrôle d'accès"
+                ]
+              },
+              {
+                title: "2.2. Infrastructure Électrique",
+                items: [
+                  "Alimentation principale",
+                  "Systèmes de secours",
+                  "Distribution électrique"
+                ]
+              }
             ]
           },
           {
@@ -146,10 +182,49 @@ export class DocumentGenerator {
               "Améliorations Prioritaires",
               "Plan d'Action Détaillé",
               "Estimations Budgétaires"
+            ],
+            subsections: [
+              {
+                title: "3.1. Actions Immédiates",
+                items: [
+                  "Corrections critiques",
+                  "Mises à niveau urgentes"
+                ]
+              },
+              {
+                title: "3.2. Plan à Moyen Terme",
+                items: [
+                  "Optimisations recommandées",
+                  "Améliorations de performance"
+                ]
+              }
             ]
           }
         ];
-      // Add other document types here
+      case 'Offre Technique':
+        return [
+          {
+            title: "1. Présentation",
+            items: [
+              "Présentation de 3R TECHNOLOGIE",
+              "Notre expertise",
+              "Références clients"
+            ]
+          },
+          // Add more sections specific to Technical Offer
+        ];
+      case 'Cahier des Charges':
+        return [
+          {
+            title: "1. Introduction",
+            items: [
+              "Contexte du projet",
+              "Objectifs",
+              "Périmètre"
+            ]
+          },
+          // Add more sections specific to Specifications
+        ];
       default:
         return [
           {
@@ -225,8 +300,4 @@ export class DocumentGenerator {
       })
     ];
   }
-  // Removed functions that were not modified or used:
-  // createCoverHeader, createCoverFooter, createVersionTable, createTableOfContents, createExecutiveSummary, createAnnexes
-
-
 }

@@ -24,10 +24,9 @@ export default function DocumentGenerator() {
     }
 
     setIsGenerating(true);
-    const toastId = toast({
+    const toastLoading = toast({
       title: "Génération en cours",
       description: "Veuillez patienter pendant la génération du document...",
-      duration: null,
     });
 
     try {
@@ -77,7 +76,7 @@ export default function DocumentGenerator() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.dismiss(toastId);
+      toastLoading.dismiss?.();
       toast({
         title: "Document généré",
         description: "Le document a été généré et téléchargé avec succès",
@@ -86,7 +85,7 @@ export default function DocumentGenerator() {
 
     } catch (error) {
       console.error('[Generation] Error:', error);
-      toast.dismiss(toastId);
+      toastLoading.dismiss?.();
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Une erreur est survenue",
