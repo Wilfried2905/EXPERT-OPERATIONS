@@ -1,11 +1,5 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, PageNumber, AlignmentType, WidthType, Header, Footer, TableOfContents, convertInchesToTwip } from 'docx';
 import type { DocumentData } from '@/types/document';
-import Anthropic from '@anthropic-ai/sdk';
-
-// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || ''
-});
 
 export class DocumentGenerator {
   private styles = {
@@ -50,6 +44,12 @@ export class DocumentGenerator {
           },
           children: [
             ...this.createCoverPage(data),
+            new Paragraph({ text: "", pageBreakBefore: true }), // Force new page
+            new Paragraph({
+              text: "Table des matières",
+              heading: HeadingLevel.HEADING_1,
+              spacing: { before: 240, after: 120 }
+            }),
             this.createTableOfContents(),
             ...sections
           ]
@@ -65,80 +65,108 @@ export class DocumentGenerator {
   }
 
   private createTableOfContents(): TableOfContents {
-    return new TableOfContents("Table des matières", {
+    return new TableOfContents("", {
       hyperlink: true,
-      headingStyleRange: "1-5",
+      headingStyleRange: "1-3",
       stylesWithLevels: [
-        { level: 1, paragraphStyle: "Heading1" },
-        { level: 2, paragraphStyle: "Heading2" }
+        { level: 1, style: "Heading1" },
+        { level: 2, style: "Heading2" }
       ]
     });
   }
 
-  private async getDocumentStructure(data: DocumentData): Promise<Paragraph[]> {
-    const documentSections = this.getDefaultSections(data.type);
-    const paragraphs: Paragraph[] = [];
-
-    // Add page break before first section
-    paragraphs.push(
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true
-      })
-    );
-
-    for (const section of documentSections) {
-      // Add section title
-      paragraphs.push(
-        new Paragraph({
-          text: section.title,
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 400, after: 200 }
-        })
-      );
-
-      // Add section content
-      if (section.items && section.items.length > 0) {
-        for (const item of section.items) {
-          paragraphs.push(
-            new Paragraph({
-              text: `• ${item}`,
-              spacing: { before: 100, after: 100 }
-            })
-          );
-        }
-      }
-
-      // Add subsections if any
-      if (section.subsections) {
-        for (const subsection of section.subsections) {
-          paragraphs.push(
-            new Paragraph({
-              text: subsection.title,
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 300, after: 150 }
-            })
-          );
-
-          if (subsection.items) {
-            for (const item of subsection.items) {
-              paragraphs.push(
-                new Paragraph({
-                  text: `• ${item}`,
-                  spacing: { before: 100, after: 100 }
-                })
-              );
-            }
-          }
-        }
-      }
-    }
-
-    return paragraphs;
-  }
-
   private getDefaultSections(type: string) {
     switch (type) {
+      case 'Offre Technique':
+        return [
+          {
+            title: "1. Présentation",
+            items: [
+              "Présentation de 3R TECHNOLOGIE",
+              "Expertise en datacenters",
+              "Certifications TIA-942",
+              "Équipe projet et qualifications"
+            ],
+            subsections: [
+              {
+                title: "1.1. Notre Expertise",
+                items: [
+                  "Audits de conformité",
+                  "Conseil en infrastructure",
+                  "Optimisation énergétique"
+                ]
+              },
+              {
+                title: "1.2. Références Projets",
+                items: [
+                  "Projets similaires réalisés",
+                  "Retours d'expérience",
+                  "Témoignages clients"
+                ]
+              }
+            ]
+          },
+          {
+            title: "2. Solution Technique",
+            items: [
+              "Architecture proposée",
+              "Conformité TIA-942",
+              "Performances attendues"
+            ],
+            subsections: [
+              {
+                title: "2.1. Architecture Détaillée",
+                items: [
+                  "Infrastructure physique",
+                  "Systèmes électriques",
+                  "Climatisation"
+                ]
+              },
+              {
+                title: "2.2. Sécurité et Monitoring",
+                items: [
+                  "Contrôle d'accès",
+                  "Surveillance",
+                  "Alertes et notifications"
+                ]
+              }
+            ]
+          },
+          {
+            title: "3. Méthodologie",
+            items: [
+              "Approche projet",
+              "Planning prévisionnel",
+              "Organisation équipe"
+            ],
+            subsections: [
+              {
+                title: "3.1. Phases du Projet",
+                items: [
+                  "Étude et conception",
+                  "Mise en œuvre",
+                  "Tests et validation"
+                ]
+              },
+              {
+                title: "3.2. Gestion des Risques",
+                items: [
+                  "Identification des risques",
+                  "Plan de mitigation",
+                  "Plan de continuité"
+                ]
+              }
+            ]
+          },
+          {
+            title: "4. Conditions Commerciales",
+            items: [
+              "Budget détaillé",
+              "Conditions de paiement",
+              "Garanties"
+            ]
+          }
+        ];
       case 'Rapport d\'Audit':
         return [
           {
@@ -201,18 +229,6 @@ export class DocumentGenerator {
             ]
           }
         ];
-      case 'Offre Technique':
-        return [
-          {
-            title: "1. Présentation",
-            items: [
-              "Présentation de 3R TECHNOLOGIE",
-              "Notre expertise",
-              "Références clients"
-            ]
-          },
-          // Add more sections specific to Technical Offer
-        ];
       case 'Cahier des Charges':
         return [
           {
@@ -222,8 +238,7 @@ export class DocumentGenerator {
               "Objectifs",
               "Périmètre"
             ]
-          },
-          // Add more sections specific to Specifications
+          }
         ];
       default:
         return [
