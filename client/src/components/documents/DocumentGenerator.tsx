@@ -24,17 +24,27 @@ export default function DocumentGenerator() {
     }
 
     setIsGenerating(true);
-    const toastId = 'document-generation';
+    const toastId = toast({
+      title: "Génération en cours",
+      description: "Veuillez patienter pendant la génération du document...",
+      duration: null,
+    });
 
     try {
       console.log(`[Generation] Starting document generation of type: ${documentType}`);
 
       const input = {
         type: documentType,
+        title: `${documentType} - Client Example`,
         clientInfo: {
           name: "Client Example",
           industry: "Technologie",
           size: "Grande entreprise"
+        },
+        metadata: {
+          date: new Date().toISOString(),
+          version: "1.0",
+          author: "3R TECHNOLOGIE"
         },
         auditData: {
           recommendations,
@@ -57,35 +67,32 @@ export default function DocumentGenerator() {
 
       console.log('[Generation] Calling generateDocument with input:', JSON.stringify(input, null, 2));
 
-      await generateDocument(input, {
-        onStart: () => {
-          toast({
-            id: toastId,
-            title: "Génération en cours",
-            description: "Veuillez patienter pendant la génération du document...",
-            duration: null,
-          });
-        },
-        onSuccess: () => {
-          toast({
-            id: toastId,
-            title: "Document généré",
-            description: "Le document a été généré et téléchargé avec succès",
-            duration: 3000,
-          });
-        },
-        onError: (error) => {
-          toast({
-            id: toastId,
-            title: "Erreur",
-            description: error.message,
-            variant: "destructive",
-            duration: 5000,
-          });
-        }
+      const blob = await generateDocument(input);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `3R_${documentType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.dismiss(toastId);
+      toast({
+        title: "Document généré",
+        description: "Le document a été généré et téléchargé avec succès",
+        duration: 3000,
       });
+
     } catch (error) {
-      console.error('[Error] Document generation failed:', error);
+      console.error('[Generation] Error:', error);
+      toast.dismiss(toastId);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setIsGenerating(false);
     }

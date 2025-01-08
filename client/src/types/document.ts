@@ -160,6 +160,19 @@ export interface TimelineEvent {
   type: string;
 }
 
+// Types pour les documents
+export enum DocumentType {
+  TECHNICAL_OFFER = 'Offre Technique',
+  SPECIFICATIONS = 'Cahier des Charges',
+  AUDIT_REPORT = 'Rapport d\'Audit'
+}
+
+export interface DocumentSection {
+  title: string;
+  content: string;
+  subsections?: DocumentSection[];
+}
+
 export interface DocumentData {
   title: string;
   type: DocumentType;
@@ -168,27 +181,29 @@ export interface DocumentData {
     industry: string;
     size: string;
   };
-  executiveSummary?: string;
-  content?: string;
   metadata: {
     date: string;
     version: string;
     author: string;
   };
+  executiveSummary?: string;
+  content?: string;
+  sections?: DocumentSection[];
   auditData?: {
-    recommendations: RecommendationSchema;
-    metrics: {
+    recommendations?: any[];
+    metrics?: {
       pue: number[];
       availability: number[];
       tierLevel: number;
       complianceGaps: string[];
     };
-    infrastructure: InfrastructureData;
-    compliance: {
+    infrastructure?: {
+      rooms: any[];
+      equipment: any[];
+    };
+    compliance?: {
       matrix: any;
       score: number;
     };
   };
 }
-
-export type DocumentType = 'audit' | 'report' | 'other';
