@@ -75,70 +75,79 @@ export class DocumentGenerator {
     });
   }
 
-  private async getDocumentStructure(data: DocumentData): Promise<Paragraph[]> {
-    const documentSections = this.getDefaultSections(data.type);
-    const paragraphs: Paragraph[] = [];
-
-    // Add page break before first section
-    paragraphs.push(
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true
-      })
-    );
-
-    for (const section of documentSections) {
-      // Add section title
-      paragraphs.push(
-        new Paragraph({
-          text: section.title,
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 400, after: 200 }
-        })
-      );
-
-      // Add section content
-      if (section.items && section.items.length > 0) {
-        for (const item of section.items) {
-          paragraphs.push(
-            new Paragraph({
-              text: `• ${item}`,
-              spacing: { before: 100, after: 100 }
-            })
-          );
-        }
-      }
-
-      // Add subsections if any
-      if (section.subsections) {
-        for (const subsection of section.subsections) {
-          paragraphs.push(
-            new Paragraph({
-              text: subsection.title,
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 300, after: 150 }
-            })
-          );
-
-          if (subsection.items) {
-            for (const item of subsection.items) {
-              paragraphs.push(
-                new Paragraph({
-                  text: `• ${item}`,
-                  spacing: { before: 100, after: 100 }
-                })
-              );
-            }
-          }
-        }
-      }
-    }
-
-    return paragraphs;
-  }
-
   private getDefaultSections(type: string) {
     switch (type) {
+      case 'Offre Technique':
+        return [
+          {
+            title: "1. Introduction",
+            items: [
+              "Présentation de 3R TECHNOLOGIE",
+              "Expertise en datacenters",
+              "Certifications TIA-942",
+              "Équipe projet et qualifications",
+              "Références projets similaires",
+              "Méthodologie de gestion de projet",
+              "Partenariats stratégiques"
+            ]
+          },
+          {
+            title: "2. Analyse des Besoins",
+            items: [
+              "Contexte et enjeux client",
+              "Objectifs de conformité TIA-942",
+              "Contraintes techniques et opérationnelles",
+              "Exigences de performance",
+              "Parties prenantes et organisation",
+              "Critères de succès du projet"
+            ]
+          },
+          {
+            title: "3. Architecture Technique TIA-942",
+            items: [
+              "Classification Tier visée",
+              "Architecture générale",
+              "Redondance N+1/2N selon Tier",
+              "Points de défaillance unique (SPOF)",
+              "Évolutivité et scalabilité",
+              "Indicateurs de performance (PUE, DCIE)",
+              "Stratégie de maintenance"
+            ]
+          },
+          {
+            title: "4. Infrastructures Critiques",
+            items: [
+              "Alimentation électrique",
+              "Système de refroidissement",
+              "Sécurité physique",
+              "Connectivité",
+              "Plan de continuité d'activité",
+              "Procédures d'exploitation"
+            ]
+          },
+          {
+            title: "5. Conformité et Certification",
+            items: [
+              "Analyse des écarts TIA-942",
+              "Plan de mise en conformité",
+              "Processus de certification",
+              "Documentation requise",
+              "Tests et validations"
+            ]
+          },
+          {
+            title: "6. Planification et Budget",
+            items: [
+              "Planning détaillé",
+              "Budget prévisionnel",
+              "Analyse des risques",
+              "Plan de transition",
+              "Plan de formation",
+              "Conditions de garantie"
+            ]
+          }
+        ];
+
       case 'Cahier des Charges':
         return [
           {
@@ -159,170 +168,59 @@ export class DocumentGenerator {
               "Conformité architecturale",
               "Conformité électrique",
               "Conformité climatisation",
-              "Conformité sécurité"
-            ],
-            subsections: [
-              {
-                title: "2.1. Spécifications Techniques",
-                items: [
-                  "Niveaux de redondance requis",
-                  "Métriques de performance attendues",
-                  "Exigences de monitoring"
-                ]
-              },
-              {
-                title: "2.2. Exigences Opérationnelles",
-                items: [
-                  "Disponibilité et SLA",
-                  "Maintenance préventive",
-                  "Gestion des incidents"
-                ]
-              }
+              "Conformité sécurité",
+              "Niveaux de redondance requis",
+              "Métriques de performance attendues",
+              "Exigences de monitoring"
             ]
           },
           {
-            title: "3. Infrastructure Technique",
+            title: "3. Spécifications Techniques",
             items: [
               "Architecture physique",
               "Infrastructure électrique",
-              "Système de refroidissement"
-            ],
-            subsections: [
-              {
-                title: "3.1. Sécurité et Monitoring",
-                items: [
-                  "Contrôle d'accès",
-                  "Vidéosurveillance",
-                  "Systèmes de détection"
-                ]
-              },
-              {
-                title: "3.2. Réseaux et Connectivité",
-                items: [
-                  "Architecture réseau",
-                  "Redondance des liens",
-                  "Sécurité périmétrique"
-                ]
-              }
+              "Système de refroidissement",
+              "Sécurité et monitoring",
+              "Infrastructure réseau",
+              "Plan de continuité d'activité",
+              "Évolutivité technique"
             ]
           },
           {
-            title: "4. Modalités de Réalisation",
+            title: "4. Exigences Opérationnelles",
             items: [
-              "Planning de déploiement",
-              "Organisation projet",
-              "Plan de transition"
-            ],
-            subsections: [
-              {
-                title: "4.1. Tests et Recette",
-                items: [
-                  "Stratégie de test",
-                  "Critères d'acceptation",
-                  "Procédures de validation"
-                ]
-              },
-              {
-                title: "4.2. Documentation",
-                items: [
-                  "Livrables attendus",
-                  "Documentation technique",
-                  "Manuels d'exploitation"
-                ]
-              }
+              "Disponibilité et SLA",
+              "Maintenance préventive",
+              "Documentation technique",
+              "Formation du personnel",
+              "Gestion des incidents",
+              "Procédures d'exploitation",
+              "Exigences de reporting"
+            ]
+          },
+          {
+            title: "5. Contraintes et Prérequis",
+            items: [
+              "Contraintes site et bâtiment",
+              "Contraintes réglementaires",
+              "Contraintes techniques spécifiques",
+              "Prérequis d'installation",
+              "Normes applicables"
+            ]
+          },
+          {
+            title: "6. Modalités de Réception",
+            items: [
+              "Critères d'acceptation",
+              "Processus de validation",
+              "Tests de réception",
+              "Livrables attendus",
+              "Conditions de garantie",
+              "Conditions contractuelles"
             ]
           }
         ];
-      case 'Offre Technique':
-        return [
-          {
-            title: "1. Présentation",
-            items: [
-              "Présentation de 3R TECHNOLOGIE",
-              "Expertise en datacenters",
-              "Certifications TIA-942",
-              "Équipe projet et qualifications"
-            ],
-            subsections: [
-              {
-                title: "1.1. Notre Expertise",
-                items: [
-                  "Audits de conformité",
-                  "Conseil en infrastructure",
-                  "Optimisation énergétique"
-                ]
-              },
-              {
-                title: "1.2. Références Projets",
-                items: [
-                  "Projets similaires réalisés",
-                  "Retours d'expérience",
-                  "Témoignages clients"
-                ]
-              }
-            ]
-          },
-          {
-            title: "2. Solution Technique",
-            items: [
-              "Architecture proposée",
-              "Conformité TIA-942",
-              "Performances attendues"
-            ],
-            subsections: [
-              {
-                title: "2.1. Architecture Détaillée",
-                items: [
-                  "Infrastructure physique",
-                  "Systèmes électriques",
-                  "Climatisation"
-                ]
-              },
-              {
-                title: "2.2. Sécurité et Monitoring",
-                items: [
-                  "Contrôle d'accès",
-                  "Surveillance",
-                  "Alertes et notifications"
-                ]
-              }
-            ]
-          },
-          {
-            title: "3. Méthodologie",
-            items: [
-              "Approche projet",
-              "Planning prévisionnel",
-              "Organisation équipe"
-            ],
-            subsections: [
-              {
-                title: "3.1. Phases du Projet",
-                items: [
-                  "Étude et conception",
-                  "Mise en œuvre",
-                  "Tests et validation"
-                ]
-              },
-              {
-                title: "3.2. Gestion des Risques",
-                items: [
-                  "Identification des risques",
-                  "Plan de mitigation",
-                  "Plan de continuité"
-                ]
-              }
-            ]
-          },
-          {
-            title: "4. Conditions Commerciales",
-            items: [
-              "Budget détaillé",
-              "Conditions de paiement",
-              "Garanties"
-            ]
-          }
-        ];
+
       case 'Rapport d\'Audit':
         return [
           {
@@ -331,107 +229,67 @@ export class DocumentGenerator {
               "Objectifs de l'audit",
               "Méthodologie d'évaluation",
               "Synthèse des conclusions majeures",
-              "Recommandations prioritaires"
-            ],
-            subsections: [
-              {
-                title: "1.1. Contexte",
-                items: [
-                  "Présentation du site",
-                  "Périmètre de l'audit",
-                  "Classification TIA-942 visée"
-                ]
-              },
-              {
-                title: "1.2. Points Clés",
-                items: [
-                  "Principaux constats",
-                  "Risques identifiés",
-                  "Opportunités d'amélioration"
-                ]
-              }
+              "Recommandations prioritaires",
+              "Impact financier des non-conformités",
+              "Analyse des risques",
+              "ROI des améliorations proposées"
             ]
           },
           {
-            title: "2. Analyse de Conformité TIA-942",
+            title: "2. Présentation du Site Audité",
+            items: [
+              "Informations client",
+              "Description des installations",
+              "Configuration des salles techniques",
+              "Inventaire des équipements critiques",
+              "Organisation opérationnelle",
+              "Processus actuels",
+              "Historique des incidents"
+            ]
+          },
+          {
+            title: "3. Analyse de Conformité TIA-942",
             items: [
               "Architecture et Structure",
               "Système Électrique",
               "Système de Refroidissement",
-              "Sécurité et Contrôle d'Accès"
-            ],
-            subsections: [
-              {
-                title: "2.1. Infrastructure Physique",
-                items: [
-                  "Configuration des salles",
-                  "Chemins de câbles",
-                  "Systèmes de sécurité"
-                ]
-              },
-              {
-                title: "2.2. Systèmes Critiques",
-                items: [
-                  "Alimentation électrique",
-                  "Climatisation",
-                  "Protection incendie"
-                ]
-              }
+              "Sécurité et Contrôle d'Accès",
+              "Conformité des Infrastructures",
+              "Points d'Amélioration",
+              "Comparaison avec les standards du marché",
+              "Évaluation de la maturité opérationnelle",
+              "Analyse des procédures"
             ]
           },
           {
-            title: "3. Recommandations",
+            title: "4. Recommandations",
             items: [
               "Améliorations Prioritaires",
               "Plan d'Action Détaillé",
-              "Estimations Budgétaires"
-            ],
-            subsections: [
-              {
-                title: "3.1. Actions Immédiates",
-                items: [
-                  "Corrections critiques",
-                  "Mises à niveau urgentes",
-                  "Risques à traiter"
-                ]
-              },
-              {
-                title: "3.2. Améliorations",
-                items: [
-                  "Optimisations recommandées",
-                  "Évolutions proposées",
-                  "Gains attendus"
-                ]
-              }
+              "Estimations Budgétaires",
+              "Calendrier de Mise en Œuvre",
+              "Analyse coût-bénéfice",
+              "Scénarios alternatifs",
+              "Impact opérationnel",
+              "Plan de formation",
+              "Indicateurs de suivi"
             ]
           },
           {
-            title: "4. Plan de Mise en Conformité",
+            title: "5. Annexes",
             items: [
-              "Calendrier de déploiement",
-              "Priorisation des actions",
-              "Budget prévisionnel"
-            ],
-            subsections: [
-              {
-                title: "4.1. Planning",
-                items: [
-                  "Court terme (0-6 mois)",
-                  "Moyen terme (6-12 mois)",
-                  "Long terme (12+ mois)"
-                ]
-              },
-              {
-                title: "4.2. Suivi",
-                items: [
-                  "Indicateurs de performance",
-                  "Points de contrôle",
-                  "Revues périodiques"
-                ]
-              }
+              "Rapports de Tests",
+              "Documentation Technique",
+              "Photos et Schémas",
+              "Références Normatives",
+              "Matrices de conformité",
+              "Historique des mesures",
+              "Fiches d'incidents",
+              "Plans d'actions correctives"
             ]
           }
         ];
+
       default:
         return [
           {
@@ -506,5 +364,67 @@ export class DocumentGenerator {
         alignment: AlignmentType.CENTER
       })
     ];
+  }
+
+  private async getDocumentStructure(data: DocumentData): Promise<Paragraph[]> {
+    const documentSections = this.getDefaultSections(data.type);
+    const paragraphs: Paragraph[] = [];
+
+    // Add page break before first section
+    paragraphs.push(
+      new Paragraph({
+        text: "",
+        pageBreakBefore: true
+      })
+    );
+
+    for (const section of documentSections) {
+      // Add section title
+      paragraphs.push(
+        new Paragraph({
+          text: section.title,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 400, after: 200 }
+        })
+      );
+
+      // Add section content
+      if (section.items && section.items.length > 0) {
+        for (const item of section.items) {
+          paragraphs.push(
+            new Paragraph({
+              text: `• ${item}`,
+              spacing: { before: 100, after: 100 }
+            })
+          );
+        }
+      }
+
+      // Add subsections if any
+      if (section.subsections) {
+        for (const subsection of section.subsections) {
+          paragraphs.push(
+            new Paragraph({
+              text: subsection.title,
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 300, after: 150 }
+            })
+          );
+
+          if (subsection.items) {
+            for (const item of subsection.items) {
+              paragraphs.push(
+                new Paragraph({
+                  text: `• ${item}`,
+                  spacing: { before: 100, after: 100 }
+                })
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return paragraphs;
   }
 }

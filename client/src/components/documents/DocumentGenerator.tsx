@@ -60,14 +60,6 @@ export default function DocumentGenerator() {
         }
       };
 
-      // Show generating toast
-      toast({
-        title: "Génération en cours",
-        description: "Veuillez patienter pendant la génération du document..."
-      });
-
-      console.log('[Generation] Calling generateDocument with input:', JSON.stringify(input, null, 2));
-
       const blob = await generateDocument(input);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -79,8 +71,8 @@ export default function DocumentGenerator() {
       window.URL.revokeObjectURL(url);
 
       toast({
-        title: "Document généré",
-        description: "Le document a été généré et téléchargé avec succès",
+        title: "Succès",
+        description: "Document généré et téléchargé avec succès",
         duration: 3000,
       });
 
@@ -88,7 +80,7 @@ export default function DocumentGenerator() {
       console.error('[Generation] Error:', error);
       toast({
         title: "Erreur",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération",
         variant: "destructive",
         duration: 5000,
       });
