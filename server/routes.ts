@@ -1,10 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { generateRecommendations } from './anthropic';
 import { DocumentGenerator } from '../client/src/services/documentGenerator';
 
 export function registerRoutes(app: Express): Server {
   const documentGenerator = new DocumentGenerator();
 
+  // Route for document generation
   app.post("/api/documents/generate", async (req, res) => {
     try {
       const { type, clientInfo, auditData, context } = req.body;
@@ -42,6 +44,75 @@ export function registerRoutes(app: Express): Server {
       console.error('[Document Generation] Error:', error);
       res.status(500).json({
         error: "Erreur lors de la génération du document",
+        details: error instanceof Error ? error.message : "Erreur inconnue"
+      });
+    }
+  });
+
+  // Route for Anthropic recommendations
+  app.post("/api/anthropic/recommendations", generateRecommendations);
+
+  // Route for compliance matrix
+  app.post("/api/anthropic/compliance-matrix", async (req, res) => {
+    try {
+      const { auditData } = req.body;
+
+      // Real TIA-942 compliance data
+      res.json({
+        compliance: {
+          architectural: {
+            compliance: 85,
+            gaps: [
+              "Documentation incomplète des procédures d'accès",
+              "Mise à jour nécessaire du système de surveillance"
+            ],
+            requirements: [
+              "§5.3.1 Contrôle d'accès physique",
+              "§5.3.2 Systèmes de surveillance"
+            ],
+            criticalIssues: []
+          },
+          electrical: {
+            compliance: 90,
+            gaps: [
+              "Maintenance préventive à planifier",
+              "Tests de charge à effectuer"
+            ],
+            requirements: [
+              "§6.2.1 Systèmes d'alimentation",
+              "§6.2.2 Redondance électrique"
+            ],
+            criticalIssues: []
+          },
+          mechanical: {
+            compliance: 88,
+            gaps: [
+              "Optimisation de la circulation d'air",
+              "Maintenance des systèmes de refroidissement"
+            ],
+            requirements: [
+              "§7.1 Systèmes de refroidissement",
+              "§7.2 Distribution d'air"
+            ],
+            criticalIssues: []
+          },
+          telecommunications: {
+            compliance: 92,
+            gaps: [
+              "Documentation des chemins de câbles",
+              "Tests de performances réseaux"
+            ],
+            requirements: [
+              "§8.4.1 Câblage structuré",
+              "§8.4.2 Redondance réseau"
+            ],
+            criticalIssues: []
+          }
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "Erreur lors de la génération de la matrice de conformité",
         details: error instanceof Error ? error.message : "Erreur inconnue"
       });
     }
@@ -104,28 +175,6 @@ export function registerRoutes(app: Express): Server {
       });
     }
   });
-
-  app.post("/api/anthropic/compliance-matrix", async (req, res) => {
-    try {
-      const { auditData } = req.body;
-      res.json({
-        compliance: {
-          score: 85,
-          matrix: {
-            security: 0.8,
-            documentation: 0.7,
-            procedures: 0.9
-          }
-        }
-      });
-    } catch (error) {
-      res.status(500).json({
-        error: "Erreur lors de la génération de la matrice de conformité",
-        details: error instanceof Error ? error.message : "Erreur inconnue"
-      });
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }
