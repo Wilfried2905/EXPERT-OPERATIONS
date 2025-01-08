@@ -1,17 +1,28 @@
 import type { Document } from 'docx';
 import type { DocumentData } from '@/types/document';
+import type { AuditData } from '@/types/audit';
 
 export async function generateDocument(input: DocumentData): Promise<Blob> {
   console.log('[Generation] Starting document generation process', input);
 
   try {
+    // Enrichir les données avec le contexte complet
+    const enrichedInput = {
+      ...input,
+      context: {
+        auditData: input.auditData,
+        recommendations: input.auditData?.recommendations || [],
+        currentDate: new Date().toLocaleDateString('fr-FR'),
+      }
+    };
+
     console.log('[Generation] Sending request to /api/documents/generate');
     const response = await fetch('/api/documents/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(input)
+      body: JSON.stringify(enrichedInput)
     });
 
     console.log('[Generation] Response status:', response.status);
@@ -48,25 +59,15 @@ export enum DocumentType {
 }
 
 // Interface pour les données d'entrée
-interface DocumentGenerationInput {
+export interface DocumentGenerationInput {
   type: DocumentType;
   clientInfo: {
     name: string;
     industry: string;
     size: string;
   };
-  auditData: {
+  auditData: AuditData & {
     recommendations: any[];
-    metrics: {
-      pue: number[];
-      availability: number[];
-      tierLevel: number;
-      complianceGaps: string[];
-    };
-    infrastructure: {
-      rooms: any[];
-      equipment: any[];
-    };
     compliance: {
       matrix: any;
       score: number;

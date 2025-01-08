@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { generateOperationalAuditPrompt } from '../client/src/services/audit-types/operational-audit';
 import { exportToWord, exportToExcel } from './exports';
 
-async function generateRecommendationSection(prompt: string, section: string, sectionIndex: number) {
+// Added helper function
+async function generateDocumentContent(type: string, section: string, context: any) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -15,30 +16,19 @@ async function generateRecommendationSection(prompt: string, section: string, se
       model: "claude-3-sonnet-20240229",
       messages: [{
         role: "user",
-        content: `Tu es un expert en audit de datacenters. Analyse la section ${section} (partie ${sectionIndex + 1}) des données d'audit et génère des recommandations détaillées en français pour cette section spécifique.
+        content: `En tant qu'expert en audit de datacenters, génère le contenu de la section "${section}" pour un document de type "${type}".
 
-Les recommandations doivent être adaptées au contexte de ${section}.
+Contexte :
+${JSON.stringify(context, null, 2)}
 
-Données d'audit pour cette section : ${prompt}
+Le contenu doit être pertinent, professionnel et aligné avec les standards du secteur.
+Utilise les données d'audit et les recommandations pour enrichir le contenu.
 
-Format de réponse JSON attendu :
+Format de sortie attendu :
 {
-  "sectionId": "${sectionIndex + 1}",
-  "sectionName": "${section}",
-  "recommendations": [
-    {
-      "id": "REC_${sectionIndex + 1}_X",
-      "titre": "string",
-      "description": "string",
-      "priorite": "critique|elevee|moyenne|faible",
-      "impact": {
-        "efficacite": number,
-        "fiabilite": number,
-        "conformite": number
-      },
-      "contexte": "string"
-    }
-  ]
+  "content": string, // Le contenu formaté de la section
+  "key_points": string[], // Points clés à retenir
+  "references": string[] // Références aux standards/normes si applicable
 }`
       }],
       temperature: 0.7,
@@ -55,119 +45,80 @@ Format de réponse JSON attendu :
   return JSON.parse(rawData.content[0].text);
 }
 
-async function generateAnalyseGlobale(allSectionData: any[], prompt: string) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-      'x-api-key': process.env.ANTHROPIC_API_KEY || ''
-    },
-    body: JSON.stringify({
-      model: "claude-3-sonnet-20240229",
-      messages: [{
-        role: "user",
-        content: `Analyse l'ensemble des données d'audit et génère une synthèse globale en français.
-Utilise les recommandations déjà générées pour créer une analyse cohérente.
 
-Données d'audit complètes : ${prompt}
-Recommandations par section : ${JSON.stringify(allSectionData)}
-
-Format de réponse JSON attendu :
-{
-  "analyse": {
-    "resume": "string",
-    "points_forts": ["string"],
-    "points_amelioration": ["string"],
-    "impacts": {
-      "description": "string",
-      "analyse_efficacite": "string",
-      "analyse_fiabilite": "string",
-      "analyse_conformite": "string"
-    }
+//Helper functions -  inferred based on context.  Replace with actual implementations.
+function getDocumentSections(type: string): { title: string }[] {
+  switch (type) {
+    case "Operational Audit":
+      return [
+        { title: "Executive Summary" },
+        { title: "Introduction" },
+        { title: "Findings" },
+        { title: "Recommendations" },
+        { title: "Conclusion" }
+      ];
+    default:
+      return [];
   }
-}`
-      }],
-      temperature: 0.7,
-      max_tokens: 4096
-    })
-  });
+}
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Erreur API Anthropic: ${response.status} - ${errorText}`);
-  }
-
-  const rawData = await response.json();
-  return JSON.parse(rawData.content[0].text);
+async function generateWordDocument(data: any): Promise<Buffer> {
+  //Replace with actual Word document generation logic
+  return Buffer.from("This is a placeholder Word document.");
 }
 
 export function registerRoutes(app: Express): Server {
-  app.post("/api/recommendations", async (req, res) => {
+  app.post("/api/documents/generate", async (req, res) => {
     try {
-      console.log('Anthropic service: Début de generateRecommendations');
-      const { auditData, auditType } = req.body;
+      const { type, clientInfo, auditData, context } = req.body;
 
-      if (!auditData) {
+      if (!type || !clientInfo || !auditData) {
         return res.status(400).json({
-          error: "Données d'audit manquantes",
-          details: "Les données d'audit sont requises pour générer des recommandations"
+          error: "Données requises manquantes",
+          details: "Le type de document, les informations client et les données d'audit sont requis"
         });
       }
 
-      const prompt = generateOperationalAuditPrompt(auditData);
-
-      // Définition des sections avec leurs données spécifiques
-      const sections = [
-        { name: "Organisation", data: auditData.facilityInfo?.organization },
-        { name: "Processus", data: auditData.facilityInfo?.processes },
-        { name: "GestionIncidents", data: auditData.facilityInfo?.incidentManagement },
-        { name: "Maintenance", data: auditData.facilityInfo?.maintenance }
-      ];
-
-      console.log('Anthropic service: Génération des recommandations par section');
-
-      // Génération des recommandations pour chaque section
-      const sectionResults = await Promise.all(
-        sections.map((section, index) =>
-          generateRecommendationSection(prompt, section.name, index)
-            .catch(error => {
-              console.error(`Erreur section ${section.name}:`, error);
-              return null;
-            })
-        )
+      const documentSections = getDocumentSections(type);
+      const sectionContents = await Promise.all(
+        documentSections.map(async section => ({
+          title: section.title,
+          content: await generateDocumentContent(type, section.title, {
+            clientInfo,
+            auditData,
+            section: section,
+            ...context
+          })
+        }))
       );
 
-      // Filtrer les sections valides et combiner les recommandations
-      const validSectionResults = sectionResults.filter(result => result !== null);
+      const wordBuffer = await generateWordDocument({
+        type,
+        clientInfo,
+        sections: sectionContents,
+        metadata: {
+          generated: new Date().toISOString(),
+          version: "1.0"
+        }
+      });
 
-      // Générer l'analyse globale avec toutes les recommandations
-      const analyseGlobale = await generateAnalyseGlobale(validSectionResults, prompt);
+      const fileName = `3R_${type.replace(/\s+/g, '_')}_${clientInfo.name}_${
+        new Date().toISOString().split('T')[0].replace(/-/g, '')
+      }`;
 
-      // Préparer la réponse finale
-      const combinedResponse = {
-        recommendations: validSectionResults.flatMap(section =>
-          section.recommendations.map(rec => ({
-            ...rec,
-            section: section.sectionName
-          }))
-        ),
-        analyse: analyseGlobale.analyse
-      };
-
-      console.log('Anthropic service: Réponse finale générée');
-      res.json(combinedResponse);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}.docx"`);
+      res.send(wordBuffer);
 
     } catch (error) {
-      console.error('Erreur dans generateRecommendations:', error);
+      console.error('Erreur dans la génération du document:', error);
       res.status(500).json({
-        error: "Erreur lors de la génération des recommandations",
+        error: "Erreur lors de la génération du document",
         details: error instanceof Error ? error.message : "Erreur inconnue"
       });
     }
   });
 
-  // Routes d'export
   app.post("/api/exports/word", async (req, res) => {
     try {
       const { recommendations, clientInfo, auditType } = req.body;
@@ -226,7 +177,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Route de la matrice de conformité
   app.post("/api/anthropic/compliance-matrix", async (req, res) => {
     try {
       const { auditData } = req.body;
