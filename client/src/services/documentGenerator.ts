@@ -1,5 +1,11 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, PageNumber, AlignmentType, WidthType, Header, Footer, convertInchesToTwip } from 'docx';
 import type { DocumentData } from '@/types/document';
+import Anthropic from '@anthropic-ai/sdk';
+
+// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || ''
+});
 
 export class DocumentGenerator {
   private styles = {
@@ -12,6 +18,9 @@ export class DocumentGenerator {
   async generateDocument(data: DocumentData): Promise<Buffer> {
     try {
       console.log('[DocumentGenerator] Starting document generation');
+
+      // Générer le contenu avec Anthropic pour chaque section
+      const sections = await this.generateSections(data);
 
       const doc = new Document({
         sections: [{
@@ -39,10 +48,10 @@ export class DocumentGenerator {
           },
           footers: {
             default: new Footer({
-              children: [this.createFooter(data)]
+              children: [this.createFooter()]
             }),
             first: new Footer({
-              children: [this.createCoverFooter(data)]
+              children: [this.createCoverFooter()]
             })
           },
           children: [
@@ -50,7 +59,7 @@ export class DocumentGenerator {
             this.createVersionTable(data),
             this.createTableOfContents(data),
             ...this.createExecutiveSummary(data),
-            ...this.createMainContent(data),
+            ...sections,
             this.createAnnexes(data)
           ]
         }]
@@ -62,6 +71,74 @@ export class DocumentGenerator {
       console.error('[DocumentGenerator] Error generating document:', error);
       throw new Error('Erreur lors de la génération du document');
     }
+  }
+
+  private async generateSections(data: DocumentData): Promise<Paragraph[]> {
+    try {
+      console.log('[DocumentGenerator] Generating sections content');
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        messages: [{
+          role: "user",
+          content: `Génère le contenu détaillé pour un ${data.type} en utilisant ces données :
+
+          ${JSON.stringify({
+            clientInfo: data.clientInfo,
+            auditData: data.auditData,
+            type: data.type
+          }, null, 2)}
+
+          Format de sortie : JSON avec une structure de sections correspondant au type de document.
+          Chaque section doit contenir :
+          - title: string (titre de la section)
+          - content: string (contenu détaillé)
+          - subsections: array (sous-sections avec même structure)`
+        }],
+        max_tokens: 4000
+      });
+
+      const sectionsData = JSON.parse(response.content[0].text);
+      return this.convertSectionsToDocx(sectionsData);
+    } catch (error) {
+      console.error('[DocumentGenerator] Error generating sections:', error);
+      throw new Error('Erreur lors de la génération des sections');
+    }
+  }
+
+  private convertSectionsToDocx(sectionsData: any[]): Paragraph[] {
+    const paragraphs: Paragraph[] = [];
+
+    for (const section of sectionsData) {
+      paragraphs.push(
+        new Paragraph({
+          text: section.title,
+          heading: HeadingLevel.HEADING_1,
+          pageBreakBefore: true,
+        }),
+        new Paragraph({
+          text: section.content,
+          spacing: { before: 200, after: 200 }
+        })
+      );
+
+      if (section.subsections) {
+        for (const subsection of section.subsections) {
+          paragraphs.push(
+            new Paragraph({
+              text: subsection.title,
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 400, after: 200 }
+            }),
+            new Paragraph({
+              text: subsection.content,
+              spacing: { before: 200, after: 200 }
+            })
+          );
+        }
+      }
+    }
+
+    return paragraphs;
   }
 
   private createHeader(data: DocumentData): Paragraph {
@@ -88,7 +165,7 @@ export class DocumentGenerator {
     });
   }
 
-  private createFooter(data: DocumentData): Paragraph {
+  private createFooter(): Paragraph {
     return new Paragraph({
       children: [
         new TextRun({
@@ -104,7 +181,7 @@ export class DocumentGenerator {
     });
   }
 
-  private createCoverFooter(data: DocumentData): Paragraph {
+  private createCoverFooter(): Paragraph {
     return new Paragraph({
       children: [
         new TextRun({
@@ -192,20 +269,6 @@ export class DocumentGenerator {
         text: data.executiveSummary || "À compléter",
       }),
     ];
-  }
-
-  private createMainContent(data: DocumentData): Paragraph[] {
-    const paragraphs: Paragraph[] = [];
-
-    // Ajout du contenu principal selon le type de document
-    if (data.content) {
-      paragraphs.push(new Paragraph({
-        text: data.content,
-        pageBreakBefore: true,
-      }));
-    }
-
-    return paragraphs;
   }
 
   private createAnnexes(data: DocumentData): Paragraph {

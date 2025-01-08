@@ -1,73 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { generateOperationalAuditPrompt } from '../client/src/services/audit-types/operational-audit';
-import { exportToWord, exportToExcel } from './exports';
-
-// Added helper function
-async function generateDocumentContent(type: string, section: string, context: any) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-      'x-api-key': process.env.ANTHROPIC_API_KEY || ''
-    },
-    body: JSON.stringify({
-      model: "claude-3-sonnet-20240229",
-      messages: [{
-        role: "user",
-        content: `En tant qu'expert en audit de datacenters, génère le contenu de la section "${section}" pour un document de type "${type}".
-
-Contexte :
-${JSON.stringify(context, null, 2)}
-
-Le contenu doit être pertinent, professionnel et aligné avec les standards du secteur.
-Utilise les données d'audit et les recommandations pour enrichir le contenu.
-
-Format de sortie attendu :
-{
-  "content": string, // Le contenu formaté de la section
-  "key_points": string[], // Points clés à retenir
-  "references": string[] // Références aux standards/normes si applicable
-}`
-      }],
-      temperature: 0.7,
-      max_tokens: 4096
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Erreur API Anthropic: ${response.status} - ${errorText}`);
-  }
-
-  const rawData = await response.json();
-  return JSON.parse(rawData.content[0].text);
-}
-
-
-//Helper functions -  inferred based on context.  Replace with actual implementations.
-function getDocumentSections(type: string): { title: string }[] {
-  switch (type) {
-    case "Operational Audit":
-      return [
-        { title: "Executive Summary" },
-        { title: "Introduction" },
-        { title: "Findings" },
-        { title: "Recommendations" },
-        { title: "Conclusion" }
-      ];
-    default:
-      return [];
-  }
-}
-
-async function generateWordDocument(data: any): Promise<Buffer> {
-  //Replace with actual Word document generation logic
-  return Buffer.from("This is a placeholder Word document.");
-}
+import { DocumentGenerator } from '../client/src/services/documentGenerator';
 
 export function registerRoutes(app: Express): Server {
+  const documentGenerator = new DocumentGenerator();
+
   app.post("/api/documents/generate", async (req, res) => {
     try {
       const { type, clientInfo, auditData, context } = req.body;
@@ -79,39 +16,30 @@ export function registerRoutes(app: Express): Server {
         });
       }
 
-      const documentSections = getDocumentSections(type);
-      const sectionContents = await Promise.all(
-        documentSections.map(async section => ({
-          title: section.title,
-          content: await generateDocumentContent(type, section.title, {
-            clientInfo,
-            auditData,
-            section: section,
-            ...context
-          })
-        }))
-      );
+      console.log('[Document Generation] Starting generation for type:', type);
+      console.log('[Document Generation] Client Info:', clientInfo);
 
-      const wordBuffer = await generateWordDocument({
+      const documentBuffer = await documentGenerator.generateDocument({
         type,
+        title: `${type} - ${clientInfo.name}`,
         clientInfo,
-        sections: sectionContents,
-        metadata: {
-          generated: new Date().toISOString(),
-          version: "1.0"
-        }
+        auditData,
+        executiveSummary: context?.executiveSummary,
+        content: context?.content
       });
 
       const fileName = `3R_${type.replace(/\s+/g, '_')}_${clientInfo.name}_${
         new Date().toISOString().split('T')[0].replace(/-/g, '')
       }`;
 
+      console.log('[Document Generation] Document generated successfully');
+
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}.docx"`);
-      res.send(wordBuffer);
+      res.send(documentBuffer);
 
     } catch (error) {
-      console.error('Erreur dans la génération du document:', error);
+      console.error('[Document Generation] Error:', error);
       res.status(500).json({
         error: "Erreur lors de la génération du document",
         details: error instanceof Error ? error.message : "Erreur inconnue"
