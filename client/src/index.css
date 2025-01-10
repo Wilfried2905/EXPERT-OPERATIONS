@@ -33,4 +33,9 @@
   button {
     @apply font-sans;
   }
+
+  /* Solution pour masquer le mot dashboard */
+  .dashboard {
+    display: none;
+  }
 }
