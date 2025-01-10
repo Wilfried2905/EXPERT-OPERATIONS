@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Phone, Mail, MapPin, Building2, User, Plus, Trash2, Tool } from 'lucide-react';
+import { Phone, Mail, MapPin, Building2, User, Plus, Trash2, MessageSquarePlus } from 'lucide-react';
 
 interface ClientSiteInfoProps {
   userEmail: string;
@@ -36,17 +36,20 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
     location: ''
   });
 
-  // Nouvel état pour les commentaires sur les équipements
+  // État pour les commentaires et leur visibilité
+  const [showComments, setShowComments] = useState(false);
   const [equipmentComments, setEquipmentComments] = useState('');
 
   // Fonction de sauvegarde automatique des commentaires
   useEffect(() => {
-    const saveTimeout = setTimeout(() => {
-      // TODO: Implémenter la sauvegarde vers le backend
-      console.log('Saving equipment comments:', equipmentComments);
-    }, 1000);
+    if (equipmentComments.trim()) {
+      const saveTimeout = setTimeout(() => {
+        // TODO: Implémenter la sauvegarde vers le backend
+        console.log('Saving equipment comments:', equipmentComments);
+      }, 1000);
 
-    return () => clearTimeout(saveTimeout);
+      return () => clearTimeout(saveTimeout);
+    }
   }, [equipmentComments]);
 
   // Date du jour automatique
@@ -100,6 +103,47 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
               onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
             />
           </div>
+        </div>
+
+        {/* Section Équipements */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Équipements</h3>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowComments(!showComments)}
+                size="sm"
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                <span>+ Ajouter un Commentaire</span>
+              </Button>
+              <Button 
+                onClick={() => {/* TODO: Ajouter la logique pour l'équipement */}}
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Ajouter un équipement</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Zone de commentaires dépliable */}
+          {showComments && (
+            <div className="space-y-2 p-4 bg-gray-50 rounded-md border">
+              <Textarea
+                placeholder="Ajoutez vos commentaires sur les équipements ici..."
+                value={equipmentComments}
+                onChange={(e) => setEquipmentComments(e.target.value)}
+                className="min-h-[100px] bg-white"
+              />
+              <p className="text-sm text-gray-500 italic">
+                Les commentaires sont sauvegardés automatiquement
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Section Clients */}
@@ -225,23 +269,6 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
             onChange={(e) => setCompanyInfo({...companyInfo, location: e.target.value})}
             className="flex-1"
           />
-        </div>
-
-        {/* Nouvelle section pour les commentaires sur les équipements */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Tool className="w-5 h-5 text-gray-500" />
-            <h3 className="text-lg font-semibold">Commentaires sur les Équipements</h3>
-          </div>
-          <Textarea
-            placeholder="Ajoutez vos commentaires sur les équipements ici..."
-            value={equipmentComments}
-            onChange={(e) => setEquipmentComments(e.target.value)}
-            className="min-h-[100px]"
-          />
-          <p className="text-sm text-gray-500 italic">
-            Les commentaires sont sauvegardés automatiquement
-          </p>
         </div>
 
         {/* Messages d'alerte pour les limites */}
