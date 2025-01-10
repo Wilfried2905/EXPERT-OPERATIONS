@@ -4,34 +4,38 @@ DONNÉES D'AUDIT FOURNIES :
 ${JSON.stringify(auditData, null, 2)}
 
 INSTRUCTIONS :
-1. Analysez en profondeur les données fournies
-2. Identifiez les points forts et les points d'amélioration 
-3. Proposez des recommandations concrètes et actionnables
+1. Analysez en profondeur les données fournies, en particulier:
+   - Les réponses au questionnaire d'évaluation
+   - Les scores de conformité par section
+   - Les commentaires et observations fournis
+2. Identifiez les points forts et les points d'amélioration en vous basant sur les réponses réelles
+3. Proposez des recommandations concrètes et actionnables, directement liées aux réponses "non-conforme"
 4. Priorisez les actions en fonction de leur impact et urgence
-5. Indiquez clairement si des données supplémentaires sont nécessaires
+5. Utilisez les commentaires fournis pour contextualiser les recommandations
 
 FORMAT DE RÉPONSE ATTENDU :
 {
   "recommendations": [
     {
-      "id": "REC_001", // Identifiant unique de la recommandation
+      "id": "REC_001",
       "title": "Titre concis de la recommandation",
       "description": "Description détaillée expliquant le contexte, la problématique et la solution proposée",
       "priority": "critical|high|medium|low",
       "impact": {
-        "efficiency": 0-100, // Impact sur l'efficacité opérationnelle
-        "reliability": 0-100, // Impact sur la fiabilité
-        "compliance": 0-100 // Impact sur la conformité aux normes
+        "efficiency": 0-100,
+        "reliability": 0-100,
+        "compliance": 0-100
       },
       "implementation": {
         "difficulty": "high|medium|low",
-        "estimatedCost": "€€€|€€|€", 
+        "estimatedCost": "€€€|€€|€",
         "timeframe": "immediate|short_term|medium_term|long_term",
         "prerequisites": ["Liste des prérequis nécessaires"]
       },
-      "dataQuality": {
-        "completeness": 0-100, // Niveau de complétude des données pour cette recommandation
-        "missingData": ["Liste des données manquantes importantes"]
+      "source": {
+        "question": "Question ayant conduit à cette recommandation",
+        "response": "Réponse non-conforme associée",
+        "comments": "Commentaires de l'auditeur"
       }
     }
   ],
@@ -40,7 +44,7 @@ FORMAT DE RÉPONSE ATTENDU :
     "strengths": ["Points forts identifiés"],
     "weaknesses": ["Points d'amélioration identifiés"],
     "dataQuality": {
-      "availableData": ["Liste des types de données analysées"],  
+      "availableData": ["Liste des types de données analysées"],
       "missingCriticalData": ["Données importantes manquantes"],
       "confidenceLevel": "high|medium|low"
     }
@@ -53,7 +57,7 @@ FORMAT DE RÉPONSE ATTENDU :
 }
 
 CRITÈRES D'ÉVALUATION :
-- Pertinence : Les recommandations doivent être directement liées aux données d'audit
+- Pertinence : Les recommandations doivent être directement liées aux réponses non-conformes
 - Faisabilité : Chaque recommandation doit être réaliste et actionnable
 - Priorisation : L'ordre des recommandations doit refléter leur importance relative
 - Complétude : Toutes les dimensions critiques doivent être couvertes
@@ -61,6 +65,8 @@ CRITÈRES D'ÉVALUATION :
 
 IMPORTANT :
 - La réponse doit être uniquement au format JSON spécifié
-- Chaque recommandation doit être auto-suffisante et compréhensible
+- Chaque recommandation doit être liée à une question spécifique du questionnaire
 - Les estimations doivent être basées sur les données disponibles
 - Indiquer clairement quand une recommandation nécessite des données supplémentaires`;
+
+export default generateRecommendationsPrompt;

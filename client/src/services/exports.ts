@@ -1,6 +1,8 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, AlignmentType, WidthType } from 'docx';
 import * as XLSX from 'xlsx';
 import type { Recommendation } from '../store/useRecommendationsStore';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ExportData {
   recommendations: Array<{
@@ -14,6 +16,14 @@ interface ExportData {
       compliance: number;
     };
   }>;
+  clientInfo: {
+    name: string;
+    type: string;
+  };
+  metadata: {
+    auditType: string;
+    date: string;
+  };
   impacts: Array<{
     title: string;
     impacts: {
@@ -233,20 +243,47 @@ export async function exportToWord(data: ExportData): Promise<Blob> {
   return Packer.toBlob(doc);
 }
 
-export async function exportToExcel(recommendations: Recommendation[]): Promise<Blob> {
-  const workbook = XLSX.utils.book_new();
-  const wsData = recommendations.map(rec => ({
+export async function exportToExcel(data: ExportData): Promise<Blob> {
+  // Format du nom de fichier: 3R_Recommandations_[Type de sous-catégorie][Nom du client][Date]
+  const formattedDate = format(new Date(), 'ddMMyyyy', { locale: fr });
+  const fileName = `3R_Recommandations_${data.metadata.auditType}_${data.clientInfo.name}_${formattedDate}`;
+
+  // Nettoyage et structuration des données pour l'export
+  const wsData = data.recommendations.map(rec => ({
     'Titre': rec.title,
     'Description': rec.description,
     'Priorité': rec.priority,
     'Impact Performance (%)': (rec.impact?.performance || 0) * 100,
     'Impact Conformité (%)': (rec.impact?.compliance || 0) * 100,
+    'Impact Efficacité (%)': (rec.impact?.energyEfficiency || 0) * 100,
     'Progression (%)': rec.progress || 0
   }));
 
+  const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(wsData);
-  XLSX.utils.book_append_sheet(workbook, ws, "Recommandations");
 
-  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  return new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  // Définition des largeurs de colonnes
+  const colWidths = [
+    { wch: 30 }, // Titre
+    { wch: 50 }, // Description
+    { wch: 15 }, // Priorité
+    { wch: 15 }, // Impact Performance
+    { wch: 15 }, // Impact Conformité
+    { wch: 15 }, // Impact Efficacité
+    { wch: 15 }, // Progression
+  ];
+  ws['!cols'] = colWidths;
+
+  XLSX.utils.book_append_sheet(wb, ws, "Recommandations");
+
+  const wbout = XLSX.write(wb, { 
+    bookType: 'xlsx', 
+    type: 'array',
+    bookSST: false,
+    compression: true
+  });
+
+  return new Blob([wbout], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
 }
