@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Info, Upload } from 'lucide-react';
 import '@/styles/progress.css';
 
+interface Section {
+  id: string;
+  title: string;
+  questions: Array<{
+    id: string;
+    question: string;
+    info: string;
+  }>;
+}
+
 interface Result {
   status: 'conforme' | 'non-conforme' | null;
   comments: string;
@@ -15,7 +25,7 @@ export default function AnalyseExistant() {
   const [activeTab, setActiveTab] = useState(0);
   const [results, setResults] = useState<Record<string, Result>>({});
 
-  const sections = [
+  const sections: Section[] = [
     {
       id: "objectifs",
       title: "Objectifs et stratégie opérationnelle",
@@ -50,9 +60,10 @@ export default function AnalyseExistant() {
   ];
 
   const calculateProgress = () => {
-    const totalQuestions = sections.reduce((acc, section) => acc + section.questions.length, 0);
+    const totalQuestions = sections.reduce((acc, section) => 
+      acc + section.questions.length, 0);
     const answeredQuestions = Object.keys(results).length;
-    return (answeredQuestions / totalQuestions) * 100;
+    return totalQuestions === 0 ? 0 : (answeredQuestions / totalQuestions) * 100;
   };
 
   const calculateConformity = () => {
@@ -75,9 +86,9 @@ export default function AnalyseExistant() {
               <h3 className="text-lg font-semibold mb-2">
                 Progression
               </h3>
-              <div className="progress-bar">
+              <div className="h-2 bg-gray-200 rounded-full">
                 <div
-                  className="progress-bar-indicator"
+                  className="h-full bg-orange-500 rounded-full"
                   style={{ width: `${calculateProgress()}%` }}
                 />
               </div>
@@ -92,9 +103,9 @@ export default function AnalyseExistant() {
               <h3 className="text-lg font-semibold mb-2">
                 Conformité
               </h3>
-              <div className="progress-bar">
+              <div className="h-2 bg-gray-200 rounded-full">
                 <div
-                  className="progress-bar-indicator"
+                  className="h-full bg-orange-500 rounded-full"
                   style={{ width: `${calculateConformity()}%` }}
                 />
               </div>
@@ -105,11 +116,11 @@ export default function AnalyseExistant() {
           </Card>
         </div>
 
-        <div className="flex space-x-0 mb-6">
+        <div className="flex mb-6">
           {sections.map((section, index) => (
             <Button
               key={section.id}
-              variant="ghost"
+              variant={activeTab === index ? "default" : "ghost"}
               onClick={() => setActiveTab(index)}
               className={`flex-1 px-4 py-2 rounded-none border-b-2 ${
                 activeTab === index
@@ -124,7 +135,7 @@ export default function AnalyseExistant() {
 
         <Card>
           <CardContent className="pt-6">
-            {sections[activeTab].questions.map((question, qIndex) => (
+            {sections[activeTab].questions.map((question) => (
               <div key={question.id} className="mb-8 last:mb-0">
                 <h3 className="text-lg font-medium mb-2">
                   {question.question}
@@ -142,8 +153,7 @@ export default function AnalyseExistant() {
                     variant="outline"
                     onClick={() => setResults(prev => ({
                       ...prev,
-                      [question.id]: { 
-                        ...prev[question.id],
+                      [question.id]: {
                         status: 'conforme',
                         comments: prev[question.id]?.comments || ''
                       }
@@ -161,7 +171,6 @@ export default function AnalyseExistant() {
                     onClick={() => setResults(prev => ({
                       ...prev,
                       [question.id]: {
-                        ...prev[question.id],
                         status: 'non-conforme',
                         comments: prev[question.id]?.comments || ''
                       }
@@ -182,6 +191,7 @@ export default function AnalyseExistant() {
                     ...prev,
                     [question.id]: {
                       ...prev[question.id],
+                      status: prev[question.id]?.status || null,
                       comments: e.target.value
                     }
                   }))}
@@ -191,7 +201,7 @@ export default function AnalyseExistant() {
                 />
 
                 <div className="flex items-center">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded cursor-pointer hover:bg-orange-600">
                     <Upload className="h-5 w-5" />
                     <span>Ajouter des fichiers</span>
                     <input type="file" className="hidden" multiple />
