@@ -115,6 +115,9 @@ function reducer(state: State, action: Action): State {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
       }
+
+    default:
+      return state
   }
 }
 
@@ -132,7 +135,7 @@ function dispatch(action: Action) {
 type Toast = Omit<ToasterToast, "id">
 
 function toast(props: Toast) {
-  const id = Math.random().toString(36).substr(2, 9)
+  const id = Math.random().toString(36).substring(2, 9)
 
   const update = (props: Toast) => {
     dispatch({
@@ -151,10 +154,8 @@ function toast(props: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
-        if (!open) {
-          dismiss()
-        }
+      onOpenChange: (open: boolean) => {
+        if (!open) dismiss()
       },
     },
   })
