@@ -223,7 +223,7 @@ export default function AnalyseExistant() {
                     onClick={() => handleStatusChange(question.id, 'conforme')}
                     className={`${
                       results[question.id]?.status === 'conforme'
-                        ? 'bg-blue-100 text-blue-800 border-blue-200'
+                        ? 'bg-orange-100 text-orange-800 border-orange-200'
                         : ''
                     }`}
                   >
@@ -234,7 +234,7 @@ export default function AnalyseExistant() {
                     onClick={() => handleStatusChange(question.id, 'non-conforme')}
                     className={`${
                       results[question.id]?.status === 'non-conforme'
-                        ? 'bg-blue-100 text-blue-800 border-blue-200'
+                        ? 'bg-orange-100 text-orange-800 border-orange-200'
                         : ''
                     }`}
                   >
