@@ -37,7 +37,7 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
   });
 
   // État pour les commentaires et leur visibilité
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState<boolean>(false);
   const [equipmentComments, setEquipmentComments] = useState('');
 
   // Fonction de sauvegarde automatique des commentaires
