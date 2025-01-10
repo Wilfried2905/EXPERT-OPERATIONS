@@ -33,16 +33,15 @@
   button {
     @apply font-sans;
   }
+}
 
-  /* Solution pour masquer le mot dashboard */
-  *:contains('dashboard') {
-    display: none;
-  }
-
-  /* Cibler spécifiquement le texte dashboard dans la navigation */
-  nav a:contains('dashboard'),
-  nav span:contains('dashboard'),
-  .nav-link:contains('dashboard') {
-    display: none;
-  }
+/* Solution pour masquer spécifiquement le mot dashboard */
+[data-text="dashboard"],
+div:has(> span:contains("dashboard")),
+span:has(text="dashboard"),
+a:has(text="dashboard"),
+*[class*="dashboard"],
+*[id*="dashboard"] {
+  display: none !important;
+  visibility: hidden !important;
 }
