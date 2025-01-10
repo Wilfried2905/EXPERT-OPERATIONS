@@ -32,6 +32,10 @@ export default function DocumentGenerator() {
     });
   };
 
+  const handleToastClose = () => {
+    setToastConfig(prev => ({ ...prev, show: false }));
+  };
+
   const handleGenerate = async () => {
     if (!documentType) {
       showToast("Veuillez sélectionner un type de document à générer", 'error');
@@ -41,28 +45,27 @@ export default function DocumentGenerator() {
     setIsGenerating(true);
 
     try {
-      console.log(`[Generation] Starting document generation of type: ${documentType}`);
+      console.log('[Generation] Starting document generation');
 
       const input = {
         type: documentType,
         title: `${documentType} - Client Example`,
-        clientInfo: {
-          name: "Client Example",
-          industry: "Technologie",
-          size: "Grande entreprise"
-        },
         metadata: {
           date: new Date().toISOString(),
           version: "1.0",
           author: "3R TECHNOLOGIE"
+        },
+        clientInfo: {
+          name: "Client Example",
+          industry: "Technologie",
+          size: "Grande entreprise"
         },
         auditData: {
           recommendations,
           metrics: {
             pue: [1.8, 1.9, 1.7],
             availability: [99.9, 99.8, 99.95],
-            tierLevel: 3,
-            complianceGaps: ['Documentation incomplète', 'Processus non formalisés']
+            tierLevel: 3
           },
           infrastructure: {
             rooms: [],
@@ -80,6 +83,7 @@ export default function DocumentGenerator() {
       const link = document.createElement('a');
       link.href = url;
       link.download = `3R_${documentType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -148,7 +152,7 @@ export default function DocumentGenerator() {
         <CustomToast
           message={toastConfig.message}
           type={toastConfig.type}
-          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))}
+          onClose={handleToastClose}
           duration={3000}
         />
       )}
