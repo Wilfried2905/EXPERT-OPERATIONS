@@ -253,109 +253,107 @@ const RoomManagement: React.FC = () => {
 
                     {/* Section Équipements avec les boutons */}
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-semibold">Équipements</h4>
-                        <div className="flex gap-2">
-                          <Button 
-                            onClick={() => {
-                              const roomKey = `${roomType}-${roomIndex}`;
-                              setShowComments(prev => ({
-                                ...prev,
-                                [roomKey]: !prev[roomKey]
-                              }));
-                            }}
-                            size="sm"
-                            variant="outline"
-                            className="flex items-center gap-2"
-                          >
-                            <MessageSquarePlus className="w-4 h-4" />
-                            <span>+ Ajouter un Commentaire</span>
-                          </Button>
-                          <Button 
-                            onClick={() => addEquipment(roomType, roomIndex)}
-                            size="sm"
-                            variant="outline"
-                            className="flex items-center gap-2"
-                          >
-                            <Plus className="w-4 h-4" />
-                            <span>Ajouter Équipement</span>
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Zone de commentaires dépliable */}
-                      {showComments[`${roomType}-${roomIndex}`] && (
-                        <div className="space-y-2 p-4 bg-gray-50 rounded-md border">
-                          <textarea
-                            className="w-full min-h-[100px] p-2 border rounded-md bg-white"
-                            placeholder="Ajoutez vos observations sur les équipements..."
-                            value={comments[`${roomType}-${roomIndex}`] || ''}
-                            onChange={(e) => {
-                              const newComments = {
-                                ...comments,
-                                [`${roomType}-${roomIndex}`]: e.target.value
-                              };
-                              setComments(newComments);
-                            }}
-                          />
-                          <p className="text-sm text-gray-500 italic">
-                            Les commentaires sont sauvegardés automatiquement
-                          </p>
-                        </div>
-                      )}
-
                       {room.equipment.map((equip, equipIndex) => (
                         <div key={equipIndex} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                          <Select
-                            value={equip.name}
-                            onValueChange={(value) => updateEquipment(roomType, roomIndex, equipIndex, 'name', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner équipement" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white shadow-lg border border-gray-200">
-                              {roomEquipment[roomType as keyof typeof roomEquipment].equipment.map((item) => (
-                                <SelectItem key={item.name} value={item.name}>
-                                  {item.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="flex flex-col space-y-4">
+                            {/* Boutons d'action */}
+                            <div className="flex items-center justify-between mb-4">
+                              <h4 className="font-semibold">Équipements</h4>
+                              <div className="flex space-x-2">
+                                <Button 
+                                  onClick={() => {
+                                    const roomKey = `${roomType}-${roomIndex}`;
+                                    setShowComments(prev => ({
+                                      ...prev,
+                                      [roomKey]: !prev[roomKey]
+                                    }));
+                                  }}
+                                  size="sm"
+                                  variant="outline"
+                                >
+                                  <MessageSquarePlus className="h-4 w-4 mr-2" />
+                                  <span>+ Ajouter un Commentaire</span>
+                                </Button>
+                                <Button 
+                                  onClick={() => addEquipment(roomType, roomIndex)}
+                                  size="sm"
+                                  variant="outline"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  <span>Ajouter Équipement</span>
+                                </Button>
+                              </div>
+                            </div>
 
-                          <Input
-                            type="number"
-                            min="1"
-                            placeholder="Quantité"
-                            value={equip.quantity}
-                            onChange={(e) => updateEquipment(roomType, roomIndex, equipIndex, 'quantity', parseInt(e.target.value))}
-                          />
+                            {/* Zone de commentaires */}
+                            {showComments[`${roomType}-${roomIndex}`] && (
+                              <div className="p-4 bg-gray-50 rounded-md border mb-4">
+                                <textarea
+                                  className="w-full min-h-[100px] p-2 border rounded-md"
+                                  placeholder="Ajoutez vos observations..."
+                                  value={comments[`${roomType}-${roomIndex}`] || ''}
+                                  onChange={(e) => {
+                                    setComments(prev => ({
+                                      ...prev,
+                                      [`${roomType}-${roomIndex}`]: e.target.value
+                                    }));
+                                  }}
+                                />
+                                <p className="text-sm text-gray-500 mt-2">
+                                  Les commentaires sont sauvegardés automatiquement
+                                </p>
+                              </div>
+                            )}
 
-                          <Select
-                            value={equip.manufacturer}
-                            onValueChange={(value) => updateEquipment(roomType, roomIndex, equipIndex, 'manufacturer', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner constructeur" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white shadow-lg border border-gray-200">
-                              {equip.name && roomEquipment[roomType as keyof typeof roomEquipment].equipment
-                                .find(item => item.name === equip.name)
-                                ?.manufacturers.map((manufacturer) => (
-                                  <SelectItem key={manufacturer} value={manufacturer}>
-                                    {manufacturer}
+                            {/* Reste du contenu de la carte */}
+                            <Select
+                              value={equip.name}
+                              onValueChange={(value) => updateEquipment(roomType, roomIndex, equipIndex, 'name', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner équipement" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {roomEquipment[roomType as keyof typeof roomEquipment].equipment.map((item) => (
+                                  <SelectItem key={item.name} value={item.name}>
+                                    {item.name}
                                   </SelectItem>
                                 ))}
-                            </SelectContent>
-                          </Select>
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeEquipment(roomType, roomIndex, equipIndex)}
-                            className="text-red-500"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              type="number"
+                              min="1"
+                              placeholder="Quantité"
+                              value={equip.quantity}
+                              onChange={(e) => updateEquipment(roomType, roomIndex, equipIndex, 'quantity', parseInt(e.target.value, 10))}
+                            />
+                            <Select
+                              value={equip.manufacturer}
+                              onValueChange={(value) => updateEquipment(roomType, roomIndex, equipIndex, 'manufacturer', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner constructeur" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {equip.name && roomEquipment[roomType as keyof typeof roomEquipment].equipment
+                                  .find(item => item.name === equip.name)
+                                  ?.manufacturers.map((manufacturer) => (
+                                    <SelectItem key={manufacturer} value={manufacturer}>
+                                      {manufacturer}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEquipment(roomType, roomIndex, equipIndex)}
+                              className="text-red-500"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
