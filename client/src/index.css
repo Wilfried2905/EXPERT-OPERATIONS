@@ -35,7 +35,14 @@
   }
 
   /* Solution pour masquer le mot dashboard */
-  .dashboard {
+  *:contains('dashboard') {
+    display: none;
+  }
+
+  /* Cibler spécifiquement le texte dashboard dans la navigation */
+  nav a:contains('dashboard'),
+  nav span:contains('dashboard'),
+  .nav-link:contains('dashboard') {
     display: none;
   }
 }
