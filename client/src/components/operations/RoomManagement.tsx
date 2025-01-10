@@ -251,12 +251,12 @@ const RoomManagement: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Équipements avec nouveau bouton de commentaires */}
+                    {/* Section Équipements avec les boutons */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h4 className="font-semibold">Équipements</h4>
-                        <div className="flex items-center gap-2">
-                          <Button
+                        <div className="flex gap-2">
+                          <Button 
                             onClick={() => {
                               const roomKey = `${roomType}-${roomIndex}`;
                               setShowComments(prev => ({
@@ -266,18 +266,19 @@ const RoomManagement: React.FC = () => {
                             }}
                             size="sm"
                             variant="outline"
-                            className="flex items-center space-x-2"
+                            className="flex items-center gap-2"
                           >
                             <MessageSquarePlus className="w-4 h-4" />
                             <span>+ Ajouter un Commentaire</span>
                           </Button>
-                          <Button
+                          <Button 
                             onClick={() => addEquipment(roomType, roomIndex)}
                             size="sm"
                             variant="outline"
+                            className="flex items-center gap-2"
                           >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Ajouter Équipement
+                            <Plus className="w-4 h-4" />
+                            <span>Ajouter Équipement</span>
                           </Button>
                         </div>
                       </div>
