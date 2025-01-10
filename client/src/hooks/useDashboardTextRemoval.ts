@@ -11,7 +11,9 @@ export function useDashboardTextRemoval() {
           {
             acceptNode: (node) => {
               if (!node.textContent) return NodeFilter.FILTER_REJECT;
-              return node.textContent.toLowerCase().includes('dashboard')
+              // Ne pas masquer "Tableau de Bord" mais uniquement "dashboard"
+              return node.textContent.toLowerCase().includes('dashboard') &&
+                     !node.textContent.includes('Tableau de Bord')
                 ? NodeFilter.FILTER_ACCEPT
                 : NodeFilter.FILTER_REJECT;
             }
@@ -28,7 +30,7 @@ export function useDashboardTextRemoval() {
         // Remplacer le texte dans chaque nœud
         textNodes.forEach((node) => {
           if (node.textContent) {
-            const newText = node.textContent.replace(/dashboard/gi, '');
+            const newText = node.textContent.replace(/\bdashboard\b/gi, '');
             if (node.textContent !== newText) {
               node.textContent = newText;
             }
@@ -47,14 +49,16 @@ export function useDashboardTextRemoval() {
         // Vérifier si la mutation concerne du texte
         if (mutation.type === 'characterData') {
           const node = mutation.target;
-          if (node.textContent?.toLowerCase().includes('dashboard')) {
+          if (node.textContent?.toLowerCase().includes('dashboard') &&
+              !node.textContent.includes('Tableau de Bord')) {
             shouldUpdate = true;
           }
         }
         // Vérifier les nouveaux nœuds
         else if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
-            if (node.textContent?.toLowerCase().includes('dashboard')) {
+            if (node.textContent?.toLowerCase().includes('dashboard') &&
+                !node.textContent.includes('Tableau de Bord')) {
               shouldUpdate = true;
             }
           });
