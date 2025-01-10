@@ -7,23 +7,34 @@ import { DocumentType, generateDocument } from '@/services/documentGeneration';
 import { useRecommendationsStore } from '@/store/useRecommendationsStore';
 import { CustomToast } from "@/components/ui/custom-toast";
 
+interface ToastConfig {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error';
+}
+
 export default function DocumentGenerator() {
   const [documentType, setDocumentType] = useState<DocumentType | ''>('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [toastConfig, setToastConfig] = useState<{
-    show: boolean;
-    message: string;
-    type: 'success' | 'error';
-  }>({ show: false, message: '', type: 'success' });
+  const [toastConfig, setToastConfig] = useState<ToastConfig>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
+
   const { recommendations } = useRecommendationsStore();
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastConfig({
+      show: true,
+      message,
+      type
+    });
+  };
 
   const handleGenerate = async () => {
     if (!documentType) {
-      setToastConfig({
-        show: true,
-        message: "Veuillez sélectionner un type de document à générer",
-        type: 'error'
-      });
+      showToast("Veuillez sélectionner un type de document à générer", 'error');
       return;
     }
 
@@ -74,19 +85,14 @@ export default function DocumentGenerator() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      setToastConfig({
-        show: true,
-        message: "Document généré et téléchargé avec succès",
-        type: 'success'
-      });
+      showToast("Document généré et téléchargé avec succès");
 
     } catch (error) {
       console.error('[Generation] Error:', error);
-      setToastConfig({
-        show: true,
-        message: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération",
-        type: 'error'
-      });
+      showToast(
+        error instanceof Error ? error.message : "Une erreur est survenue lors de la génération",
+        'error'
+      );
     } finally {
       setIsGenerating(false);
     }
