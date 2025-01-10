@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, Minus, Trash2 } from 'lucide-react';
+import { Plus, Minus, Trash2, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Définition des équipements par type de salle
@@ -106,6 +106,8 @@ const MANUFACTURERS_BY_EQUIPMENT: Record<string, string[]> = {
 const ClientInformation = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [companyName, setCompanyName] = useState('');
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState('');
   const [clients, setClients] = useState([{
     name: '',
     phone: '',
@@ -226,6 +228,41 @@ const ClientInformation = () => {
         <h1 className={`text-3xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
           Informations Client et Site
         </h1>
+
+        {/* Section Commentaires Généraux */}
+        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg mb-6`}>
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+                Commentaires Généraux
+              </h2>
+              <Button
+                onClick={() => setShowComments(!showComments)}
+                variant="outline"
+                className={isDarkMode ? 'text-white' : ''}
+              >
+                <MessageSquarePlus className="h-4 w-4 mr-2" />
+                {showComments ? 'Masquer les commentaires' : 'Ajouter un commentaire'}
+              </Button>
+            </div>
+
+            {showComments && (
+              <div className="space-y-4">
+                <textarea
+                  className={`w-full min-h-[150px] p-3 rounded-md border ${
+                    isDarkMode ? 'bg-[#001F33] text-white' : 'bg-white'
+                  }`}
+                  placeholder="Ajoutez vos commentaires généraux ici..."
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                />
+                <p className="text-sm text-gray-500 italic">
+                  Les commentaires sont sauvegardés automatiquement
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
 
         <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg mb-6`}>
           <div className="p-6">
