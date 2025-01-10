@@ -231,6 +231,7 @@ const AnalyseExistant = () => {
                     </div>
                   </div>
 
+                  {/* Ajout des boutons Conforme/Non Conforme */}
                   <div className="flex space-x-4">
                     <button
                       onClick={() => setResults(prev => ({
@@ -278,7 +279,6 @@ const AnalyseExistant = () => {
                     }`}
                     rows={3}
                   />
-
                   <div className="flex items-center space-x-4">
                     <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
                       isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
