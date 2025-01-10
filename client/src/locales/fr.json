@@ -1,5 +1,5 @@
 {
-  "dashboard": "Tableau de Bord",
+  "dashboard": "",
   "general": "Vue Générale",
   "financial": "Vue Financière",
   "client": "Vue Client",
@@ -18,7 +18,7 @@
     "comparison": "Comparaison par Service"
   },
   "navigation": {
-    "dashboard": "Tableau de Bord",
+    "dashboard": "",
     "operations": "Opérations",
     "administration": "Administration"
   },
