@@ -353,19 +353,6 @@ const RoomManagement: React.FC = () => {
                           </div>
                         </div>
                       ))}
-
-                      {/* Bouton d'ajout d'équipement additionnel si nécessaire */}
-                      {room.equipment.length === 0 && (
-                        <div className="flex justify-center py-4">
-                          <Button 
-                            onClick={() => addEquipment(roomType, roomIndex)}
-                            variant="outline"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Ajouter le premier équipement
-                          </Button>
-                        </div>
-                      )}
                     </div>
 
                     {/* Bouton suppression salle */}
