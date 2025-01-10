@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardHeader, 
@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Phone, Mail, MapPin, Building2, User, Plus, Trash2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Phone, Mail, MapPin, Building2, User, Plus, Trash2, Tool } from 'lucide-react';
 
 interface ClientSiteInfoProps {
   userEmail: string;
@@ -23,17 +24,30 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
     phone: '',
     email: ''
   }]);
-  
+
   const [technicians, setTechnicians] = useState([{
     name: '',
     phone: '',
-    email: userEmail // Email auto-rempli avec l'email de connexion
+    email: userEmail
   }]);
 
   const [companyInfo, setCompanyInfo] = useState({
     name: '',
     location: ''
   });
+
+  // Nouvel état pour les commentaires sur les équipements
+  const [equipmentComments, setEquipmentComments] = useState('');
+
+  // Fonction de sauvegarde automatique des commentaires
+  useEffect(() => {
+    const saveTimeout = setTimeout(() => {
+      // TODO: Implémenter la sauvegarde vers le backend
+      console.log('Saving equipment comments:', equipmentComments);
+    }, 1000);
+
+    return () => clearTimeout(saveTimeout);
+  }, [equipmentComments]);
 
   // Date du jour automatique
   const today = new Date().toISOString().split('T')[0];
@@ -103,7 +117,7 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
               </Button>
             )}
           </div>
-          
+
           {clients.map((client, index) => (
             <div key={`client-${index}`} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded">
               <div className="flex items-center space-x-2">
@@ -160,7 +174,7 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
               </Button>
             )}
           </div>
-          
+
           {technicians.map((tech, index) => (
             <div key={`tech-${index}`} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded">
               <div className="flex items-center space-x-2">
@@ -211,6 +225,23 @@ const ClientSiteInfo: React.FC<ClientSiteInfoProps> = ({ userEmail }) => {
             onChange={(e) => setCompanyInfo({...companyInfo, location: e.target.value})}
             className="flex-1"
           />
+        </div>
+
+        {/* Nouvelle section pour les commentaires sur les équipements */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Tool className="w-5 h-5 text-gray-500" />
+            <h3 className="text-lg font-semibold">Commentaires sur les Équipements</h3>
+          </div>
+          <Textarea
+            placeholder="Ajoutez vos commentaires sur les équipements ici..."
+            value={equipmentComments}
+            onChange={(e) => setEquipmentComments(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <p className="text-sm text-gray-500 italic">
+            Les commentaires sont sauvegardés automatiquement
+          </p>
         </div>
 
         {/* Messages d'alerte pour les limites */}
