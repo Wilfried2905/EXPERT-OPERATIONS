@@ -34,28 +34,77 @@ export default function AnalyseExistant() {
           id: "obj1",
           question: "Quels sont les principaux objectifs du client en matière de performance opérationnelle ?",
           info: "Cette question permet de comprendre les priorités du client en matière d'efficacité et de performance dans ses opérations."
+        },
+        {
+          id: "obj2",
+          question: "Comment sont définis les indicateurs de performance ?",
+          info: "Cette question évalue la méthode de définition et de suivi des KPIs."
         }
       ]
     },
     {
       id: "processus",
       title: "Gestion des processus opérationnels",
-      questions: []
+      questions: [
+        {
+          id: "proc1",
+          question: "Comment sont structurés les processus opérationnels actuels ?",
+          info: "Cette question permet d'évaluer l'organisation et l'efficacité des processus existants."
+        },
+        {
+          id: "proc2",
+          question: "Existe-t-il une documentation formelle des processus ?",
+          info: "Cette question évalue le niveau de formalisation et de documentation des processus."
+        }
+      ]
     },
     {
       id: "ressources",
       title: "Gestion des ressources humaines",
-      questions: []
+      questions: [
+        {
+          id: "rh1",
+          question: "Comment sont gérées les ressources humaines dans l'organisation ?",
+          info: "Cette question évalue la gestion et l'allocation des ressources humaines."
+        },
+        {
+          id: "rh2",
+          question: "Quel est le processus de formation et de développement des compétences ?",
+          info: "Cette question analyse les méthodes de formation et de développement du personnel."
+        }
+      ]
     },
     {
       id: "risques",
       title: "Gestion des risques opérationnels",
-      questions: []
+      questions: [
+        {
+          id: "risk1",
+          question: "Quels sont les principaux risques opérationnels identifiés ?",
+          info: "Cette question permet d'identifier et d'évaluer les risques opérationnels existants."
+        },
+        {
+          id: "risk2",
+          question: "Comment sont gérés les incidents et les situations de crise ?",
+          info: "Cette question évalue les procédures de gestion des incidents et des crises."
+        }
+      ]
     },
     {
       id: "performance",
       title: "Performance et contrôle",
-      questions: []
+      questions: [
+        {
+          id: "perf1",
+          question: "Comment la performance opérationnelle est-elle mesurée et contrôlée ?",
+          info: "Cette question évalue les méthodes de mesure et de contrôle de la performance."
+        },
+        {
+          id: "perf2",
+          question: "Quels sont les outils de reporting utilisés ?",
+          info: "Cette question analyse les outils et méthodes de reporting de la performance."
+        }
+      ]
     }
   ];
 
@@ -71,6 +120,26 @@ export default function AnalyseExistant() {
     if (answeredQuestions.length === 0) return 0;
     const conformeCount = answeredQuestions.filter(r => r.status === 'conforme').length;
     return (conformeCount / answeredQuestions.length) * 100;
+  };
+
+  const handleStatusChange = (questionId: string, status: 'conforme' | 'non-conforme') => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: {
+        status: status,
+        comments: prev[questionId]?.comments || ''
+      }
+    }));
+  };
+
+  const handleCommentChange = (questionId: string, comment: string) => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: {
+        status: prev[questionId]?.status || null,
+        comments: comment
+      }
+    }));
   };
 
   return (
@@ -151,13 +220,7 @@ export default function AnalyseExistant() {
                 <div className="flex gap-4 mb-4">
                   <Button
                     variant="outline"
-                    onClick={() => setResults(prev => ({
-                      ...prev,
-                      [question.id]: {
-                        status: 'conforme',
-                        comments: prev[question.id]?.comments || ''
-                      }
-                    }))}
+                    onClick={() => handleStatusChange(question.id, 'conforme')}
                     className={`${
                       results[question.id]?.status === 'conforme'
                         ? 'bg-blue-100 text-blue-800 border-blue-200'
@@ -168,13 +231,7 @@ export default function AnalyseExistant() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setResults(prev => ({
-                      ...prev,
-                      [question.id]: {
-                        status: 'non-conforme',
-                        comments: prev[question.id]?.comments || ''
-                      }
-                    }))}
+                    onClick={() => handleStatusChange(question.id, 'non-conforme')}
                     className={`${
                       results[question.id]?.status === 'non-conforme'
                         ? 'bg-blue-100 text-blue-800 border-blue-200'
@@ -187,14 +244,7 @@ export default function AnalyseExistant() {
 
                 <textarea
                   value={results[question.id]?.comments || ''}
-                  onChange={(e) => setResults(prev => ({
-                    ...prev,
-                    [question.id]: {
-                      ...prev[question.id],
-                      status: prev[question.id]?.status || null,
-                      comments: e.target.value
-                    }
-                  }))}
+                  onChange={(e) => handleCommentChange(question.id, e.target.value)}
                   placeholder="Commentaires et observations..."
                   className="w-full p-3 rounded border border-gray-200 mb-4"
                   rows={3}
