@@ -19,7 +19,6 @@ export default function DocumentGenerator() {
         title: "Type de document requis",
         description: "Veuillez sélectionner un type de document à générer",
         variant: "destructive",
-        duration: 3000,
       });
       return;
     }
@@ -73,7 +72,6 @@ export default function DocumentGenerator() {
 
       toast({
         description: "Document généré et téléchargé avec succès",
-        duration: 3000,
       });
 
     } catch (error) {
@@ -82,7 +80,6 @@ export default function DocumentGenerator() {
         title: "Erreur",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la génération",
         variant: "destructive",
-        duration: 3000,
       });
     } finally {
       setIsGenerating(false);
