@@ -16,28 +16,18 @@ const AnalyseExistant = () => {
       questions: [
         {
           id: "obj1",
-          question: "Quels sont les principaux objectifs du client en matière de performance opérationnelle ?",
-          norm: "Cette question permet de comprendre les priorités du client en matière d'efficacité et de performance dans ses opérations."
+          question: "Quels sont les principaux objectifs en matière de performance opérationnelle ?",
+          norm: "Cette question permet de comprendre les priorités en matière d'efficacité et de performance."
         },
         {
           id: "obj2",
           question: "Avez-vous déjà réalisé un audit opérationnel ?",
-          norm: "Permet de connaître l'historique des audits et des évaluations précédentes réalisés sur les opérations internes."
-        },
-        {
-          id: "obj3",
-          question: "Quels sont les indicateurs de performance (KPI) actuellement suivis ?",
-          norm: "Cela permet d'évaluer les mesures de performance utilisées et leur pertinence dans le cadre des objectifs du client."
-        },
-        {
-          id: "obj4",
-          question: "Quelles ressources ou outils utilisez-vous pour gérer vos opérations au quotidien ?",
-          norm: "Cette question permet de comprendre les outils en place pour la gestion des processus opérationnels."
+          norm: "Permet de connaître l'historique des audits et des évaluations précédentes."
         }
       ]
     },
     {
-      title: "Gestion des processus opérationnels",
+      title: "Gestion des processus",
       questions: [
         {
           id: "proc1",
@@ -48,91 +38,6 @@ const AnalyseExistant = () => {
           id: "proc2",
           question: "Avez-vous une documentation formalisée des processus ?",
           norm: "Permet d'évaluer le niveau de standardisation et de documentation des processus."
-        },
-        {
-          id: "proc3",
-          question: "Comment gérez-vous les modifications des processus ?",
-          norm: "Évalue les mécanismes de contrôle des changements dans les processus."
-        },
-        {
-          id: "proc4",
-          question: "Comment mesurez-vous l'efficacité des processus ?",
-          norm: "Évalue la capacité à mesurer et améliorer la performance des processus opérationnels."
-        }
-      ]
-    },
-    {
-      title: "Gestion des ressources humaines",
-      questions: [
-        {
-          id: "rh1",
-          question: "Comment sont gérées les compétences des équipes opérationnelles ?",
-          norm: "Évalue la gestion des compétences et la formation continue du personnel."
-        },
-        {
-          id: "rh2",
-          question: "Existe-t-il des plans de formation spécifiques aux opérations ?",
-          norm: "Vérifie l'existence de programmes de développement des compétences."
-        },
-        {
-          id: "rh3",
-          question: "Comment est organisée la répartition des tâches opérationnelles ?",
-          norm: "Évalue l'efficacité de l'organisation du travail et la répartition des responsabilités."
-        },
-        {
-          id: "rh4",
-          question: "Comment gérez-vous la continuité des opérations en cas d'absence ?",
-          norm: "Vérifie les mécanismes de backup et la gestion des remplacements."
-        }
-      ]
-    },
-    {
-      title: "Gestion des risques opérationnels",
-      questions: [
-        {
-          id: "risk1",
-          question: "Comment identifiez-vous les risques opérationnels ?",
-          norm: "Évalue les méthodes d'identification et d'analyse des risques."
-        },
-        {
-          id: "risk2",
-          question: "Quelles mesures de prévention sont en place ?",
-          norm: "Vérifie l'existence et l'efficacité des mesures préventives."
-        },
-        {
-          id: "risk3",
-          question: "Comment sont gérés les incidents opérationnels ?",
-          norm: "Évalue les procédures de gestion des incidents et leur efficacité."
-        },
-        {
-          id: "risk4",
-          question: "Existe-t-il un plan de continuité des opérations ?",
-          norm: "Vérifie l'existence et la pertinence des plans de continuité."
-        }
-      ]
-    },
-    {
-      title: "Performance et contrôle",
-      questions: [
-        {
-          id: "perf1",
-          question: "Comment suivez-vous la performance opérationnelle au quotidien ?",
-          norm: "Évalue les méthodes de suivi et de mesure de la performance."
-        },
-        {
-          id: "perf2",
-          question: "Quels sont vos mécanismes de contrôle qualité ?",
-          norm: "Vérifie l'existence et l'efficacité des contrôles qualité."
-        },
-        {
-          id: "perf3",
-          question: "Comment gérez-vous les non-conformités opérationnelles ?",
-          norm: "Évalue la gestion des écarts et des actions correctives."
-        },
-        {
-          id: "perf4",
-          question: "Comment sont suivis les objectifs de performance ?",
-          norm: "Vérifie les méthodes de suivi et d'évaluation des objectifs."
         }
       ]
     }
@@ -155,7 +60,7 @@ const AnalyseExistant = () => {
     <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto mb-6">
         <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
-          Analyse de l'existant - Audit Opérationnel
+          Analyse de l'existant
         </h1>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -173,7 +78,6 @@ const AnalyseExistant = () => {
               {calculateProgress().toFixed(1)}% complété
             </p>
           </Card>
-
           <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
             <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
               Conformité
@@ -231,7 +135,7 @@ const AnalyseExistant = () => {
                     </div>
                   </div>
 
-                  {/* Ajout des boutons Conforme/Non Conforme */}
+                  {/* Boutons Conforme/Non Conforme avant la zone de commentaires */}
                   <div className="flex space-x-4">
                     <button
                       onClick={() => setResults(prev => ({
@@ -279,6 +183,7 @@ const AnalyseExistant = () => {
                     }`}
                     rows={3}
                   />
+
                   <div className="flex items-center space-x-4">
                     <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
                       isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
@@ -306,7 +211,7 @@ const AnalyseExistant = () => {
             Précédent
           </button>
           <button
-            onClick={() => setLocation('/operations/operational/step2')}
+            onClick={() => setLocation('/operations/operational/questionnaire')}
             className={`px-6 py-3 rounded font-medium ${
               isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
             } text-white`}

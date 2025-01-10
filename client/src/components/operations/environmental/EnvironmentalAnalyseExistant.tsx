@@ -10,7 +10,6 @@ const EnvironmentalAnalyseExistant = () => {
   const [results, setResults] = useState<Record<string, { status: 'conforme' | 'non-conforme' | null; comments: string }>>({});
   const [, setLocation] = useLocation();
 
-  // Nous garderons la même structure de sections mais nous mettrons à jour les questions plus tard
   const sections = [
     {
       title: "Objectifs et stratégie environnementale",
@@ -18,12 +17,12 @@ const EnvironmentalAnalyseExistant = () => {
         {
           id: "obj1",
           question: "Quels sont les objectifs principaux en matière d'environnement ?",
-          norm: "Cette question permet de comprendre les priorités du client en matière de gestion environnementale."
+          norm: "Cette question permet de comprendre les priorités en matière de gestion environnementale."
         },
         {
           id: "obj2",
           question: "Avez-vous déjà réalisé un audit environnemental ?",
-          norm: "Permet de connaître l'historique des audits et des évaluations déjà effectués."
+          norm: "Permet de connaître l'historique des audits environnementaux."
         }
       ]
     },
@@ -136,6 +135,7 @@ const EnvironmentalAnalyseExistant = () => {
                     </div>
                   </div>
 
+                  {/* Boutons Conforme/Non Conforme avant la zone de commentaires */}
                   <div className="flex space-x-4">
                     <button
                       onClick={() => setResults(prev => ({

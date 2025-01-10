@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
 import { useUser } from '@/hooks/use-user';
 import { Button } from '@/components/ui/button';
+import { useDashboardTextRemoval } from '@/hooks/useDashboardTextRemoval';
 import {
   LayoutDashboard,
   ClipboardList,
@@ -24,6 +25,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useUser();
 
+  // Utiliser le hook pour supprimer le texte dashboard
+  useDashboardTextRemoval();
+
   const handleLogout = async () => {
     await logout();
     setLocation('/');
@@ -37,7 +41,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     {
       href: '/dashboard',
       label: "Tableau de Bord",
-      icon: <LayoutDashboard className="w-4 h-4" />
+      icon: <LayoutDashboard className="w-4 h-4" />,
+      'data-text': "Tableau de Bord"
     },
     {
       href: '/operations',
@@ -103,6 +108,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 return (
                   <Link key={item.href} href={item.href}>
                     <a
+                      data-text={item['data-text']}
                       className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200
                         ${isSelected 
                           ? 'bg-[#FF9900] hover:bg-[#FF9900]/90 text-white' 
