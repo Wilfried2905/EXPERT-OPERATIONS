@@ -82,20 +82,6 @@ const AnalyseExistant: React.FC = () => {
     return (conformeCount / answeredQuestions.length) * 100;
   };
 
-  const handleConformityChange = (questionId: string, status: 'conforme' | 'non-conforme') => {
-    setResults(prev => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], status, comments: prev[questionId]?.comments || '' }
-    }));
-  };
-
-  const handleCommentChange = (questionId: string, comment: string) => {
-    setResults(prev => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], comments: comment }
-    }));
-  };
-
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-6xl mx-auto mb-6">
@@ -145,9 +131,10 @@ const AnalyseExistant: React.FC = () => {
               <Button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`flex-1 px-4 py-3 text-center font-medium transition-colors ${
+                variant="ghost"
+                className={`flex-1 px-4 py-3 text-center font-medium transition-colors rounded-none ${
                   activeTab === index
-                    ? 'bg-[#003366] text-white border-b-2 border-[#003366]'
+                    ? 'bg-[#003366] text-white'
                     : 'text-[#003366] hover:bg-gray-50'
                 }`}
               >
@@ -170,23 +157,32 @@ const AnalyseExistant: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 mt-4">
+                  {/* Boutons Conforme/Non Conforme avant la zone de commentaires */}
+                  <div className="flex gap-4">
                     <Button
-                      onClick={() => handleConformityChange(q.id, 'conforme')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      variant="outline"
+                      className={`px-4 py-2 ${
                         results[q.id]?.status === 'conforme'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-blue-100 text-blue-800 border-blue-200'
+                          : 'hover:bg-gray-100'
                       }`}
                     >
                       Conforme
                     </Button>
                     <Button
-                      onClick={() => handleConformityChange(q.id, 'non-conforme')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      variant="outline"
+                      className={`px-4 py-2 ${
                         results[q.id]?.status === 'non-conforme'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-blue-100 text-blue-800 border-blue-200'
+                          : 'hover:bg-gray-100'
                       }`}
                     >
                       Non Conforme
@@ -195,7 +191,10 @@ const AnalyseExistant: React.FC = () => {
 
                   <textarea
                     value={results[q.id]?.comments || ''}
-                    onChange={(e) => handleCommentChange(q.id, e.target.value)}
+                    onChange={(e) => setResults(prev => ({
+                      ...prev,
+                      [q.id]: { ...prev[q.id], comments: e.target.value }
+                    }))}
                     placeholder="Commentaires et observations..."
                     className="w-full p-3 rounded border bg-white border-gray-200 text-[#003366]"
                     rows={3}
@@ -217,13 +216,14 @@ const AnalyseExistant: React.FC = () => {
         <div className="mt-6 flex justify-between">
           <Button
             onClick={() => window.history.back()}
-            className="px-6 py-3 rounded font-medium bg-[#003366] text-white"
+            variant="outline"
+            className="px-6 py-2 bg-[#003366] text-white hover:bg-[#002347]"
           >
             Précédent
           </Button>
           <Button
             onClick={() => setLocation('/operations/multisite/step2')}
-            className="px-6 py-3 rounded font-medium bg-[#FF9900] text-white"
+            className="px-6 py-2 bg-[#FF9900] text-white hover:bg-[#E68A00]"
           >
             Suivant
           </Button>
