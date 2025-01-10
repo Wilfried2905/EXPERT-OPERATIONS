@@ -46,8 +46,18 @@ a:has(text="dashboard"),
   visibility: hidden !important;
 }
 
+/* Exception pour le Tableau de Bord */
+[data-text="Tableau de Bord"],
+*[class*="tableau-de-bord"],
+*[id*="tableau-de-bord"],
+*:has(> :contains("Tableau de Bord")),
+a:has(:contains("Tableau de Bord")) {
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* Règles supplémentaires pour couvrir d'autres cas */
-*:not(script):not(style):not(meta):not(link) {
+*:not(script):not(style):not(meta):not(link):not([data-preserve="true"]) {
   &[class*="dashboard"],
   &[id*="dashboard"],
   &[aria-label*="dashboard"],
@@ -63,9 +73,9 @@ a:has(text="dashboard"),
   content: none !important;
 }
 
-/* Masquer les éléments de navigation contenant "dashboard" */
-nav a[href*="dashboard"],
-.sidebar a[href*="dashboard"],
-.navigation a[href*="dashboard"] {
+/* Masquer les éléments de navigation contenant "dashboard" sauf Tableau de Bord */
+nav a[href*="dashboard"]:not(:has(:contains("Tableau de Bord"))),
+.sidebar a[href*="dashboard"]:not(:has(:contains("Tableau de Bord"))),
+.navigation a[href*="dashboard"]:not(:has(:contains("Tableau de Bord"))) {
   display: none !important;
 }

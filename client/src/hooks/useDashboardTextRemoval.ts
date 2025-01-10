@@ -12,8 +12,11 @@ export function useDashboardTextRemoval() {
             acceptNode: (node) => {
               if (!node.textContent) return NodeFilter.FILTER_REJECT;
               // Ne pas masquer "Tableau de Bord" mais uniquement "dashboard"
-              return node.textContent.toLowerCase().includes('dashboard') &&
-                     !node.textContent.includes('Tableau de Bord')
+              const isTableauDeBord = node.textContent.includes('Tableau de Bord');
+              const isDashboard = node.textContent.toLowerCase().includes('dashboard');
+
+              // Accepter uniquement si c'est "dashboard" et pas "Tableau de Bord"
+              return isDashboard && !isTableauDeBord
                 ? NodeFilter.FILTER_ACCEPT
                 : NodeFilter.FILTER_REJECT;
             }
@@ -30,7 +33,8 @@ export function useDashboardTextRemoval() {
         // Remplacer le texte dans chaque nœud
         textNodes.forEach((node) => {
           if (node.textContent) {
-            const newText = node.textContent.replace(/\bdashboard\b/gi, '');
+            // Utiliser une expression régulière plus précise pour ne remplacer que le mot exact "dashboard"
+            const newText = node.textContent.replace(/\b(dashboard|Dashboard|DASHBOARD)\b/g, '');
             if (node.textContent !== newText) {
               node.textContent = newText;
             }
@@ -49,16 +53,22 @@ export function useDashboardTextRemoval() {
         // Vérifier si la mutation concerne du texte
         if (mutation.type === 'characterData') {
           const node = mutation.target;
-          if (node.textContent?.toLowerCase().includes('dashboard') &&
-              !node.textContent.includes('Tableau de Bord')) {
+          const nodeText = node.textContent || '';
+          const isTableauDeBord = nodeText.includes('Tableau de Bord');
+          const isDashboard = nodeText.toLowerCase().includes('dashboard');
+
+          if (isDashboard && !isTableauDeBord) {
             shouldUpdate = true;
           }
         }
         // Vérifier les nouveaux nœuds
         else if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
-            if (node.textContent?.toLowerCase().includes('dashboard') &&
-                !node.textContent.includes('Tableau de Bord')) {
+            const nodeText = node.textContent || '';
+            const isTableauDeBord = nodeText.includes('Tableau de Bord');
+            const isDashboard = nodeText.toLowerCase().includes('dashboard');
+
+            if (isDashboard && !isTableauDeBord) {
               shouldUpdate = true;
             }
           });
