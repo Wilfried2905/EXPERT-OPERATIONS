@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Info, Upload } from 'lucide-react';
 import { useLocation } from 'wouter';
+import '@/styles/progress.css';
 
 export default function MultisiteAuditStep1() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [results, setResults] = useState<Record<string, { status: 'conforme' | 'non-conforme' | null; comments: string }>>({});
 
-  // Questions pour l'analyse de l'existant de l'Audit Multisite
-  const questions = [
+  const sections = [
     {
       category: "Structure organisationnelle",
       items: [
@@ -49,51 +52,164 @@ export default function MultisiteAuditStep1() {
     }
   ];
 
-  const handleAnswerChange = (question: string, answer: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [question]: answer
-    }));
+  const calculateProgress = () => {
+    const totalQuestions = sections.reduce((acc, section) => acc + section.items.length, 0);
+    const answeredQuestions = Object.keys(results).length;
+    return (answeredQuestions / totalQuestions) * 100;
   };
 
-  const handleNext = () => {
-    // Sauvegarder les réponses et rediriger vers les recommandations
-    setLocation('/recommendations');
+  const calculateConformity = () => {
+    const answeredQuestions = Object.values(results);
+    if (answeredQuestions.length === 0) return 0;
+    const conformeCount = answeredQuestions.filter(r => r.status === 'conforme').length;
+    return (conformeCount / answeredQuestions.length) * 100;
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{t('multisite.analysis.title')}</h1>
-      <p className="text-gray-600">{t('multisite.analysis.description')}</p>
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          {t('multisite.analysis.title')}
+        </h1>
 
-      {questions.map((section, sectionIndex) => (
-        <Card key={sectionIndex}>
-          <CardContent className="pt-6">
-            <h2 className="text-xl font-semibold mb-4">{section.category}</h2>
-            <div className="space-y-4">
-              {section.items.map((question, questionIndex) => (
-                <div key={questionIndex} className="space-y-2">
-                  <label className="block font-medium">{question}</label>
-                  <textarea
-                    className="w-full p-2 border rounded-md"
-                    rows={3}
-                    value={answers[question] || ''}
-                    onChange={(e) => handleAnswerChange(question, e.target.value)}
-                  />
-                </div>
-              ))}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Progression
+            </h3>
+            <div className="progress-bar">
+              <div
+                className="progress-bar-indicator green"
+                style={{ width: `${calculateProgress()}%` }}
+              />
             </div>
-          </CardContent>
-        </Card>
-      ))}
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {calculateProgress().toFixed(1)}% complété
+            </p>
+          </Card>
 
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleNext}
-          className="bg-[#003366] hover:bg-[#002347] text-white"
-        >
-          {t('common.next')}
-        </Button>
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Conformité
+            </h3>
+            <div className="progress-bar">
+              <div
+                className={`progress-bar-indicator ${
+                  calculateConformity() >= 75 ? 'green' :
+                    calculateConformity() >= 50 ? 'yellow' :
+                      'red'
+                }`}
+                style={{ width: `${calculateConformity()}%` }}
+              />
+            </div>
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {calculateConformity().toFixed(1)}% conforme
+            </p>
+          </Card>
+        </div>
+
+        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
+          <div className="flex border-b border-gray-200">
+            {sections.map((section, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`flex-1 px-4 py-3 text-center font-medium transition-colors
+                  ${activeTab === index
+                    ? isDarkMode
+                      ? 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
+                      : 'bg-[#003366] text-white border-b-2 border-[#003366]'
+                    : isDarkMode
+                      ? 'text-[#E0E0E0] hover:bg-[#001F33]'
+                      : 'text-[#003366] hover:bg-gray-50'
+                  }`}
+              >
+                {section.category}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6">
+            {sections[activeTab].items.map((question, questionIndex) => (
+              <div key={questionIndex} className="mb-8 last:mb-0">
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-2">
+                    <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+                      {question}
+                    </h3>
+                  </div>
+
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [question]: { ...prev[question], status: 'conforme', comments: prev[question]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[question]?.status === 'conforme'
+                          ? 'bg-green-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Conforme
+                    </button>
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [question]: { ...prev[question], status: 'non-conforme', comments: prev[question]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[question]?.status === 'non-conforme'
+                          ? 'bg-red-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Non Conforme
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={results[question]?.comments || ''}
+                    onChange={(e) => setResults(prev => ({
+                      ...prev,
+                      [question]: { ...prev[question], comments: e.target.value }
+                    }))}
+                    placeholder="Commentaires et observations..."
+                    className={`w-full p-3 rounded border ${
+                      isDarkMode
+                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]'
+                        : 'bg-white border-gray-200 text-[#003366]'
+                    }`}
+                    rows={3}
+                  />
+
+                  <div className="flex items-center space-x-4">
+                    <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
+                      isDarkMode ? 'bg-[#FF9900]' : 'bg-[#003366]'
+                    } text-white`}>
+                      <Upload size={20} />
+                      <span>Ajouter des fichiers</span>
+                      <input type="file" multiple className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div className="mt-6 flex justify-end">
+          <Button 
+            onClick={() => setLocation('/recommendations')}
+            className="bg-[#003366] hover:bg-[#002347] text-white"
+          >
+            {t('common.next')}
+          </Button>
+        </div>
       </div>
     </div>
   );
