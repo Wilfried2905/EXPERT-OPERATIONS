@@ -15,6 +15,7 @@ import GithubTokenInput from "./components/settings/GithubTokenInput";
 import RecommendationsView from "@/components/recommendations/RecommendationsView";
 import DocumentGenerator from "@/components/documents/DocumentGenerator";
 import DocumentNavigation from "@/components/operations/DocumentNavigation";
+import AnalyseExistant from "@/components/operations/multisite/AnalyseExistant";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect } from "react";
 
@@ -37,7 +38,6 @@ function App() {
     );
   }
 
-  // Si l'utilisateur n'est pas connecté, on ne montre que la page d'authentification
   if (!user) {
     return (
       <Switch>
@@ -75,6 +75,12 @@ function App() {
         <Route path="/operations/main">
           <ProtectedRoute>
             <MainOperationsFlow />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/operations/multisite/analyse-existant">
+          <ProtectedRoute>
+            <AnalyseExistant />
           </ProtectedRoute>
         </Route>
 
