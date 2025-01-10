@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Trash2, Calculator } from 'lucide-react';
+import { Plus, Trash2, Calculator, MessageSquarePlus } from 'lucide-react';
 
 // Données des équipements par type de salle
 const roomEquipment = {
@@ -92,6 +92,12 @@ const roomEquipment = {
   },
 };
 
+interface Equipment {
+  name: string;
+  quantity: number;
+  manufacturer: string;
+}
+
 interface Room {
   dimensions: {
     length: string;
@@ -100,11 +106,8 @@ interface Room {
   };
   surface: number;
   volume: number;
-  equipment: Array<{
-    name: string;
-    quantity: number;
-    manufacturer: string;
-  }>;
+  equipment: Equipment[];
+  comments?: string;
 }
 
 interface RoomList {
@@ -117,8 +120,8 @@ const RoomManagement: React.FC = () => {
     'Salle Énergie': [],
     'Salle Supervision': [],
   });
-  
-  // État pour les commentaires
+
+  const [showComments, setShowComments] = useState<{[key: string]: boolean}>({});
   const [comments, setComments] = useState<{[key: string]: string}>({});
 
   const calculateDimensions = (length: number, width: number, height: number) => {
@@ -133,7 +136,8 @@ const RoomManagement: React.FC = () => {
         dimensions: { length: '', width: '', height: '' },
         surface: 0,
         volume: 0,
-        equipment: []
+        equipment: [],
+        comments: ''
       };
       setRooms({
         ...rooms,
@@ -147,7 +151,6 @@ const RoomManagement: React.FC = () => {
     const room = updatedRooms[roomType][roomIndex];
     room.dimensions[field as keyof typeof room.dimensions] = value;
 
-    // Calcul automatique surface et volume
     if (room.dimensions.length && room.dimensions.width && room.dimensions.height) {
       const { surface, volume } = calculateDimensions(
         parseFloat(room.dimensions.length),
@@ -171,14 +174,16 @@ const RoomManagement: React.FC = () => {
     setRooms(updatedRooms);
   };
 
-  const updateEquipment = (roomType: string, roomIndex: number, equipIndex: number, field: string, value: string | number) => {
+  const updateEquipment = (roomType: string, roomIndex: number, equipIndex: number, field: keyof Equipment, value: string | number) => {
     const updatedRooms = { ...rooms };
     const equipment = updatedRooms[roomType][roomIndex].equipment[equipIndex];
-    if (field === 'quantity') {
-      equipment.quantity = value as number;
-    } else {
-      equipment[field as keyof typeof equipment] = value as string;
+
+    if (field === 'quantity' && typeof value === 'number') {
+      equipment[field] = value;
+    } else if (typeof value === 'string' && field !== 'quantity') {
+      equipment[field] = value;
     }
+
     setRooms(updatedRooms);
   };
 
@@ -246,19 +251,57 @@ const RoomManagement: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Équipements */}
+                    {/* Équipements avec nouveau bouton de commentaires */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h4 className="font-semibold">Équipements</h4>
-                        <Button
-                          onClick={() => addEquipment(roomType, roomIndex)}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Ajouter Équipement
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => {
+                              const roomKey = `${roomType}-${roomIndex}`;
+                              setShowComments(prev => ({
+                                ...prev,
+                                [roomKey]: !prev[roomKey]
+                              }));
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="flex items-center space-x-2"
+                          >
+                            <MessageSquarePlus className="w-4 h-4" />
+                            <span>+ Ajouter un Commentaire</span>
+                          </Button>
+                          <Button
+                            onClick={() => addEquipment(roomType, roomIndex)}
+                            size="sm"
+                            variant="outline"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Ajouter Équipement
+                          </Button>
+                        </div>
                       </div>
+
+                      {/* Zone de commentaires dépliable */}
+                      {showComments[`${roomType}-${roomIndex}`] && (
+                        <div className="space-y-2 p-4 bg-gray-50 rounded-md border">
+                          <textarea
+                            className="w-full min-h-[100px] p-2 border rounded-md bg-white"
+                            placeholder="Ajoutez vos observations sur les équipements..."
+                            value={comments[`${roomType}-${roomIndex}`] || ''}
+                            onChange={(e) => {
+                              const newComments = {
+                                ...comments,
+                                [`${roomType}-${roomIndex}`]: e.target.value
+                              };
+                              setComments(newComments);
+                            }}
+                          />
+                          <p className="text-sm text-gray-500 italic">
+                            Les commentaires sont sauvegardés automatiquement
+                          </p>
+                        </div>
+                      )}
 
                       {room.equipment.map((equip, equipIndex) => (
                         <div key={equipIndex} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
@@ -314,20 +357,6 @@ const RoomManagement: React.FC = () => {
                           </Button>
                         </div>
                       ))}
-                    </div>
-
-                    {/* Commentaires */}
-                    <div className="space-y-2">
-                      <label className="font-medium">Commentaires</label>
-                      <textarea
-                        className="w-full min-h-[100px] p-2 border rounded-md"
-                        placeholder="Ajoutez vos observations sur cette salle..."
-                        value={comments[`${roomType}-${roomIndex}`] || ''}
-                        onChange={(e) => setComments({
-                          ...comments,
-                          [`${roomType}-${roomIndex}`]: e.target.value
-                        })}
-                      />
                     </div>
 
                     {/* Bouton suppression salle */}
