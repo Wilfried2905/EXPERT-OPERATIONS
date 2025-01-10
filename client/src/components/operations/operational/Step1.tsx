@@ -230,6 +230,38 @@ const AnalyseExistant = () => {
                     </div>
                   </div>
 
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[q.id]?.status === 'conforme'
+                          ? 'bg-green-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Conforme
+                    </button>
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[q.id]?.status === 'non-conforme'
+                          ? 'bg-red-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Non Conforme
+                    </button>
+                  </div>
 
                   <textarea
                     value={results[q.id]?.comments || ''}
@@ -261,6 +293,26 @@ const AnalyseExistant = () => {
           </div>
         </Card>
 
+        <div className="mt-6 flex justify-between">
+          <button
+            onClick={() => window.history.back()}
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode
+                ? 'bg-[#002B47] text-white'
+                : 'bg-[#003366] text-white'
+            }`}
+          >
+            Précédent
+          </button>
+          <button
+            onClick={() => setLocation('/operations/operational/questionnaire')}
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+            } text-white`}
+          >
+            Suivant
+          </button>
+        </div>
       </div>
     </div>
   );
