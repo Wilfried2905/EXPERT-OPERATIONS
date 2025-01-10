@@ -45,3 +45,27 @@ a:has(text="dashboard"),
   display: none !important;
   visibility: hidden !important;
 }
+
+/* Règles supplémentaires pour couvrir d'autres cas */
+*:not(script):not(style):not(meta):not(link) {
+  &[class*="dashboard"],
+  &[id*="dashboard"],
+  &[aria-label*="dashboard"],
+  &[title*="dashboard"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+/* Masquer les textes contenant "dashboard" */
+*:not(script):not(style):not(meta):not(link)::before,
+*:not(script):not(style):not(meta):not(link)::after {
+  content: none !important;
+}
+
+/* Masquer les éléments de navigation contenant "dashboard" */
+nav a[href*="dashboard"],
+.sidebar a[href*="dashboard"],
+.navigation a[href*="dashboard"] {
+  display: none !important;
+}

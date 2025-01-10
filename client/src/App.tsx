@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useUser } from "./hooks/use-user";
 import { useTranslation } from 'react-i18next';
+import { useDashboardTextRemoval } from "./hooks/useDashboardTextRemoval";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import OperationsPage from "./pages/OperationsPage";
@@ -23,6 +24,9 @@ function App() {
   const { user, isLoading } = useUser();
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
+
+  // Réactivation du hook
+  useDashboardTextRemoval();
 
   useEffect(() => {
     if (!isLoading && !user) {
