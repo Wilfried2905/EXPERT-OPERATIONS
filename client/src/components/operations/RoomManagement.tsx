@@ -207,8 +207,8 @@ const RoomManagement: React.FC = () => {
             <div className="flex justify-between items-center">
               <CardTitle>{roomType}</CardTitle>
               {roomList.length < 5 && (
-                <Button onClick={() => addRoom(roomType)} className="flex items-center space-x-2">
-                  <Plus className="w-4 h-4" />
+                <Button onClick={() => addRoom(roomType)}>
+                  <Plus className="w-4 h-4 mr-2" />
                   <span>Ajouter {roomType}</span>
                 </Button>
               )}
@@ -254,7 +254,7 @@ const RoomManagement: React.FC = () => {
                     {/* Section Équipements */}
                     <div className="space-y-4">
                       {/* En-tête avec boutons */}
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center border-b pb-2">
                         <h3 className="text-lg font-semibold">Équipements</h3>
                         <div className="flex gap-2">
                           <Button 
@@ -265,35 +265,35 @@ const RoomManagement: React.FC = () => {
                                 [roomKey]: !prev[roomKey]
                               }));
                             }}
-                            size="sm"
                             variant="outline"
+                            size="sm"
                           >
                             <MessageSquarePlus className="h-4 w-4 mr-2" />
-                            <span>+ Ajouter un Commentaire</span>
+                            + Ajouter un Commentaire
                           </Button>
                           <Button 
                             onClick={() => addEquipment(roomType, roomIndex)}
                             size="sm"
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            <span>Ajouter un équipement</span>
+                            Ajouter un équipement
                           </Button>
                         </div>
                       </div>
 
                       {/* Zone de commentaires */}
                       {showComments[`${roomType}-${roomIndex}`] && (
-                        <div className="space-y-2 p-4 bg-gray-50 rounded-md border">
+                        <div className="p-4 bg-gray-50 rounded-md border mb-4">
                           <textarea
                             className="w-full min-h-[100px] p-2 border rounded-md bg-white"
-                            placeholder="Ajoutez vos commentaires sur les équipements ici..."
+                            placeholder="Ajoutez vos commentaires ici..."
                             value={comments[`${roomType}-${roomIndex}`] || ''}
                             onChange={(e) => setComments(prev => ({
                               ...prev,
                               [`${roomType}-${roomIndex}`]: e.target.value
                             }))}
                           />
-                          <p className="text-sm text-gray-500 italic">
+                          <p className="text-sm text-gray-500 italic mt-2">
                             Les commentaires sont sauvegardés automatiquement
                           </p>
                         </div>
@@ -353,10 +353,23 @@ const RoomManagement: React.FC = () => {
                           </div>
                         </div>
                       ))}
+
+                      {/* Bouton d'ajout d'équipement additionnel si nécessaire */}
+                      {room.equipment.length === 0 && (
+                        <div className="flex justify-center py-4">
+                          <Button 
+                            onClick={() => addEquipment(roomType, roomIndex)}
+                            variant="outline"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Ajouter le premier équipement
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Bouton suppression salle */}
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-4 border-t">
                       <Button
                         variant="ghost"
                         onClick={() => removeRoom(roomType, roomIndex)}
