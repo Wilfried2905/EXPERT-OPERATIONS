@@ -109,7 +109,7 @@ export default function AnalyseExistant() {
   ];
 
   const calculateProgress = () => {
-    const totalQuestions = sections.reduce((acc, section) => 
+    const totalQuestions = sections.reduce((acc, section) =>
       acc + section.questions.length, 0);
     const answeredQuestions = Object.keys(results).length;
     return totalQuestions === 0 ? 0 : (answeredQuestions / totalQuestions) * 100;

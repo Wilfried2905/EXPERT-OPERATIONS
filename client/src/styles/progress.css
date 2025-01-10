@@ -4,6 +4,7 @@
   height: 8px;
   width: 100%;
   overflow: hidden;
+  margin: 8px 0;
 }
 
 .progress-bar-indicator {
@@ -22,4 +23,8 @@
 
 .progress-bar-indicator.red {
   background-color: #ef4444;
+}
+
+.progress-bar-indicator.orange {
+  background-color: #f97316;
 }
