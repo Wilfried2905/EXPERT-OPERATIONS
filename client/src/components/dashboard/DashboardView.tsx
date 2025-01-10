@@ -24,31 +24,31 @@ export default function DashboardView() {
               value="general" 
               className="flex-1 py-2 px-4 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
             >
-              Vue Générale
+              {t('general')}
             </TabsTrigger>
             <TabsTrigger 
               value="financier"
               className="flex-1 py-2 px-4 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
             >
-              Vue Financière
+              {t('financial')}
             </TabsTrigger>
             <TabsTrigger 
               value="client"
               className="flex-1 py-2 px-4 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
             >
-              Vue Client
+              {t('client')}
             </TabsTrigger>
             <TabsTrigger 
               value="operations"
               className="flex-1 py-2 px-4 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
             >
-              Vue Opérations
+              {t('operations')}
             </TabsTrigger>
             <TabsTrigger 
               value="predictif"
               className="flex-1 py-2 px-4 data-[state=active]:bg-[#003366] data-[state=active]:text-white"
             >
-              Vue Analyses Prédictives
+              {t('predictive')}
             </TabsTrigger>
             <TabsTrigger 
               value="recommendations"
