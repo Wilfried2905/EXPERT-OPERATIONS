@@ -143,6 +143,7 @@ export default function DocumentGenerator() {
           message={toastConfig.message}
           type={toastConfig.type}
           onClose={() => setToastConfig(prev => ({ ...prev, show: false }))}
+          duration={3000}
         />
       )}
     </>
