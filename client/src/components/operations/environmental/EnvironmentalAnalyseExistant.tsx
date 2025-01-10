@@ -1,230 +1,224 @@
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import { Upload } from 'lucide-react';
-import { Textarea } from "@/components/ui/textarea";
+import { Card } from '@/components/ui/card';
+import { Info, Upload } from 'lucide-react';
+import '@/styles/progress.css';
 
 const EnvironmentalAnalyseExistant = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [results, setResults] = useState<Record<string, { status: 'conforme' | 'non-conforme' | null; comments: string }>>({});
   const [, setLocation] = useLocation();
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, { conformity: string; comment: string }>>({});
 
-  const questions = [
+  // Nous garderons la même structure de sections mais nous mettrons à jour les questions plus tard
+  const sections = [
     {
       title: "Objectifs et stratégie environnementale",
       questions: [
         {
-          question: "Quels sont les objectifs du client en matière de durabilité et de réduction de l'impact environnemental ?",
-          description: "Cette question permet de comprendre les priorités du client en matière de gestion environnementale."
+          id: "obj1",
+          question: "Quels sont les objectifs principaux en matière d'environnement ?",
+          norm: "Cette question permet de comprendre les priorités du client en matière de gestion environnementale."
         },
         {
-          question: "Avez-vous déjà réalisé un audit environnemental ou une évaluation de vos impacts environnementaux ?",
-          description: "Permet de connaître les initiatives précédentes prises par l'entreprise concernant la gestion environnementale."
-        },
-        {
-          question: "Quelles normes ou certifications environnementales suivez-vous actuellement (ISO 14001, EMAS, etc.) ?",
-          description: "Permet de comprendre les référentiels existants qui orientent les actions environnementales de l'entreprise."
-        },
-        {
-          question: "Quel est le niveau d'engagement des parties prenantes (employés, clients, fournisseurs) dans les actions environnementales ?",
-          description: "Cela permet d'évaluer l'implication des différentes parties prenantes dans la gestion environnementale."
+          id: "obj2",
+          question: "Avez-vous déjà réalisé un audit environnemental ?",
+          norm: "Permet de connaître l'historique des audits et des évaluations déjà effectués."
         }
       ]
     },
     {
-      title: "Gestion des ressources et des déchets",
+      title: "Infrastructure et ressources",
       questions: [
         {
-          question: "Disposez-vous d'une politique de gestion des ressources naturelles et des matières premières ?",
-          description: "Cela permet d'évaluer l'approche du client en matière de gestion durable des ressources."
+          id: "infra1",
+          question: "Quel est le niveau actuel de gestion des ressources ?",
+          norm: "Évalue la gestion actuelle des ressources environnementales."
         },
         {
-          question: "Quels types de déchets générez-vous (déchets solides, liquides, dangereux) et comment sont-ils traités ?",
-          description: "Permet de comprendre la gestion des déchets, un aspect clé de l'audit environnemental."
-        },
-        {
-          question: "Avez-vous mis en place des initiatives pour réduire votre consommation d'énergie, d'eau et d'autres ressources ?",
-          description: "Évalue les efforts du client pour optimiser l'utilisation des ressources."
-        },
-        {
-          question: "Comment le recyclage et la réutilisation des matériaux sont-ils intégrés dans vos opérations ?",
-          description: "Cela permet de vérifier si le client met en œuvre des pratiques de recyclage et de réutilisation."
-        }
-      ]
-    },
-    {
-      title: "Emissions et impact carbone",
-      questions: [
-        {
-          question: "Avez-vous une stratégie de réduction des émissions de gaz à effet de serre (GES) ?",
-          description: "Cette question permet d'évaluer les efforts de réduction de l'empreinte carbone de l'entreprise."
-        },
-        {
-          question: "Disposez-vous de systèmes de suivi des émissions de GES et des autres polluants ?",
-          description: "Permet de vérifier si des outils de suivi sont en place pour mesurer les émissions et les impacts environnementaux."
-        },
-        {
-          question: "Avez-vous un objectif de neutralité carbone et une feuille de route pour y parvenir ?",
-          description: "Cela permet de comprendre les objectifs à long terme de l'entreprise en matière de réduction de son empreinte carbone."
-        },
-        {
-          question: "Quels sont vos principaux leviers pour réduire vos émissions de GES (efficacité énergétique, changement d'énergies, etc.) ?",
-          description: "Cette question permet d'identifier les actions concrètes prises par le client pour réduire ses émissions."
-        }
-      ]
-    },
-    {
-      title: "Conformité réglementaire et risques environnementaux",
-      questions: [
-        {
-          question: "Êtes-vous en conformité avec la législation environnementale locale, nationale et internationale ?",
-          description: "Vérifie la conformité de l'entreprise avec les obligations légales et réglementaires en matière d'environnement."
-        },
-        {
-          question: "Avez-vous identifié des risques environnementaux spécifiques à votre activité (pollution, dégradation des écosystèmes, etc.) ?",
-          description: "Cette question explore les risques que l'entreprise prend en compte dans sa gestion environnementale."
-        },
-        {
-          question: "Quel est le processus mis en place pour gérer les incidents environnementaux (fuites, pollutions, etc.) ?",
-          description: "Permet de comprendre comment l'entreprise gère les incidents environnementaux et si un plan d'action est en place."
-        },
-        {
-          question: "Est-ce que des audits environnementaux internes ou externes sont réalisés régulièrement pour évaluer votre performance environnementale ?",
-          description: "Cela permet de vérifier la fréquence et l'impact des audits environnementaux dans l'organisation."
-        }
-      ]
-    },
-    {
-      title: "Performance et communication",
-      questions: [
-        {
-          question: "Comment mesurez-vous l'impact environnemental de vos opérations (indicateurs, rapports, etc.) ?",
-          description: "Permet de comprendre comment l'entreprise évalue l'impact environnemental de ses activités."
-        },
-        {
-          question: "Les résultats des audits environnementaux sont-ils communiqués aux parties prenantes (internes et externes) ?",
-          description: "Évalue la transparence et l'implication des parties prenantes dans la gestion des performances environnementales."
-        },
-        {
-          question: "Quel est le processus de révision et d'amélioration continue de votre stratégie environnementale ?",
-          description: "Cette question permet de vérifier si l'entreprise met en place des processus d'amélioration continue."
-        },
-        {
-          question: "Disposez-vous d'une équipe ou d'un responsable dédié à la gestion environnementale ?",
-          description: "Permet de vérifier si une gouvernance claire et responsable est mise en place pour la gestion de l'environnement."
+          id: "infra2",
+          question: "Les contrôles environnementaux sont-ils bien définis ?",
+          norm: "Permet de vérifier l'efficacité des contrôles environnementaux."
         }
       ]
     }
   ];
 
-  const totalQuestions = questions.reduce((acc, section) => acc + section.questions.length, 0);
-  const progress = (Object.keys(answers).length / totalQuestions) * 100;
-  const conformityCount = Object.values(answers).filter(a => a.conformity === 'conforme').length;
-  const conformity = (conformityCount / totalQuestions) * 100;
-
-  const handleAnswerChange = (questionIndex: number, data: { conformity?: string; comment?: string }) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionIndex]: {
-        ...prev[questionIndex] || { conformity: '', comment: '' },
-        ...data
-      }
-    }));
+  const calculateProgress = () => {
+    const totalQuestions = sections.reduce((acc, section) => acc + section.questions.length, 0);
+    const answeredQuestions = Object.keys(results).length;
+    return (answeredQuestions / totalQuestions) * 100;
   };
 
-  const handleNext = () => {
-    if (currentQuestion < totalQuestions - 1) {
-      setCurrentQuestion(prev => prev + 1);
-    } else {
-      setLocation('/operations/environmental/questionnaire');
-    }
+  const calculateConformity = () => {
+    const answeredQuestions = Object.values(results);
+    if (answeredQuestions.length === 0) return 0;
+    const conformeCount = answeredQuestions.filter(r => r.status === 'conforme').length;
+    return (conformeCount / answeredQuestions.length) * 100;
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Analyse de l'existant - Audit Environnemental</h1>
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#001F33]' : 'bg-gray-50'}`}>
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+          Analyse de l'existant - Audit Environnemental
+        </h1>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <h2 className="text-sm font-medium mb-2">Progression</h2>
-            <Progress value={progress} className="progress-bar" />
-            <span className="text-sm text-gray-500">{Math.round(progress)}% complété</span>
-          </div>
-
-          <div>
-            <h2 className="text-sm font-medium mb-2">Conformité</h2>
-            <Progress value={conformity} className="progress-bar" />
-            <span className="text-sm text-gray-500">{Math.round(conformity)}% conforme</span>
-          </div>
-        </div>
-
-        <Card className="p-6">
-          <div className="mb-6">
-            {questions.map((section, sectionIndex) => {
-              const questionData = section.questions[currentQuestion - section.questions.length * sectionIndex];
-              if (questionData) {
-                return (
-                  <div key={sectionIndex}>
-                    <h2 className="text-xl font-semibold mb-4">
-                      {section.title}
-                    </h2>
-                    <p className="text-lg mb-2">
-                      {questionData.question}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {questionData.description}
-                    </p>
-                  </div>
-                );
-              }
-              return null;
-            })}
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Button
-                variant={answers[currentQuestion]?.conformity === 'conforme' ? 'default' : 'outline'}
-                onClick={() => handleAnswerChange(currentQuestion, { conformity: 'conforme' })}
-              >
-                Conforme
-              </Button>
-              <Button
-                variant={answers[currentQuestion]?.conformity === 'non-conforme' ? 'default' : 'outline'}
-                onClick={() => handleAnswerChange(currentQuestion, { conformity: 'non-conforme' })}
-              >
-                Non Conforme
-              </Button>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Commentaires et observations
-              </label>
-              <Textarea
-                value={answers[currentQuestion]?.comment || ''}
-                onChange={(e) => handleAnswerChange(currentQuestion, { comment: e.target.value })}
-                rows={4}
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Progression
+            </h3>
+            <div className="progress-bar">
+              <div
+                className="progress-bar-indicator green"
+                style={{ width: `${calculateProgress()}%` }}
               />
             </div>
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {calculateProgress().toFixed(1)}% complété
+            </p>
+          </Card>
+          <Card className={`p-4 ${isDarkMode ? 'bg-[#002B47]' : 'bg-white'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+              Conformité
+            </h3>
+            <div className="progress-bar">
+              <div
+                className={`progress-bar-indicator ${
+                  calculateConformity() >= 75 ? 'green' :
+                    calculateConformity() >= 50 ? 'yellow' :
+                      'red'
+                }`}
+                style={{ width: `${calculateConformity()}%` }}
+              />
+            </div>
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {calculateConformity().toFixed(1)}% conforme
+            </p>
+          </Card>
+        </div>
 
+        <Card className={`${isDarkMode ? 'bg-[#002B47]' : 'bg-white'} shadow-lg`}>
+          <div className="flex border-b border-gray-200">
+            {sections.map((section, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(index)}
+                className={`flex-1 px-4 py-3 text-center font-medium transition-colors
+                  ${activeTab === index
+                    ? isDarkMode
+                      ? 'bg-[#CC7A00] text-white border-b-2 border-[#CC7A00]'
+                      : 'bg-[#FF9900] text-white border-b-2 border-[#FF9900]'
+                    : isDarkMode
+                      ? 'text-[#E0E0E0] hover:bg-[#001F33]'
+                      : 'text-[#003366] hover:bg-gray-50'
+                  }`}
+              >
+                {section.title}
+              </button>
+            ))}
           </div>
 
-          <div className="flex justify-between mt-6">
-            <Button
-              onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
-              disabled={currentQuestion === 0}
-            >
-              Précédent
-            </Button>
-            <Button onClick={handleNext}>
-              {currentQuestion === totalQuestions - 1 ? 'Terminer' : 'Suivant'}
-            </Button>
+          <div className="p-6">
+            {sections[activeTab].questions.map((q) => (
+              <div key={q.id} className="mb-8 last:mb-0">
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col space-y-2">
+                    <h3 className={`font-medium ${isDarkMode ? 'text-white' : 'text-[#003366]'}`}>
+                      {q.question}
+                    </h3>
+                    <div className={`text-sm p-3 rounded ${
+                      isDarkMode ? 'bg-[#001F33] text-[#E0E0E0]' : 'bg-blue-50 text-[#003366]'
+                    }`}>
+                      <Info className="inline mr-2" size={16} />
+                      {q.norm}
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[q.id]?.status === 'conforme'
+                          ? 'bg-green-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Conforme
+                    </button>
+                    <button
+                      onClick={() => setResults(prev => ({
+                        ...prev,
+                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
+                      }))}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        results[q.id]?.status === 'non-conforme'
+                          ? 'bg-red-500 text-white'
+                          : isDarkMode
+                            ? 'bg-[#002B47] text-[#E0E0E0]'
+                            : 'bg-gray-100 text-[#003366]'
+                      }`}
+                    >
+                      Non Conforme
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={results[q.id]?.comments || ''}
+                    onChange={(e) => setResults(prev => ({
+                      ...prev,
+                      [q.id]: { ...prev[q.id], comments: e.target.value }
+                    }))}
+                    placeholder="Commentaires et observations..."
+                    className={`w-full p-3 rounded border ${
+                      isDarkMode
+                        ? 'bg-[#001F33] border-[#334455] text-[#E0E0E0]'
+                        : 'bg-white border-gray-200 text-[#003366]'
+                    }`}
+                    rows={3}
+                  />
+
+                  <div className="flex items-center space-x-4">
+                    <label className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded ${
+                      isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+                    } text-white`}>
+                      <Upload size={20} />
+                      <span>Ajouter des fichiers</span>
+                      <input type="file" multiple className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
+
+        <div className="mt-6 flex justify-between">
+          <button
+            onClick={() => window.history.back()}
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode
+                ? 'bg-[#002B47] text-white'
+                : 'bg-[#003366] text-white'
+            }`}
+          >
+            Précédent
+          </button>
+          <button
+            onClick={() => setLocation('/operations/environmental/questionnaire')}
+            className={`px-6 py-3 rounded font-medium ${
+              isDarkMode ? 'bg-[#CC7A00]' : 'bg-[#FF9900]'
+            } text-white`}
+          >
+            Suivant
+          </button>
+        </div>
       </div>
     </div>
   );
