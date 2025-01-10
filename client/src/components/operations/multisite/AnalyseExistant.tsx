@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
 import { Info, Upload } from 'lucide-react';
 import '@/styles/progress.css';
 
-const AnalyseExistant = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [results, setResults] = useState<Record<string, { status: 'conforme' | 'non-conforme' | null; comments: string }>>({});
-  const [, setLocation] = useLocation();
+interface Result {
+  status: 'conforme' | 'non-conforme' | null;
+  comments: string;
+}
 
-  const sections = [
+interface Question {
+  id: string;
+  question: string;
+  norm: string;
+}
+
+interface Section {
+  title: string;
+  questions: Question[];
+}
+
+const AnalyseExistant: React.FC = () => {
+  const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState(0);
+  const [results, setResults] = useState<Record<string, Result>>({});
+
+  const sections: Section[] = [
     {
       title: "Structure organisationnelle",
       questions: [
@@ -27,11 +44,6 @@ const AnalyseExistant = () => {
           id: "struct3",
           question: "Comment sont répartis les rôles et responsabilités entre les sites ?",
           norm: "Évalue la distribution des responsabilités et la coordination entre les sites."
-        },
-        {
-          id: "struct4",
-          question: "Existe-t-il une documentation centralisée de l'organisation multisite ?",
-          norm: "Vérifie l'existence et la qualité de la documentation de l'organisation."
         }
       ]
     },
@@ -52,61 +64,6 @@ const AnalyseExistant = () => {
           id: "coord3",
           question: "Comment sont coordonnées les opérations entre les sites ?",
           norm: "Évalue les mécanismes de coordination opérationnelle."
-        },
-        {
-          id: "coord4",
-          question: "Comment sont gérés les incidents impliquant plusieurs sites ?",
-          norm: "Vérifie les procédures de gestion d'incidents multi-sites."
-        }
-      ]
-    },
-    {
-      title: "Standardisation et cohérence",
-      questions: [
-        {
-          id: "std1",
-          question: "Les procédures sont-elles standardisées entre les sites ?",
-          norm: "Évalue le niveau de standardisation des procédures."
-        },
-        {
-          id: "std2",
-          question: "Comment est assurée la cohérence des pratiques ?",
-          norm: "Vérifie les mécanismes d'harmonisation des pratiques."
-        },
-        {
-          id: "std3",
-          question: "Existe-t-il des référentiels communs ?",
-          norm: "Identifie l'existence et l'utilisation de référentiels partagés."
-        },
-        {
-          id: "std4",
-          question: "Comment sont gérées les spécificités locales ?",
-          norm: "Évalue la gestion des particularités de chaque site."
-        }
-      ]
-    },
-    {
-      title: "Surveillance et reporting",
-      questions: [
-        {
-          id: "surv1",
-          question: "Comment est effectué le monitoring des différents sites ?",
-          norm: "Évalue les systèmes et processus de surveillance."
-        },
-        {
-          id: "surv2",
-          question: "Quels sont les indicateurs de performance utilisés ?",
-          norm: "Identifie les KPIs et métriques de performance."
-        },
-        {
-          id: "surv3",
-          question: "Comment sont consolidés les rapports multisite ?",
-          norm: "Vérifie les processus de consolidation des rapports."
-        },
-        {
-          id: "surv4",
-          question: "Existe-t-il un tableau de bord centralisé ?",
-          norm: "Évalue les outils de reporting centralisé."
         }
       ]
     }
@@ -123,6 +80,20 @@ const AnalyseExistant = () => {
     if (answeredQuestions.length === 0) return 0;
     const conformeCount = answeredQuestions.filter(r => r.status === 'conforme').length;
     return (conformeCount / answeredQuestions.length) * 100;
+  };
+
+  const handleConformityChange = (questionId: string, status: 'conforme' | 'non-conforme') => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], status, comments: prev[questionId]?.comments || '' }
+    }));
+  };
+
+  const handleCommentChange = (questionId: string, comment: string) => {
+    setResults(prev => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], comments: comment }
+    }));
   };
 
   return (
@@ -171,7 +142,7 @@ const AnalyseExistant = () => {
         <Card className="bg-white shadow-lg">
           <div className="flex border-b border-gray-200">
             {sections.map((section, index) => (
-              <button
+              <Button
                 key={index}
                 onClick={() => setActiveTab(index)}
                 className={`flex-1 px-4 py-3 text-center font-medium transition-colors ${
@@ -181,7 +152,7 @@ const AnalyseExistant = () => {
                 }`}
               >
                 {section.title}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -199,41 +170,32 @@ const AnalyseExistant = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setResults(prev => ({
-                        ...prev,
-                        [q.id]: { ...prev[q.id], status: 'conforme', comments: prev[q.id]?.comments || '' }
-                      }))}
-                      className={`px-4 py-2 rounded transition-colors ${
+                  <div className="flex gap-4 mt-4">
+                    <Button
+                      onClick={() => handleConformityChange(q.id, 'conforme')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium ${
                         results[q.id]?.status === 'conforme'
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-100 text-[#003366]'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       Conforme
-                    </button>
-                    <button
-                      onClick={() => setResults(prev => ({
-                        ...prev,
-                        [q.id]: { ...prev[q.id], status: 'non-conforme', comments: prev[q.id]?.comments || '' }
-                      }))}
-                      className={`px-4 py-2 rounded transition-colors ${
+                    </Button>
+                    <Button
+                      onClick={() => handleConformityChange(q.id, 'non-conforme')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium ${
                         results[q.id]?.status === 'non-conforme'
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-100 text-[#003366]'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       Non Conforme
-                    </button>
+                    </Button>
                   </div>
 
                   <textarea
                     value={results[q.id]?.comments || ''}
-                    onChange={(e) => setResults(prev => ({
-                      ...prev,
-                      [q.id]: { ...prev[q.id], comments: e.target.value }
-                    }))}
+                    onChange={(e) => handleCommentChange(q.id, e.target.value)}
                     placeholder="Commentaires et observations..."
                     className="w-full p-3 rounded border bg-white border-gray-200 text-[#003366]"
                     rows={3}
@@ -253,18 +215,18 @@ const AnalyseExistant = () => {
         </Card>
 
         <div className="mt-6 flex justify-between">
-          <button
+          <Button
             onClick={() => window.history.back()}
             className="px-6 py-3 rounded font-medium bg-[#003366] text-white"
           >
             Précédent
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setLocation('/operations/multisite/step2')}
             className="px-6 py-3 rounded font-medium bg-[#FF9900] text-white"
           >
             Suivant
-          </button>
+          </Button>
         </div>
       </div>
     </div>
