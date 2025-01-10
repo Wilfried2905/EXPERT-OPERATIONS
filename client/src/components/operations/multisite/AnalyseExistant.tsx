@@ -223,9 +223,9 @@ export default function AnalyseExistant() {
                     onClick={() => handleStatusChange(question.id, 'conforme')}
                     className={`${
                       results[question.id]?.status === 'conforme'
-                        ? 'bg-orange-100 text-orange-800 border-orange-200'
-                        : ''
-                    }`}
+                        ? 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200'
+                        : 'hover:bg-gray-100'
+                    } transition-colors`}
                   >
                     Conforme
                   </Button>
@@ -234,9 +234,9 @@ export default function AnalyseExistant() {
                     onClick={() => handleStatusChange(question.id, 'non-conforme')}
                     className={`${
                       results[question.id]?.status === 'non-conforme'
-                        ? 'bg-orange-100 text-orange-800 border-orange-200'
-                        : ''
-                    }`}
+                        ? 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200'
+                        : 'hover:bg-gray-100'
+                    } transition-colors`}
                   >
                     Non Conforme
                   </Button>
