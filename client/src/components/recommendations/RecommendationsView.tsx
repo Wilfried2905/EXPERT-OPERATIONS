@@ -25,40 +25,32 @@ export default function RecommendationsView() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const auditData = {
-          infrastructure: {
-            questionnaire: {
-              resultats: {
-                "Sécurité physique": {
-                  "Contrôle d'accès": "conforme",
-                  "Vidéosurveillance": "non-conforme"
-                }
-              },
-              scores: {
-                global: {
-                  score: 75,
-                  repondu: 80,
-                  nom: "Score Global"
-                },
-                parGroupe: {
-                  "Sécurité physique": {
-                    score: 70,
-                    repondu: 100,
-                    nom: "Sécurité"
-                  }
-                }
-              }
-            }
-          }
-        };
+        // Récupérer les données du localStorage
+        const storedData = localStorage.getItem('auditData');
+        if (!storedData) {
+          throw new Error("Aucune donnée d'audit trouvée");
+        }
 
-        const response = await generateRecommendations(auditData);
-        setRecommendations(response.recommendations || []);
+        const auditData = JSON.parse(storedData);
+        const response = await generateRecommendations({
+          auditData,
+          options: {
+            model: "claude-3-sonnet-20241022",
+            temperature: 0.7,
+            maxTokens: 2000
+          }
+        });
+
+        if (!response || !Array.isArray(response.recommendations)) {
+          throw new Error("Format de réponse invalide");
+        }
+
+        setRecommendations(response.recommendations);
 
         const matrix = await generateMatrixCompliance(auditData);
         setComplianceMatrix(matrix);
 
-        const gantt = await generateGanttData(response.recommendations || []);
+        const gantt = await generateGanttData(response.recommendations);
         setGanttData(gantt);
 
       } catch (error) {
@@ -87,46 +79,35 @@ export default function RecommendationsView() {
         return;
       }
 
+      // Récupérer les informations du client depuis le localStorage
+      const clientInfo = JSON.parse(localStorage.getItem('clientInfo') || '{}');
+      const auditType = localStorage.getItem('auditType') || 'standard';
+
       const exportData = {
         recommendations: recommendations.map(rec => ({
           title: rec.title,
           description: rec.description,
           priority: rec.priority,
-          progress: rec.progress || 0,
           impact: {
-            energyEfficiency: rec.impact?.efficiency || 0,
-            performance: rec.impact?.reliability || 0,
+            efficiency: rec.impact?.efficiency || 0,
+            reliability: rec.impact?.reliability || 0,
             compliance: rec.impact?.compliance || 0
           }
         })),
-        impacts: recommendations.map(rec => ({
-          title: rec.title,
-          impacts: {
-            energyEfficiency: { 
-              value: rec.impact?.efficiency || 0, 
-              details: "Impact sur l'efficacité énergétique" 
-            },
-            performance: { 
-              value: rec.impact?.reliability || 0, 
-              details: "Impact sur la performance" 
-            },
-            compliance: { 
-              value: rec.impact?.compliance || 0, 
-              details: "Impact sur la conformité" 
-            }
-          }
-        })),
-        matrix: complianceMatrix ? [complianceMatrix] : [],
-        planning: ganttData?.phases || []
+        clientInfo,
+        metadata: {
+          auditType,
+          date: format(new Date(), 'yyyy-MM-dd')
+        }
       };
 
-      const fileName = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.docx`;
       const blob = await exportToWord(exportData);
+      const fileName = `3R_Recommandations_${auditType}_${clientInfo.name}_${format(new Date(), 'yyyyMMdd')}`;
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = fileName;
+      a.download = `${fileName}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -148,11 +129,44 @@ export default function RecommendationsView() {
 
   const handleExportExcel = async () => {
     try {
-      const blob = await exportToExcel(recommendations);
+      if (!recommendations?.length) {
+        toast({
+          title: "Erreur",
+          description: "Aucune recommandation à exporter",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Récupérer les informations du client depuis le localStorage
+      const clientInfo = JSON.parse(localStorage.getItem('clientInfo') || '{}');
+      const auditType = localStorage.getItem('auditType') || 'standard';
+
+      const exportData = {
+        recommendations: recommendations.map(rec => ({
+          title: rec.title,
+          description: rec.description,
+          priority: rec.priority,
+          impact: {
+            efficiency: rec.impact?.efficiency || 0,
+            reliability: rec.impact?.reliability || 0,
+            compliance: rec.impact?.compliance || 0
+          }
+        })),
+        clientInfo,
+        metadata: {
+          auditType,
+          date: format(new Date(), 'yyyy-MM-dd')
+        }
+      };
+
+      const blob = await exportToExcel(exportData);
+      const fileName = `3R_Recommandations_${auditType}_${clientInfo.name}_${format(new Date(), 'yyyyMMdd')}`;
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Recommandations_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+      a.download = `${fileName}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

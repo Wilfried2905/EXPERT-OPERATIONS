@@ -6,46 +6,28 @@ interface RecommendationsResponse {
     id: string;
     title: string;
     description: string;
-    priority: 'critique' | 'élevée' | 'moyenne' | 'faible';
+    priority: 'critical' | 'high' | 'medium' | 'low';
     impact: {
-      efficacite: number;
-      fiabilite: number;
-      conformite: number;
+      efficiency: number;
+      reliability: number;
+      compliance: number;
     };
     implementation: {
-      difficulte: 'élevée' | 'moyenne' | 'faible';
-      delai: 'immediat' | 'court_terme' | 'moyen_terme' | 'long_terme';
-      prerequis: string[];
-      benefices: string[];
+      difficulty: 'high' | 'medium' | 'low';
+      timeframe: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+      prerequisites: string[];
     };
   }>;
-  analyse: {
-    resume: string;
-    points_forts: string[];
-    points_amelioration: string[];
-    impacts: {
-      description: string;
-      analyse_efficacite: string;
-      analyse_fiabilite: string;
-      analyse_conformite: string;
-    };
-  };
 }
 
-export async function generateRecommendations(auditData: AuditData): Promise<RecommendationsResponse> {
+export async function generateRecommendations(params: { auditData: AuditData; options?: any }): Promise<RecommendationsResponse> {
   try {
-    console.log('Service client - generateRecommendations:', { auditData });
-
-    const response = await fetch('/api/recommendations', {
+    const response = await fetch('/api/anthropic/recommendations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
-      body: JSON.stringify({ 
-        auditData,
-        auditType: 'operational' // Indiquer explicitement le type d'audit
-      })
+      body: JSON.stringify(params)
     });
 
     if (!response.ok) {
@@ -60,24 +42,11 @@ export async function generateRecommendations(auditData: AuditData): Promise<Rec
 
     const data = await response.json();
 
-    if (!data || typeof data !== 'object') {
+    if (!data || !Array.isArray(data.recommendations)) {
       throw new Error("Format de réponse invalide");
     }
 
-    return {
-      recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
-      analyse: {
-        resume: data.analyse?.resume || "",
-        points_forts: Array.isArray(data.analyse?.points_forts) ? data.analyse.points_forts : [],
-        points_amelioration: Array.isArray(data.analyse?.points_amelioration) ? data.analyse.points_amelioration : [],
-        impacts: {
-          description: data.analyse?.impacts?.description || "",
-          analyse_efficacite: data.analyse?.impacts?.analyse_efficacite || "",
-          analyse_fiabilite: data.analyse?.impacts?.analyse_fiabilite || "",
-          analyse_conformite: data.analyse?.impacts?.analyse_conformite || ""
-        }
-      }
-    };
+    return data;
   } catch (error) {
     console.error('Error in generateRecommendations:', error);
     throw error instanceof Error ? error : new Error('Une erreur est survenue lors de la génération des recommandations');
